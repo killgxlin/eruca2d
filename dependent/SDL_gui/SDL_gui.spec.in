@@ -1,0 +1,78 @@
+%define name @PACKAGE@
+%define version @VERSION@
+%define release 1
+
+Summary: Simple DirectMedia Layer - Graphical User Interface Library
+Name: %{name}
+Version: %{version}
+Release: %{release}
+Source0: %{name}-%{version}.tar.gz
+Copyright: LGPL
+Group: System Environment/Libraries
+BuildRoot: /var/tmp/%{name}-buildroot
+Prefix: %{_prefix}
+Packager: Ray Kelm <rhk@newimage.com>
+BuildRequires: SDL-devel
+BuildRequires: SDL_image-devel
+BuildRequires: SDL_ttf-devel
+
+%description
+This is a Graphical User Interface that runs on top of SDL. 
+It supports several simple widgets.
+
+%package devel
+Summary: Libraries, includes and more to develop GUI applications.
+Group: Development/Libraries
+Requires: %{name}
+Requires: SDL-devel
+Requires: SDL_image-devel
+
+%description devel
+This is a Graphical User Interface that runs on top of SDL. 
+It supports several widgets.
+
+%prep
+rm -rf ${RPM_BUILD_ROOT}
+
+%setup 
+
+%build
+CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%{prefix}
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make install prefix=$RPM_BUILD_ROOT/%{prefix}
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root)
+%doc README CHANGES COPYING
+%{prefix}/lib/libSDL_gui-*.so
+%{prefix}/lib/libSDL_gui.so
+%{prefix}/lib/libSDL_gui.la
+
+%files devel
+%defattr(-,root,root)
+%{prefix}/lib/libSDL_gui.a
+%{prefix}/lib/libSDL_gui.la
+%{prefix}/include/SDL/SDL_gui.h
+
+%changelog
+
+* Mon Jun 12 2000 Ray Kelm <rhk@newimage.com>
+- removed ttf subpackages
+
+* Thu Jun 08 2000 Ray Kelm <rhk@newimage.com>
+- include libtool definition files in devel packages.
+
+* Sun May 21 2000 Ray Kelm <rhk@newimage.com>
+- added python subpackages
+
+* Sun May 21 2000 Ray Kelm <rhk@newimage.com>
+- split ttf lib into subpackage
+
+* Sun Apr 30 2000 Ray Kelm <rhk@newimage.com>
+- initial spec file

@@ -1,0 +1,25 @@
+This is SDL_gui, a Graphical User Interface library
+that runs on top of SDL (Simple Directmedia Layer).
+
+SDL_gui is a (slightly) higher level library than SDL.
+It provides widgets and containers, and an event loop.
+The library is written in C++, and widget classes can be
+extended by deriving from them.
+
+The older (0.9.x) C interface still exists for now, but
+it will not be extended as new features are added.
+
+It requires the following libraries:
+
+SDL >= 1.1.2
+SDL_image >= 1.0.9
+SDL_ttf >= 1.2.0
+
+SDL_gui is released under the LGPL.
+
+The home site for SDL_gui is http://www.newimage.com/~rhk/SDL_gui
+and the author is Ray Kelm (rhk@newimage.com).
+
+If you have any suggestions, patches, (complaints?) etc please
+feel free to send email.
+

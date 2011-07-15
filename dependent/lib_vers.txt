@@ -1,0 +1,6 @@
+SDL-1.2.14
+SDL_gui-0.10.3
+SDL_image-1.2.10
+SDL_mixer-1.2.11
+SDL_ttf-2.0.9
+lib_vers.txt

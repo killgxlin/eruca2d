@@ -1,0 +1,13 @@
+- DOCUMENTATION IS NEEDED! 
+- Add more widgets:
+  Slider
+  ListBox
+  TextArea
+  TreeList
+- ESC causes GUI to exit. This needs to be configurable.
+- editting keys in TextEntry: home/end/arrows
+- TextEntry needs a cursor (caret? whatever)
+- make the demo install to /usr/share, and add an RPM
+  for the demo. this should make it easier to try out the
+  library.
+- background tile function does not like negative offsets.

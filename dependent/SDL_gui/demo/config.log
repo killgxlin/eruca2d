@@ -1,0 +1,40 @@
+This file contains any messages produced by compilers while
+running configure, to aid debugging if configure makes a mistake.
+
+configure:566: checking for a BSD compatible install
+configure:619: checking whether build environment is sane
+configure:676: checking whether make sets ${MAKE}
+configure:722: checking for working aclocal
+configure:735: checking for working autoconf
+configure:748: checking for working automake
+configure:761: checking for working autoheader
+configure:774: checking for working makeinfo
+configure:796: checking host system type
+configure:817: checking target system type
+configure:837: checking whether make sets ${MAKE}
+configure:866: checking for gcc
+configure:979: checking whether the C compiler (gcc  ) works
+configure:995: gcc -o conftest    conftest.c  1>&5
+configure:1021: checking whether the C compiler (gcc  ) is a cross-compiler
+configure:1026: checking whether we are using GNU C
+configure:1035: gcc -E conftest.c
+configure:1054: checking whether gcc accepts -g
+configure:1090: checking for c++
+configure:1122: checking whether the C++ compiler (c++  ) works
+configure:1138: c++ -o conftest    conftest.C  1>&5
+configure:1164: checking whether the C++ compiler (c++  ) is a cross-compiler
+configure:1169: checking whether we are using GNU C++
+configure:1178: c++ -E conftest.C
+configure:1197: checking whether c++ accepts -g
+configure:1240: checking for a BSD compatible install
+configure:1295: checking for working const
+configure:1349: gcc -c -g -O2  conftest.c 1>&5
+configure:1433: checking for sdl-config
+configure:1468: checking for SDL - version >= 1.1.2
+configure:1553: gcc -o conftest -g -O2 -I/usr/include/SDL -D_REENTRANT   conftest.c  -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread 1>&5
+configure:1637: checking for IMG_Load_RW in -lSDL_image
+configure:1656: gcc -o conftest -g -O2 -I/usr/include/SDL -D_REENTRANT   conftest.c -lSDL_image   -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread 1>&5
+configure:1685: checking for TTF_FontDescent in -lSDL_ttf
+configure:1704: gcc -o conftest -g -O2 -I/usr/include/SDL -D_REENTRANT   conftest.c -lSDL_ttf   -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread -lSDL_image 1>&5
+configure:1731: checking for OpenGL support
+configure:1744: gcc -c -g -O2 -I/usr/include/SDL -D_REENTRANT  conftest.c 1>&5

@@ -1,0 +1,26 @@
+1. Configure
+
+    If you checked out the library from CVS.
+
+        ./autogen.sh --prefix=/usr
+
+    otherwise,
+
+        ./configure --prefix=/usr
+
+    I usually add --prefix=/usr, since that's where I keep SDL,
+    but it is not required.
+
+2. Build the library:
+
+	make
+
+3. Install the library and headers. Do this as root.
+
+	make install
+
+4. Test the library
+
+	cd demo
+	./uitest
+

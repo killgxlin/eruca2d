@@ -1,0 +1,101 @@
+# This first line initializes autoconf and gives it a file that it can
+# look for to make sure the source distribution is complete.
+AC_INIT(README)
+
+dnl Set various version strings - taken gratefully from the SDL sources
+
+MAJOR_VERSION=0
+MINOR_VERSION=10
+MICRO_VERSION=3
+SDLGUI_VERSION=$MAJOR_VERSION.$MINOR_VERSION.$MICRO_VERSION
+
+AC_SUBST(MAJOR_VERSION)
+AC_SUBST(MINOR_VERSION)
+AC_SUBST(MICRO_VERSION)
+AC_SUBST(SDLGUI_VERSION)
+
+# The AM_INIT_AUTOMAKE macro tells automake the name and version number
+# of the software package so it can generate rules for building a source
+# archive.
+AM_INIT_AUTOMAKE(SDL_gui, $SDLGUI_VERSION)
+
+dnl Detect the canonical host and target build environment
+
+AC_CANONICAL_HOST
+AC_CANONICAL_TARGET
+
+dnl Check for tools
+
+AC_LIBTOOL_WIN32_DLL
+AM_PROG_LIBTOOL
+AC_PROG_MAKE_SET
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_INSTALL
+
+dnl Check for compiler environment
+
+AC_C_CONST
+
+case "$target" in
+    alpha*-*-linux*)
+        CFLAGS="$CFLAGS -mcpu=ev4 -Wa,-mall"
+        ;;
+    *-*-cygwin* | *-*-mingw*)
+        if test "$build" != "$target"; then # cross-compiling
+            ac_default_prefix=/usr/local/cross-tools/i386-mingw32msvc
+        fi
+        SYS_GL_LIBS="-lopengl32 -lglu32"
+        ;;
+    *-*-linux*)
+        SYS_GL_LIBS="-L/usr/X11R6/lib -lGL"
+        ;;
+    *)
+        SYS_GL_LIBS="-lGL"
+        ;;
+esac
+
+# Use the macro SDL provides to check the installed version of the SDL
+# development environment.  Abort the configuration process if the
+# minimum version we require isn't available.
+SDL_VERSION=1.1.2
+AM_PATH_SDL($SDL_VERSION,
+            :,
+	    AC_MSG_ERROR([*** SDL version $SDL_VERSION not found!])
+)
+# Add the SDL preprocessor flags and libraries to the build process
+CFLAGS="$CFLAGS $SDL_CFLAGS"
+LIBS="$LIBS $SDL_LIBS"
+
+# Look for a working SDL_image library
+AC_CHECK_LIB(SDL_image, IMG_Load_RW, have_SDL_image=yes)
+if test x$have_SDL_image != xyes; then
+    AC_MSG_ERROR([*** SDL_image library not found!
+Try: http://www.libsdl.org/projects/SDL_image/
+])
+fi
+LIBS="$LIBS -lSDL_image"
+
+# Look for a working SDL_ttf library
+AC_CHECK_LIB(SDL_ttf, TTF_FontDescent, have_SDL_ttf=yes)
+if test x$have_SDL_ttf != xyes; then
+  AC_MSG_ERROR([*** SDL_ttf library not found!
+Try: http://www.libsdl.org/projects/SDL_ttf/
+])
+fi
+
+dnl Expand the include directories for building SDL
+CFLAGS="-Wall -Werror -I\$(top_srcdir)/include $CFLAGS"
+
+CXXFLAGS="$CXXFLAGS $CFLAGS"
+
+# Finally create all the generated files
+# The configure script takes "file.in" and substitutes variables to produce
+# "file".  In this case we are just generating the Makefiles, but this could
+# be used to generate any number of automatically generated files.
+AC_OUTPUT([
+Makefile
+SDL_gui.spec
+src/Makefile
+include/Makefile
+])
