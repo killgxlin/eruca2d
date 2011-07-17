@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="cruca2d"
+	Name="eruca2d"
 	ProjectGUID="{582E6AAD-8613-4959-AA59-642888EB02EE}"
 	RootNamespace="cruca2d"
 	Keyword="Win32Proj"
@@ -40,9 +40,10 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="-D_SCL_SECURE_NO_WARNINGS&#x0D;&#x0A;&#x0D;&#x0A;"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dependent\SDL_image\include;..\..\dependent\SDL\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;D_SCL_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -169,23 +170,7 @@
 	</References>
 	<Files>
 		<Filter
-			Name="源文件"
-			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
-			>
-			<File
-				RelativePath="..\..\src\killerg_nc.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\stdafx.cpp"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="头文件"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			Name="engine"
 			>
 			<File
 				RelativePath="..\..\src\cfg_file.h"
@@ -212,15 +197,35 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\res_mgr.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\res_mgr.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\spirit.h"
+				RelativePath="..\..\src\SDL_rotozoom.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\stdafx.h"
+				RelativePath="..\..\src\SDL_rotozoom.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\sprite.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\sprite.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\text.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\util.h"
 				>
 			</File>
 			<File
@@ -228,10 +233,78 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath="..\..\src\todo.txt"
+		<Filter
+			Name="game"
 			>
-		</File>
+			<File
+				RelativePath="..\..\src\creature.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\killerg_nc.cpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="data"
+			>
+			<Filter
+				Name="sprites"
+				>
+				<File
+					RelativePath="..\..\game\data\sprites\girl.txt"
+					>
+				</File>
+				<File
+					RelativePath="..\..\game\data\sprites\mult_channel_sprite.txt"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="levels"
+				>
+				<File
+					RelativePath="..\..\game\data\levels\level.txt"
+					>
+				</File>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="doc"
+			>
+			<File
+				RelativePath="..\..\src\design_collide.txt"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\design_misc.txt"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\design_resmgr.txt"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\design_sound.txt"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\design_sprite.txt"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\todo.txt"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

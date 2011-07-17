@@ -1,0 +1,5 @@
+	资源文件
+		data/images/tiles/bricks.png	tile_bricks
+		data/images/tiles/
+	用文件名而非枚举做索引
+		ResMgr.Load

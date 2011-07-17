@@ -1,0 +1,22 @@
+image_file	data\images\jump.PNG
+channel_begin 0	;右行走
+;图形文件				x	y	w	h	翻转时间点
+0	0	16	17	0	0.1f
+16	0	16	17	0	0.2f
+channel_end                                 
+channel_begin 1	;左行走                      
+0	0	16	17	1	0.1f
+16	0	16	17	1	0.2f
+channel_end                                 
+channel_begin 2	;右跳上                      
+16	0	16	17	0	1f
+channel_end                                 
+channel_begin 3	;左跳上                      
+16	0	16	17	1	1f
+channel_end                                 
+channel_begin 4	;右跳下                      
+0	0	16	17	0	1f
+channel_end                                 
+channel_begin 5	;左跳下                      
+0	0	16	17	1	1f
+channel_end                                 

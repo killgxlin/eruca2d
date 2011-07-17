@@ -20,20 +20,29 @@ enum ECollidType
 
 struct tagCollidCfg
 {
-	DWORD	dwCollidDirSet;
-	DWORD	dwCollidTypeSet;
+	Uint32	u32CollidDirSet;
+	Uint32	u32CollidTypeSet;
 
-	DWORD	dwCollidDirSelf;
-	DWORD	dwCollidTypeSelf;
+	Uint32	u32CollidDirSelf;
+	Uint32	u32CollidTypeSelf;
 
 	tagCollidCfg()
 	{
-		dwCollidDirSelf = 0;
-		dwCollidTypeSelf = 0;
+		u32CollidDirSelf = 0;
+		u32CollidTypeSelf = 0;
 
-		dwCollidDirSet = 0;
-		dwCollidTypeSet = 0;
+		u32CollidDirSet = 0;
+		u32CollidTypeSet = 0;
 	}
+};
+
+class Collider
+{
+public:
+	bool	Init();
+	void	Destroy();
+
+	void	Update(float dt);
 };
 
 #endif

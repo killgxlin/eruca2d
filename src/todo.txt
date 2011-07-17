@@ -1,59 +1,30 @@
-Spirit
-	done 加入动画系统
-	 	SpiritAnimate
-			Spirit加入播放速度
-		SpiritStatic
-			加入背景图片Spirit
-	done 动画文件格式
-		animate::begin arrows.png 32 32
-			1	0.2
-			2	0.4
-			3	0.6
-		animate::end
-	加入物体Spirit
-		各个方向的走动
-		跳跃
-		下落
+[整理一下代码，重构，让架构更整洁
 
+*[加入multchannelsprite
+*[修改resmgr
 
-整理整个架构，看看WaitFrame加在哪里
-	真实时间间隔和逻辑时间间隔
-	单独的FrameRate对象
-		控制游戏fps
-		控制游戏的速度
-
-输入系统Input
-	如果漏按
-
-done 读取配置文件
-
-整理工作目录
-
-done 加入github
-
-
-
-加入物理系统
-	力学系统
-	碰撞系统
-
-加入粒子系统
-
+[	加入地图系统和游戏对象
+	加入碰撞系统
+	加入力学系统
 	
-加入声音系统
-	音效系统
-		多音效同时播放
-	音乐系统
-		播放背景音乐
-	
-ui系统
 
-加入一个地面
-可以在地面上走
-可以在地面上跳
-加入一个悬浮在地面上的物体
-可以跳上物体
-可以在物体上面走
-可以掉下来
+
+
+[调整framerate和timer
+
+[解决input漏键的问题
+
+[加入粒子系统
+
+[加入声音系统
+
+[加入ui系统
+
+[加入text文本渲染系
+
+[增加init和xml的支持
+
+
+
 
 

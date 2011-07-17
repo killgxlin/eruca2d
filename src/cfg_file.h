@@ -25,7 +25,9 @@ public:
 
 	bool	LoadLine()
 	{
-		char *str = fgets(_line, MAX_LINE, _fp);
+		char *str;
+		while( (str = fgets(_line, MAX_LINE, _fp)) && str != 0 && *str == ';' );
+		
 		if( 0 == str || *str == EOF ) return false;
 
 		int len = 0, i = 0;

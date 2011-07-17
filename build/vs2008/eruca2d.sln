@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cruca2d", "cruca2d.vcproj", "{582E6AAD-8613-4959-AA59-642888EB02EE}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "eruca2d", "eruca2d.vcproj", "{582E6AAD-8613-4959-AA59-642888EB02EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
