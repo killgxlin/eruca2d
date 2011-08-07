@@ -1,7 +1,0 @@
-
-tile	data\images\bricks1.png	b1
-tile	data\images\bricks2.png	b2
-
-level_begin
-
-level_end

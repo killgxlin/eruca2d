@@ -1,61 +1,42 @@
-#ifndef SPIRIT
-#define SPIRIT
+#ifndef SPRITE_H
+#define SPRITE_H
 
-
-class Window;
+class Painter;
+class GameObj;
 
 class Sprite
 {
 public:
-	virtual void	Update(float dt) = 0;
-	virtual void	Draw(Window* pScreen, int x, int y) = 0;
+	virtual VOID	Animate(float dt){}
+	virtual VOID	Draw(Painter* pPainter, const Vector2 &vPos);
+	virtual AABBox	GetAABBox(const Vector2 &vPos);
+
+public:
+	Sprite(GameObj* pGameObj, INT nW, INT nH, UINT8 u8R, UINT8 u8G, UINT8 u8B):m_pGameObj(pGameObj), m_Size(nW, nH),m_u8R(u8R), m_u8G(u8G), m_u8B(u8B){}
+	
+protected:
+	Size		m_Size;
+	UINT8		m_u8R;
+	UINT8		m_u8G;
+	UINT8		m_u8B;
+	GameObj*	m_pGameObj;
 };
 
-class SpriteStatic : public Sprite
+class SpritePlayer : public Sprite
 {
 public:
-	void	Update(float dt){}
-	void	Draw(Window* pScreen, int x, int y);
-
-	bool	SetSurface(SDL_Surface* img);
+	VOID			Animate(float dt);
+public:
+	SpritePlayer(GameObj* pGameObj):Sprite(pGameObj, 20, 20, 120, 0, 90), m_nCounter(0){}
 
 private:
-	SDL_Surface*	_img;
+	INT				m_nCounter;
 };
 
-class SpriteMultChannel : public Sprite
+class SpriteTile : public Sprite
 {
 public:
-	void	Update(float dt);
-	void	Draw(Window* pScreen, int x, int y);
-
-	struct Frame
-	{
-		SDL_Surface		*surface;
-		float			end;;
-	};
-
-	struct Channel 
-	{
-		Frame*			frames;
-		int				frames_num;
-	};
-
-	bool	Init(char* file_);
-	void	Destroy();
-	bool	PlayChannel(int channel_);
-	int		GetChannelNum() const { return _channel_num; }
-	void	Stop();
-
-private:
-
-	bool		_play;
-	float		_cur_time;
-
-	int			_cur_channel;
-	int			_channel_num;
-	Channel*	_channels;
+	SpriteTile(GameObj* pGameObj):Sprite(pGameObj, 20, 20, 120, 120, 120){}
 };
-
 
 #endif
