@@ -64,7 +64,7 @@ VOID FrameRate::EndFrame()
 
 VOID FrameRate::WaitFrame()
 {
-	INT nSleep = 1000 / m_fCustomFPS - m_timer.GetIntervalU();
+	INT nSleep = ceil(1000 / m_fCustomFPS) - m_timer.GetIntervalU();
 	if( nSleep > 0 ) SDL_Delay(nSleep);
 }
 

@@ -29,6 +29,13 @@ BOOL Level::Load()
 		m_collider.AddGameObj(pTile);
 	}
 
+	{
+		Tile* pTile = new Tile;
+		pTile->SetPos(Vector2(20, 200));
+		pTile->SetCollideDirFlag(ECD_All);
+		m_lstTiles.push_back(pTile);
+		m_collider.AddGameObj(pTile);
+	}
 
 
 	return TRUE;
