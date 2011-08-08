@@ -15,6 +15,7 @@ public:
 		:m_vPos(vPos), m_nCollidePri(nCollidePri), m_uCollideDirFlag(uCollideDirFlag){}
 	virtual ~GameObj(){}
 	VOID			SetPos(const Vector2 &vPos) { m_vPos = vPos; }
+	VOID			SetCollideDirFlag(UINT32 uFlag) { m_uCollideDirFlag = uFlag; }
 
 protected:
 	Sprite*			m_pSprite;

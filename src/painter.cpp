@@ -27,7 +27,7 @@ VOID Painter::Flush()
 
 VOID Painter::Clear()
 {
-	SDL_FillRect(m_pScreen, 0, SDL_MapRGB(m_pScreen->format, 0, 0, 0));
+	SDL_FillRect(m_pScreen, 0, GetColor(0, 0, 0));
 }
 
 VOID Painter::DrawRect( const Vector2 &vPos, const Size &sSize, UINT32 uColor )
@@ -39,4 +39,9 @@ VOID Painter::DrawRect( const Vector2 &vPos, const Size &sSize, UINT32 uColor )
 	rect.y = vPos.y - sSize.h / 2;
 
 	SDL_FillRect(m_pScreen, &rect, uColor);
+}
+
+Uint32 Painter::GetColor( Uint8 u8R, Uint8 u8G, Uint8 u8B )
+{
+	return SDL_MapRGB(m_pScreen->format, u8R, u8G, u8B);
 }

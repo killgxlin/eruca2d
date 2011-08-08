@@ -11,10 +11,20 @@ public:
 
 	BOOL	SetFont(const char* szPath);
 
-	VOID	DrawText(Painter* pScreen, const Vector2 &vPos, const char* szText, UINT32 uColor);
-	VOID	DrawText(const Vector2 &vPos, UINT8 u8R, UINT8 u8G, UINT8 u8B, const char* szFormat, ...);
+	VOID	AddText(UINT32 uColor, const char* szFormat, ...);
+	VOID	DrawTextAll();
+
 private:
-	TTF_Font*	m_pFont;
+	VOID	DrawText(const Vector2 &vPos, UINT32 uColor, const char* szFormat, ...);
+
+	TTF_Font*		m_pFont;
+	struct tagUnit
+	{
+		Uint32	uColor;
+		string	strMsg;
+	};
+
+	list<tagUnit>	m_lstUnits;;
 };
 
 extern Text g_text;

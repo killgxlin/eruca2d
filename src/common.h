@@ -11,11 +11,13 @@
 
 #include <map>
 #include <list>
+#include <string>
 #include <algorithm>
 
 using std::map;
 using std::list;
 using std::pair;
+using std::string;
 using std::make_pair;
 using std::for_each;
 

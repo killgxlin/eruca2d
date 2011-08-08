@@ -7,7 +7,7 @@
 
 VOID Sprite::Draw(Painter* pPainter, const Vector2 &vPos)
 {
-	pPainter->DrawRect(vPos, m_Size, SDL_MapRGB(pPainter->GetScreen()->format,m_u8R, m_u8G, m_u8B));
+	pPainter->DrawRect(vPos, m_Size, pPainter->GetColor(m_u8R, m_u8G, m_u8B));
 }
 
 AABBox Sprite::GetAABBox( const Vector2 &vPos )

@@ -14,6 +14,8 @@ public:
 
 	VOID	DrawRect(const Vector2 &vPos, const Size &sSize, UINT32 uColor);
 
+	Uint32	GetColor(Uint8 u8R, Uint8 u8G, Uint8 u8B);
+
 	SDL_Surface*	GetScreen() { return m_pScreen; }
 
 private:

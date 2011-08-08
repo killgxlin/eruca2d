@@ -64,16 +64,27 @@ UINT32 Tile::Collide( GameObj* pRunner )
 		if( uFlag & ECD_Down )
 		{
 			vOffset.y += thisBox.vMax.y - thatBox.vMin.y;
+			if( pPlayer->m_vVel.y < 0 )
+			{
+				pPlayer->m_vVel.y *= -1;
+			}
 		}
 		if( uFlag & ECD_Left )
 		{
 			vOffset.x -= thatBox.vMax.x - thisBox.vMin.x;
-			pPlayer->m_vVel.x = 0;
+			if( pPlayer->m_vVel.x > 0 )
+			{
+				pPlayer->m_vVel.x *= -1;
+			}
 		}
 		if( uFlag & ECD_Right )
 		{
 			vOffset.x += thisBox.vMax.x - thatBox.vMin.x;
-			pPlayer->m_vVel.x = 0;
+
+			if( pPlayer->m_vVel.x < 0 )
+			{
+				pPlayer->m_vVel.x *= -1;
+			}
 		}
 
 		pPlayer->SetPos(pPlayer->GetPos() + vOffset);
