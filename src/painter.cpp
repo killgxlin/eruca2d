@@ -33,10 +33,10 @@ VOID Painter::Clear()
 VOID Painter::DrawRect( const Vector2 &vPos, const Size &sSize, UINT32 uColor )
 {
 	SDL_Rect rect;
-	rect.w = sSize.nW;
-	rect.h = sSize.nH;
-	rect.x = vPos.nX - sSize.nW / 2;
-	rect.y = vPos.nY - sSize.nH / 2;
+	rect.w = sSize.w;
+	rect.h = sSize.h;
+	rect.x = vPos.x - sSize.w / 2;
+	rect.y = vPos.y - sSize.h / 2;
 
 	SDL_FillRect(m_pScreen, &rect, uColor);
 }

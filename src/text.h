@@ -11,8 +11,8 @@ public:
 
 	BOOL	SetFont(const char* szPath);
 
-	VOID DrawText(Painter* pScreen, const Vector2 &vPos, const char* szText, UINT32 uColor);
-
+	VOID	DrawText(Painter* pScreen, const Vector2 &vPos, const char* szText, UINT32 uColor);
+	VOID	DrawText(const Vector2 &vPos, UINT8 u8R, UINT8 u8G, UINT8 u8B, const char* szFormat, ...);
 private:
 	TTF_Font*	m_pFont;
 };

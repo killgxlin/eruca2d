@@ -14,11 +14,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 					   LPTSTR    lpCmdLine,
 					   int       nCmdShow)
 {
-	Painter painter;
-	painter.Init(640, 480, "eruca2d");
+	g_painter.Init(640, 480, "eruca2d");
 
-	Timer timer;
-	timer.Init();
 	Timer timer2;
 	timer2.Init();
 
@@ -31,31 +28,29 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	
 	while( !g_keyboard.m_bKey[SDLK_ESCAPE] )
 	{
-		timer.Update();
+
 		timer2.Update();
 
-		g_framerate.Update(timer2.GetIntervalU());
+		g_framerate.CountFrame(timer2.GetIntervalU());
+
+		g_framerate.BeginFrame();
 
 		g_keyboard.Update();
 
 		lvl.Update(timer2.GetIntervalF());
 
-		painter.Clear();
+		g_painter.Clear();
 
-		lvl.Draw(&painter);
+		lvl.Draw(&g_painter);
 
-		char buffer[100];
-		sprintf(buffer, "frame rate: %f", g_framerate.GetFrameRate());
-		g_text.DrawText(&painter, Vector2(0, 40), buffer, SDL_MapRGB(painter.GetScreen()->format, 100, 100, 100));
+		g_text.DrawText(Vector2(0, 20), 255, 255, 255, "FPS   : %4.2f", g_framerate.GetFPS());
+		g_text.DrawText(Vector2(0, 40), 255, 255, 255, "factor: %4.2f", g_framerate.GetSpeedRate());
 
-		painter.Flush();
+		g_painter.Flush();
 
-		timer.Update();
+		g_framerate.EndFrame();
 
-		INT nSleep = 10-timer.GetIntervalU();
-		if(  nSleep < 0 ) nSleep = 0;
-		SDL_Delay(nSleep);
-
+		g_framerate.WaitFrame();
 
 	}
 
@@ -66,9 +61,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	g_framerate.Destroy();
 
 	timer2.Destroy();
-	timer.Destroy();
-
-	painter.Destroy();
+	g_painter.Destroy();
 
 	return 0;
 }

@@ -9,8 +9,8 @@ VOID Text::DrawText( Painter* pScreen, const Vector2 &vPos, const char* szText, 
 	if (text_surface != NULL)
 	{
 		SDL_Rect rect;
-		rect.x = vPos.nX;
-		rect.y = vPos.nY;
+		rect.x = vPos.x;
+		rect.y = vPos.y;
 		rect.w = text_surface->w;
 		rect.h = text_surface->h;
 
@@ -48,6 +48,20 @@ BOOL Text::SetFont( const char* szPath )
 	if( m_pFont == NULL ) return FALSE;
 
 	return TRUE;
+}
+
+VOID Text::DrawText(const Vector2 &vPos, UINT8 u8R, UINT8 u8G, UINT8 u8B, const char* szFormat, ...)
+{
+	va_list argList;
+	va_start(argList, szFormat);
+
+
+	char buffer[1024];
+	vsprintf(buffer, szFormat, argList);
+
+	va_end(argList);
+
+	DrawText( &g_painter, vPos, buffer, SDL_MapRGB(g_painter.GetScreen()->format, u8R, u8G, u8B) );
 }
 
 

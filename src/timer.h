@@ -42,39 +42,29 @@ private:
 class FrameRate
 {
 public:
-	BOOL	Init()
-	{
-		m_uDt = 0.0f;
-		m_nFrames = 0;
-		m_nFrames = 0;
-		return TRUE;
-	}
-	VOID	Destroy(){}
+	BOOL	Init();
+	VOID	Destroy(){ m_timer.Destroy(); }
 
-	VOID	Update(UINT32 dt)
-	{
-		// 记帧数
-		++m_nFrames;
+	VOID	CountFrame(UINT32 dt);
+	VOID	BeginFrame();
+	VOID	EndFrame();
+	VOID	WaitFrame();
 
-		// 计时间
-		m_uDt += dt;
-		// 若时间大于1秒
-		if( m_uDt >= 1000 )
-		{
-			// 计算fps
-			m_fFrameRate = m_nFrames * 1000.0f / m_uDt;
+	VOID	SetCustomFPS(FLOAT fCustom);
+	FLOAT	GetCustomFPS() const		{ return m_fCustomFPS; }
+	FLOAT	GetFPS() const				{ return m_fCurFPS; }
 
-			// 清空时间和帧数
-			m_uDt = 0.0f;
-			m_nFrames = 0;
-		}
-
-	}
-	float		GetFrameRate() const	{ return m_fFrameRate; }
+	VOID	SetSpeedRate(FLOAT fRate)	{ m_fSpeedRate = Cut(fRate, 0.5f, 10.0f); }
+	FLOAT	GetSpeedRate() const		{ return m_fSpeedRate; }
 private:
 	UINT32	m_uDt;
 	INT		m_nFrames;
-	float	m_fFrameRate;
+	FLOAT	m_fCurFPS;
+
+	FLOAT	m_fCustomFPS;
+	FLOAT	m_fSpeedRate;
+
+	Timer	m_timer;
 };
 
 extern FrameRate g_framerate;

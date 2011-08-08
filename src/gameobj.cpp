@@ -55,25 +55,25 @@ UINT32 Tile::Collide( GameObj* pRunner )
 		Player *pPlayer = dynamic_cast<Player *>(pRunner);
 		if( uFlag & ECD_Top )
 		{
-			vOffset.nY -= thatBox.vMax.nY - thisBox.vMin.nY;
-			if( pPlayer->m_vVel.nY > 0 )
+			vOffset.y -= thatBox.vMax.y - thisBox.vMin.y;
+			if( pPlayer->m_vVel.y > 0 )
 			{
-				pPlayer->m_vVel.nY *= -1;
+				pPlayer->m_vVel.y *= -1;
 			}
 		}
 		if( uFlag & ECD_Down )
 		{
-			vOffset.nY += thisBox.vMax.nY - thatBox.vMin.nY;
+			vOffset.y += thisBox.vMax.y - thatBox.vMin.y;
 		}
 		if( uFlag & ECD_Left )
 		{
-			vOffset.nX -= thatBox.vMax.nX - thisBox.vMin.nX;
-			pPlayer->m_vVel.nX = 0;
+			vOffset.x -= thatBox.vMax.x - thisBox.vMin.x;
+			pPlayer->m_vVel.x = 0;
 		}
 		if( uFlag & ECD_Right )
 		{
-			vOffset.nX += thisBox.vMax.nX - thatBox.vMin.nX;
-			pPlayer->m_vVel.nX = 0;
+			vOffset.x += thisBox.vMax.x - thatBox.vMin.x;
+			pPlayer->m_vVel.x = 0;
 		}
 
 		pPlayer->SetPos(pPlayer->GetPos() + vOffset);
@@ -95,28 +95,30 @@ VOID Player::Update( float dt )
 {
 	GameObj::Update(dt);
 
+	Vector2 vOld = m_vVel;
 
-	m_vVel.nY += XGravity;
-	if( m_vVel.nY > XMaxPlayerSpeed )
-	{
-		m_vVel.nY = XMaxPlayerSpeed;
-	}
+	m_vVel.y += XGravity * dt;
 
 	if( g_keyboard.m_bKey[SDLK_LEFT] )
 	{
-		m_vVel.nX -= XCtrlAcc;
+		m_vVel.x -= XCtrlAcc * dt;
 	}
 	if( g_keyboard.m_bKey[SDLK_RIGHT] )
 	{
-		m_vVel.nX += XCtrlAcc;
+		m_vVel.x += XCtrlAcc * dt;
 	}
 	if( g_keyboard.m_bKey[SDLK_UP] )
 	{
-		m_vVel.nY -= XCtrlAcc;
+		m_vVel.y -= XCtrlAcc * dt;
 	}
 	if( g_keyboard.m_bKey[SDLK_DOWN] )
 	{
-		m_vVel.nY += XCtrlAcc;
+		m_vVel.y += XCtrlAcc * dt;
+	}
+
+	if( m_vVel.Length() > XMaxPlayerSpeed )
+	{
+		m_vVel = vOld;
 	}
 
 	Vector2 vOffset = m_vVel * dt;
@@ -124,12 +126,12 @@ VOID Player::Update( float dt )
 
 	m_vPos += vOffset;
 
-	if( m_vPos.nX > 630 )
+	if( m_vPos.x > 630 )
 	{
-		m_vPos.nX = 10;
+		m_vPos.x = 10;
 	}
-	if( m_vPos.nX < 10 )
+	if( m_vPos.x < 10 )
 	{
-		m_vPos.nX = 630;
+		m_vPos.x = 630;
 	}
 }

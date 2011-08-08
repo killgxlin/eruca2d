@@ -4,6 +4,7 @@
 #include "gameobj.h"
 #include "painter.h"
 #include "text.h"
+#include "timer.h"
 
 BOOL Level::Load()
 {
@@ -19,19 +20,7 @@ BOOL Level::Load()
 		m_collider.AddGameObj(pTile);
 	}
 
-	{
-		Tile* pTile = new Tile;
-		pTile->SetPos(Vector2(50, 380));
-		m_lstTiles.push_back(pTile);
-		m_collider.AddGameObj(pTile);
-	}
 
-	{
-		Tile* pTile = new Tile;
-		pTile->SetPos(Vector2(100, 360));
-		m_lstTiles.push_back(pTile);
-		m_collider.AddGameObj(pTile);
-	}
 
 
 	return TRUE;
@@ -62,6 +51,8 @@ struct TileUpdate
 
 VOID Level::Update( float dt )
 {
+	dt *= g_framerate.GetSpeedRate();
+
 	for_each(m_lstTiles.begin(), m_lstTiles.end(), TileUpdate(dt));
 	m_pPlayer->Update(dt);
 
@@ -83,8 +74,6 @@ VOID Level::Draw( Painter* pPainter )
 	for_each(m_lstTiles.begin(), m_lstTiles.end(), TileDraw(pPainter));
 	m_pPlayer->Draw(pPainter);
 
-	char buffer[1000];
-	sprintf(buffer, "vel of player:%d ,%d, %f", m_pPlayer->m_vVel.nX, m_pPlayer->m_vVel.nY, m_pPlayer->m_vVel.Length() / float(XMaxPlayerSpeed));
-	g_text.DrawText(pPainter, Vector2(0, 0), buffer, SDL_MapRGB(pPainter->GetScreen()->format, 255, 255, 255));
+	g_text.DrawText(Vector2(0, 0), 255, 255, 255, "vel of player:%4.2f ,%4.2f, %4.2f", m_pPlayer->m_vVel.x, m_pPlayer->m_vVel.y, m_pPlayer->m_vVel.Length());
 	
 }

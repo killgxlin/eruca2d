@@ -43,66 +43,66 @@ class Size
 {
 public:
 	Size(void) {}
-	Size(INT width, INT height) : nW(width), nH(height) {}
+	Size(FLOAT width, FLOAT height) : w(width), h(height) {}
 
 	bool operator==(const Size& other) const;
 	bool operator!=(const Size& other) const;
 
-	INT nW, nH;
+	FLOAT w, h;
 };
 class Vector2
 {
 public:
 	Vector2(void) {}
-	Vector2(INT x, INT y) : nX(x), nY(y) {}
+	Vector2(FLOAT x, FLOAT y) : x(x), y(y) {}
 
 	Vector2& operator+=(const Vector2& vec)
 	{
-		nX += vec.nX;
-		nY += vec.nY;
+		x += vec.x;
+		y += vec.y;
 
 		return *this;
 	}
 
 	Vector2& operator-=(const Vector2& vec)
 	{
-		nX -= vec.nX;
-		nY -= vec.nY;
+		x -= vec.x;
+		y -= vec.y;
 
 		return *this;
 	}
 
 	Vector2	operator+(const Vector2& vec) const
 	{
-		return Vector2(nX + vec.nX, nY + vec.nY);
+		return Vector2(x + vec.x, y + vec.y);
 	}
 
 	Vector2	operator-(const Vector2& vec) const
 	{
-		return Vector2(nX - vec.nX, nY - vec.nY);
+		return Vector2(x - vec.x, y - vec.y);
 	}
 
 	Vector2	operator*(const Vector2& vec) const
 	{
-		return Vector2(nX * vec.nX, nY * vec.nY);
+		return Vector2(x * vec.x, y * vec.y);
 	}
 
 	Vector2	operator*(const FLOAT factor) const
 	{
-		return Vector2(nX * factor, nY * factor);
+		return Vector2(x * factor, y * factor);
 	}
 
 	Vector2	operator/(FLOAT factor) const
 	{
 		if( factor == 0.0f ) factor = 1.0f;
 
-		return Vector2(nX / factor, nY / factor);
+		return Vector2(x / factor, y / factor);
 	}
 
 
 	bool	operator==(const Vector2& vec) const
 	{
-		return ((nX == vec.nX) && (nY == vec.nY));
+		return ((x == vec.x) && (y == vec.y));
 	}
 
 	bool	operator!=(const Vector2& vec) const
@@ -110,9 +110,9 @@ public:
 		return !(operator==(vec));
 	}
 
-	Size	asSize() const     { return Size(nX, nY); }
-	INT		Length()const		{ return sqrt(float(nX*nX+nY*nY)); }
-	INT nX, nY;
+	Size	asSize() const     { return Size(x, y); }
+	FLOAT	Length()const		{ return sqrt(x*x+y*y); }
+	FLOAT	x, y;
 };
 
 
@@ -128,16 +128,16 @@ T		Min(T val1, T val2)
 }
 
 template<typename T>
-BOOL	IsBetween(T val, T min, T max)
+BOOL	IsBetweenClose(T val, T min, T max)
 {
-	return (val>=min && val<max);
+	return (val>=min && val<=max);
 }
 
 template<typename T>
 T		Cut(T val, T min, T max)
 {
 	val = Max(min, val);
-	val = Min(max-1, val);
+	val = Min(max, val);
 
 	return val;
 }
@@ -148,46 +148,46 @@ public:
 	UINT32		IntersectTest(const AABBox &other)
 	{
 		UINT32 uFlag = ECD_None;
-		INT nDeep = 0;
+		FLOAT fDeep = 0;
 
-		if( IsBetween(other.vMin.nX, this->vMin.nX, this->vMax.nX) || IsBetween(other.vMax.nX-1, this->vMin.nX, this->vMax.nX) )
+		if( IsBetweenClose(other.vMin.x, this->vMin.x, this->vMax.x) || IsBetweenClose(other.vMax.x, this->vMin.x, this->vMax.x) )
 		{
 			// top
-			if( IsBetween(other.vMax.nY-1, this->vMin.nY, this->vMax.nY) && other.vMin.nY < this->vMin.nY)
+			if( IsBetweenClose(other.vMax.y, this->vMin.y, this->vMax.y) && other.vMin.y < this->vMin.y)
 			{
-				if( nDeep < this->vMin.nY - other.vMin.nY )
+				if( fDeep < this->vMin.y - other.vMin.y )
 				{
-					nDeep = this->vMin.nY - other.vMin.nY;
+					fDeep = this->vMin.y - other.vMin.y;
 					uFlag = ECD_Top;
 				}
 			}
 			// down
-			if( IsBetween(other.vMin.nY, this->vMin.nY, this->vMax.nY) && other.vMax.nY > this->vMax.nY )
+			if( IsBetweenClose(other.vMin.y, this->vMin.y, this->vMax.y) && other.vMax.y > this->vMax.y )
 			{
-				if( nDeep < other.vMax.nY - this->vMax.nY )
+				if( fDeep < other.vMax.y - this->vMax.y )
 				{
-					nDeep = other.vMax.nY - this->vMax.nY;
+					fDeep = other.vMax.y - this->vMax.y;
 					uFlag = ECD_Down;
 				}				
 			}
 		}
-		if( IsBetween(other.vMin.nY, this->vMin.nY, this->vMax.nY) || IsBetween(other.vMax.nY-1, this->vMin.nY, this->vMax.nY) )
+		if( IsBetweenClose(other.vMin.y, this->vMin.y, this->vMax.y) || IsBetweenClose(other.vMax.y, this->vMin.y, this->vMax.y) )
 		{
 			// left
-			if( IsBetween(other.vMax.nX-1, this->vMin.nX, this->vMax.nX) && other.vMin.nX < this->vMin.nX)
+			if( IsBetweenClose(other.vMax.x, this->vMin.x, this->vMax.x) && other.vMin.x < this->vMin.x)
 			{
-				if( nDeep < this->vMin.nX - other.vMin.nX )
+				if( fDeep < this->vMin.x - other.vMin.x )
 				{
-					nDeep = this->vMin.nX - other.vMin.nX;
+					fDeep = this->vMin.x - other.vMin.x;
 					uFlag = ECD_Left;
 				}
 			}
 			// right
-			if( IsBetween(other.vMin.nX, this->vMin.nX, this->vMax.nX) && other.vMax.nX > this->vMax.nX )
+			if( IsBetweenClose(other.vMin.x, this->vMin.x, this->vMax.x) && other.vMax.x > this->vMax.x )
 			{
-				if( nDeep < other.vMax.nX - this->vMax.nX )
+				if( fDeep < other.vMax.x - this->vMax.x )
 				{
-					nDeep = other.vMax.nX - this->vMax.nX;
+					fDeep = other.vMax.x - this->vMax.x;
 					uFlag = ECD_Right;
 				}
 			}
