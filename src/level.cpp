@@ -9,34 +9,17 @@
 BOOL Level::Load()
 {
 	m_pPlayer = new Player;
-	m_pPlayer->SetPos(Vector2(100, 10));
+	m_pPlayer->SetPos(Vector2(100, 400));
 	m_collider.AddGameObj(m_pPlayer);
 
 	for( INT i=10; i<= 630; i+=20 )
 	{
 		Tile* pTile = new Tile;
-		pTile->SetPos(Vector2(i, 400));
+		pTile->SetPos(Vector2(i, 10));
 		pTile->SetCollideDirFlag(ECD_Top | ECD_Down);
 		m_lstTiles.push_back(pTile);
 		m_collider.AddGameObj(pTile);
 	}
-
-	{
-		Tile* pTile = new Tile;
-		pTile->SetPos(Vector2(320, 200));
-		pTile->SetCollideDirFlag(ECD_All);
-		m_lstTiles.push_back(pTile);
-		m_collider.AddGameObj(pTile);
-	}
-
-	{
-		Tile* pTile = new Tile;
-		pTile->SetPos(Vector2(20, 200));
-		pTile->SetCollideDirFlag(ECD_All);
-		m_lstTiles.push_back(pTile);
-		m_collider.AddGameObj(pTile);
-	}
-
 
 	return TRUE;
 }

@@ -20,6 +20,15 @@ public:
 
 private:
 	SDL_Surface*	m_pScreen;
+
+public:
+	VOID	SetCenter(const Vector2 &vPos)	{ m_vCenter = vPos; }
+	VOID	WorldDrawRect(const Vector2 &vWorldPos, const Size &sSize, UINT32 uColor);
+private:
+	VOID	WorldToScreen(Vector2* pPt);
+	VOID	ScreenToSDL(Vector2* pPt);
+	Vector2	m_vCenter;
+
 };
 
 extern Painter g_painter;

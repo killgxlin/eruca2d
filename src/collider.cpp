@@ -42,11 +42,12 @@ VOID Collider::DelGameObj( GameObj* pObj )
 
 VOID Collider::Collide()
 {
+	tagCollideRes result;
 	for(list<CollidePair>::iterator itr = m_lstCollidePairs.begin();
 		itr != m_lstCollidePairs.end();
 		++itr)
 	{
-		itr->first->Collide(itr->second);
+		itr->first->Collide(itr->second, &result);
 	}
 }
 

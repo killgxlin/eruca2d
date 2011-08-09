@@ -10,6 +10,8 @@ BOOL Painter::Init( int w, int h, const char* title )
 
 	if( title != NULL )
 		SDL_WM_SetCaption(title, 0);
+
+	SetCenter(Vector2(320, 240));
 	return true;
 }
 
@@ -44,4 +46,25 @@ VOID Painter::DrawRect( const Vector2 &vPos, const Size &sSize, UINT32 uColor )
 Uint32 Painter::GetColor( Uint8 u8R, Uint8 u8G, Uint8 u8B )
 {
 	return SDL_MapRGB(m_pScreen->format, u8R, u8G, u8B);
+}
+
+VOID Painter::WorldDrawRect( const Vector2 &vWorldPos, const Size &sSize, UINT32 uColor )
+{
+	Vector2 vPos = vWorldPos;
+	WorldToScreen(&vPos);
+	ScreenToSDL(&vPos);
+
+	DrawRect(vPos, sSize, uColor);
+}
+
+VOID Painter::WorldToScreen( Vector2* pPt )
+{
+	Vector2 vSize(m_pScreen->w, m_pScreen->h);
+	Vector2 vLeftBottom = m_vCenter - vSize / 2;
+	*pPt -= vLeftBottom;
+}
+
+VOID Painter::ScreenToSDL( Vector2* pPt )
+{
+	pPt->y = m_pScreen->h - pPt->y;
 }

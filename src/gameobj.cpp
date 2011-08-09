@@ -3,6 +3,7 @@
 
 #include "sprite.h"
 #include "keyboard.h"
+#include "painter.h"
 
 VOID GameObj::Update( float dt )
 {
@@ -14,12 +15,13 @@ VOID GameObj::Draw( Painter* pScreen )
 	m_pSprite->Draw(pScreen, m_vPos);
 }
 
-UINT32 GameObj::Collide( GameObj* pRunner )
+VOID GameObj::Collide( GameObj* pRunner, tagCollideRes* pRes )
 {
 	AABBox thisBox = GetAABBox();
 	AABBox thatBox = pRunner->GetAABBox();
 
-	return thisBox.IntersectTest(thatBox);
+	
+	pRes->dwDirFlag = thisBox.IntersectTest(thatBox, pRes->fDeep);
 }
 
 AABBox GameObj::GetAABBox() const
@@ -37,49 +39,43 @@ Tile::~Tile()
 	delete m_pSprite;
 }
 
-UINT32 Tile::Collide( GameObj* pRunner )
+VOID Tile::Collide( GameObj* pRunner, tagCollideRes* pRes )
 {
-	UINT32 uFlag = GameObj::Collide(pRunner);
-	if( !(uFlag & GetCollideDirFlag()) )
-	{
-		return ECD_None;
-	}
-
-	AABBox thisBox = GetAABBox();
-	AABBox thatBox = pRunner->GetAABBox();
+	GameObj::Collide(pRunner, pRes);
+	if( !(pRes->dwDirFlag & GetCollideDirFlag()) )	return;
 
 	if( pRunner->GetCollidePri() == ECP_Player )
 	{
 		Vector2 vOffset(0, 0);
 
 		Player *pPlayer = dynamic_cast<Player *>(pRunner);
-		if( uFlag & ECD_Top )
+		if( pRes->dwDirFlag & ECD_Top )
 		{
-			vOffset.y -= thatBox.vMax.y - thisBox.vMin.y;
-			if( pPlayer->m_vVel.y > 0 )
-			{
-				pPlayer->m_vVel.y *= -1;
-			}
-		}
-		if( uFlag & ECD_Down )
-		{
-			vOffset.y += thisBox.vMax.y - thatBox.vMin.y;
+			vOffset.y += pRes->fDeep ;
 			if( pPlayer->m_vVel.y < 0 )
 			{
 				pPlayer->m_vVel.y *= -1;
 			}
 		}
-		if( uFlag & ECD_Left )
+		if( pRes->dwDirFlag & ECD_Down )
 		{
-			vOffset.x -= thatBox.vMax.x - thisBox.vMin.x;
+			vOffset.y -= pRes->fDeep;
+			if( pPlayer->m_vVel.y > 0 )
+			{
+				pPlayer->m_vVel.y *= -1;
+			}
+		}
+		if( pRes->dwDirFlag & ECD_Left )
+		{
+			vOffset.x -= pRes->fDeep;
 			if( pPlayer->m_vVel.x > 0 )
 			{
 				pPlayer->m_vVel.x *= -1;
 			}
 		}
-		if( uFlag & ECD_Right )
+		if( pRes->dwDirFlag & ECD_Right )
 		{
-			vOffset.x += thisBox.vMax.x - thatBox.vMin.x;
+			vOffset.x += pRes->fDeep;
 
 			if( pPlayer->m_vVel.x < 0 )
 			{
@@ -89,7 +85,6 @@ UINT32 Tile::Collide( GameObj* pRunner )
 
 		pPlayer->SetPos(pPlayer->GetPos() + vOffset);
 	}
-	return uFlag;
 }
 
 Player::Player() :GameObj(Vector2(0, 0), ECP_Player, ECD_None), m_vVel(0, 0)
@@ -120,11 +115,11 @@ VOID Player::Update( float dt )
 	}
 	if( g_keyboard.m_bKey[SDLK_UP] )
 	{
-		m_vVel.y -= XCtrlAcc * dt;
+		m_vVel.y += XCtrlAcc * dt;
 	}
 	if( g_keyboard.m_bKey[SDLK_DOWN] )
 	{
-		m_vVel.y += XCtrlAcc * dt;
+		m_vVel.y -= XCtrlAcc * dt;
 	}
 
 	if( m_vVel.Length() > XMaxPlayerSpeed )
@@ -145,4 +140,6 @@ VOID Player::Update( float dt )
 	{
 		m_vPos.x = 630;
 	}
+
+	g_painter.SetCenter(GetPos());
 }

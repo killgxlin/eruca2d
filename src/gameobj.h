@@ -4,12 +4,18 @@
 class Sprite;
 class Painter;
 
+struct tagCollideRes 
+{
+	DWORD	dwDirFlag;
+	FLOAT	fDeep;
+};
+
 class GameObj
 {
 public:
 	virtual VOID	Update(float dt);
 	virtual VOID	Draw(Painter* pScreen);
-	virtual UINT32	Collide(GameObj* pRunner);
+	virtual VOID	Collide(GameObj* pRunner, tagCollideRes* pRes);
 
 	GameObj(const Vector2 &vPos, INT nCollidePri, UINT32 uCollideDirFlag)
 		:m_vPos(vPos), m_nCollidePri(nCollidePri), m_uCollideDirFlag(uCollideDirFlag){}
@@ -37,7 +43,7 @@ public:
 	Tile(/*const Vector2 &vPos*/);
 	~Tile();
 
-	virtual UINT32	Collide(GameObj* pRunner);
+	virtual VOID	Collide(GameObj* pRunner, tagCollideRes* pRes);
 };
 
 class Player : public GameObj

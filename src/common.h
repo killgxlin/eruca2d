@@ -38,7 +38,7 @@ enum ECollideDir
 };
 
 #define XMaxPlayerSpeed		400	//pixel per sec
-#define XGravity			10	//pixel * pixel per sec
+#define XGravity			-10	//pixel * pixel per sec
 #define XCtrlAcc			15	//
 
 class Size
@@ -147,30 +147,32 @@ T		Cut(T val, T min, T max)
 class AABBox
 {
 public:
-	UINT32		IntersectTest(const AABBox &other)
+	UINT32 IntersectTest(const AABBox &other, FLOAT &fDeep)
 	{
 		UINT32 uFlag = ECD_None;
-		FLOAT fDeep = 0;
+		fDeep = 0;
 
 		if( IsBetweenClose(other.vMin.x, this->vMin.x, this->vMax.x) || IsBetweenClose(other.vMax.x, this->vMin.x, this->vMax.x) )
 		{
 			// top
-			if( IsBetweenClose(other.vMax.y, this->vMin.y, this->vMax.y) && other.vMin.y < this->vMin.y)
-			{
-				if( fDeep < this->vMin.y - other.vMin.y )
-				{
-					fDeep = this->vMin.y - other.vMin.y;
-					uFlag = ECD_Top;
-				}
-			}
-			// down
 			if( IsBetweenClose(other.vMin.y, this->vMin.y, this->vMax.y) && other.vMax.y > this->vMax.y )
 			{
-				if( fDeep < other.vMax.y - this->vMax.y )
+				FLOAT fCurDeep = this->vMax.y - other.vMin.y;
+				if( fDeep < fCurDeep )
 				{
-					fDeep = other.vMax.y - this->vMax.y;
-					uFlag = ECD_Down;
+					fDeep = fCurDeep;
+					uFlag = ECD_Top;
 				}				
+			}
+			// down
+			if( IsBetweenClose(other.vMax.y, this->vMin.y, this->vMax.y) && other.vMin.y < this->vMin.y)
+			{
+				FLOAT fCurDeep = other.vMax.y - this->vMin.y;
+				if( fDeep < fCurDeep )
+				{
+					fDeep = fCurDeep;
+					uFlag = ECD_Down;
+				}
 			}
 		}
 		if( IsBetweenClose(other.vMin.y, this->vMin.y, this->vMax.y) || IsBetweenClose(other.vMax.y, this->vMin.y, this->vMax.y) )
@@ -178,18 +180,20 @@ public:
 			// left
 			if( IsBetweenClose(other.vMax.x, this->vMin.x, this->vMax.x) && other.vMin.x < this->vMin.x)
 			{
-				if( fDeep < this->vMin.x - other.vMin.x )
+				FLOAT fCurDeep = other.vMax.x - this->vMin.x;
+				if( fDeep < fCurDeep )
 				{
-					fDeep = this->vMin.x - other.vMin.x;
+					fDeep = fCurDeep;
 					uFlag = ECD_Left;
 				}
 			}
 			// right
 			if( IsBetweenClose(other.vMin.x, this->vMin.x, this->vMax.x) && other.vMax.x > this->vMax.x )
 			{
-				if( fDeep < other.vMax.x - this->vMax.x )
+				FLOAT fCurDeep = this->vMax.x - other.vMin.x;
+				if( fDeep < fCurDeep )
 				{
-					fDeep = other.vMax.x - this->vMax.x;
+					fDeep = fCurDeep;
 					uFlag = ECD_Right;
 				}
 			}
