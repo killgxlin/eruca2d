@@ -16,10 +16,20 @@ BOOL Level::Load()
 	{
 		Tile* pTile = new Tile;
 		pTile->SetPos(Vector2(i, 10));
-		pTile->SetCollideDirFlag(ECD_Top | ECD_Down);
+		pTile->SetCollideDirFlag(ECD_All);
 		m_lstTiles.push_back(pTile);
 		m_collider.AddGameObj(pTile);
 	}
+
+	for( INT i=10; i<= 630; i+=20 )
+	{
+		Tile* pTile = new Tile;
+		pTile->SetPos(Vector2(i, 470));
+		pTile->SetCollideDirFlag(ECD_All);
+		m_lstTiles.push_back(pTile);
+		m_collider.AddGameObj(pTile);
+	}
+
 
 	return TRUE;
 }

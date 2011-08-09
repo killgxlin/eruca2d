@@ -147,7 +147,7 @@ T		Cut(T val, T min, T max)
 class AABBox
 {
 public:
-	UINT32 IntersectTest(const AABBox &other, FLOAT &fDeep)
+	UINT32 IntersectTest(const AABBox &other, FLOAT &fDeep, DWORD dwColDirFlag)
 	{
 		UINT32 uFlag = ECD_None;
 		fDeep = 0;
@@ -155,7 +155,7 @@ public:
 		if( IsBetweenClose(other.vMin.x, this->vMin.x, this->vMax.x) || IsBetweenClose(other.vMax.x, this->vMin.x, this->vMax.x) )
 		{
 			// top
-			if( IsBetweenClose(other.vMin.y, this->vMin.y, this->vMax.y) && other.vMax.y > this->vMax.y )
+			if( ECD_Top & dwColDirFlag && IsBetweenClose(other.vMin.y, this->vMin.y, this->vMax.y) && other.vMax.y > this->vMax.y )
 			{
 				FLOAT fCurDeep = this->vMax.y - other.vMin.y;
 				if( fDeep < fCurDeep )
@@ -165,7 +165,7 @@ public:
 				}				
 			}
 			// down
-			if( IsBetweenClose(other.vMax.y, this->vMin.y, this->vMax.y) && other.vMin.y < this->vMin.y)
+			if( ECD_Down & dwColDirFlag && IsBetweenClose(other.vMax.y, this->vMin.y, this->vMax.y) && other.vMin.y < this->vMin.y)
 			{
 				FLOAT fCurDeep = other.vMax.y - this->vMin.y;
 				if( fDeep < fCurDeep )
@@ -178,7 +178,7 @@ public:
 		if( IsBetweenClose(other.vMin.y, this->vMin.y, this->vMax.y) || IsBetweenClose(other.vMax.y, this->vMin.y, this->vMax.y) )
 		{
 			// left
-			if( IsBetweenClose(other.vMax.x, this->vMin.x, this->vMax.x) && other.vMin.x < this->vMin.x)
+			if( ECD_Left & dwColDirFlag && IsBetweenClose(other.vMax.x, this->vMin.x, this->vMax.x) && other.vMin.x < this->vMin.x)
 			{
 				FLOAT fCurDeep = other.vMax.x - this->vMin.x;
 				if( fDeep < fCurDeep )
@@ -188,7 +188,7 @@ public:
 				}
 			}
 			// right
-			if( IsBetweenClose(other.vMin.x, this->vMin.x, this->vMax.x) && other.vMax.x > this->vMax.x )
+			if( ECD_Right & dwColDirFlag && IsBetweenClose(other.vMin.x, this->vMin.x, this->vMax.x) && other.vMax.x > this->vMax.x )
 			{
 				FLOAT fCurDeep = this->vMax.x - other.vMin.x;
 				if( fDeep < fCurDeep )

@@ -21,7 +21,7 @@ VOID GameObj::Collide( GameObj* pRunner, tagCollideRes* pRes )
 	AABBox thatBox = pRunner->GetAABBox();
 
 	
-	pRes->dwDirFlag = thisBox.IntersectTest(thatBox, pRes->fDeep);
+	pRes->dwDirFlag = thisBox.IntersectTest(thatBox, pRes->fDeep, GetCollideDirFlag());
 }
 
 AABBox GameObj::GetAABBox() const
@@ -42,7 +42,7 @@ Tile::~Tile()
 VOID Tile::Collide( GameObj* pRunner, tagCollideRes* pRes )
 {
 	GameObj::Collide(pRunner, pRes);
-	if( !(pRes->dwDirFlag & GetCollideDirFlag()) )	return;
+	if( !pRes->dwDirFlag ) return;
 
 	if( pRunner->GetCollidePri() == ECP_Player )
 	{
@@ -51,34 +51,33 @@ VOID Tile::Collide( GameObj* pRunner, tagCollideRes* pRes )
 		Player *pPlayer = dynamic_cast<Player *>(pRunner);
 		if( pRes->dwDirFlag & ECD_Top )
 		{
-			vOffset.y += pRes->fDeep ;
 			if( pPlayer->m_vVel.y < 0 )
 			{
+				vOffset.y += pRes->fDeep ;
 				pPlayer->m_vVel.y *= -1;
 			}
 		}
 		if( pRes->dwDirFlag & ECD_Down )
 		{
-			vOffset.y -= pRes->fDeep;
 			if( pPlayer->m_vVel.y > 0 )
 			{
+				vOffset.y -= pRes->fDeep;
 				pPlayer->m_vVel.y *= -1;
 			}
 		}
 		if( pRes->dwDirFlag & ECD_Left )
 		{
-			vOffset.x -= pRes->fDeep;
 			if( pPlayer->m_vVel.x > 0 )
 			{
+				vOffset.x -= pRes->fDeep;
 				pPlayer->m_vVel.x *= -1;
 			}
 		}
 		if( pRes->dwDirFlag & ECD_Right )
 		{
-			vOffset.x += pRes->fDeep;
-
 			if( pPlayer->m_vVel.x < 0 )
 			{
+				vOffset.x += pRes->fDeep;
 				pPlayer->m_vVel.x *= -1;
 			}
 		}
@@ -122,10 +121,10 @@ VOID Player::Update( float dt )
 		m_vVel.y -= XCtrlAcc * dt;
 	}
 
-	if( m_vVel.Length() > XMaxPlayerSpeed )
-	{
-		m_vVel = vOld;
-	}
+// 	if( m_vVel.Length() > XMaxPlayerSpeed )
+// 	{
+// 		m_vVel = vOld;
+// 	}
 
 	Vector2 vOffset = m_vVel * dt;
 
@@ -141,5 +140,5 @@ VOID Player::Update( float dt )
 		m_vPos.x = 630;
 	}
 
-	g_painter.SetCenter(GetPos());
+	//g_painter.SetCenter(GetPos());
 }
