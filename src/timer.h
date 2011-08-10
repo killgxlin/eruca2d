@@ -1,20 +1,20 @@
-#ifndef TIMER_H
-#define TIMER_H
+#ifndef __TIMER_H__
+#define __TIMER_H__
 
 class Timer 
 {
 public:
-	bool	Init()
+	BOOL	Init()
 	{
 		_last_tick = SDL_GetTicks();
 		_elapse = 0;
 
-		return true;
+		return TRUE;
 	}
 
 	void	Update()
 	{
-		Uint32 cur_tick = SDL_GetTicks();
+		UINT32 cur_tick = SDL_GetTicks();
 
 		_interval = cur_tick - _last_tick;
 		_elapse += _interval;
@@ -26,16 +26,16 @@ public:
 	{
 	}
 
-	Uint32	GetIntervalU() const { return _interval; }
-	float	GetIntervalF() const { return _interval / 1000.0f; }
+	UINT32	GetIntervalU() const { return _interval; }
+	FLOAT	GetIntervalF() const { return _interval / 1000.0f; }
 
-	Uint32	GetElapseU() const { return _elapse; }
-	float	GetElapseF() const { return _elapse / 1000.0f; }
+	UINT32	GetElapseU() const { return _elapse; }
+	FLOAT	GetElapseF() const { return _elapse / 1000.0f; }
 
 private:
-	Uint32	_last_tick;
-	Uint32	_interval;
-	Uint32	_elapse;
+	UINT32	_last_tick;
+	UINT32	_interval;
+	UINT32	_elapse;
 
 };
 

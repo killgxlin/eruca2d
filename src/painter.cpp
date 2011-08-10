@@ -3,7 +3,7 @@
 
 Painter g_painter;
 
-BOOL Painter::Init( int w, int h, const char* title )
+BOOL Painter::Init( INT w, INT h, const char* title )
 {
 	m_pScreen = SDL_SetVideoMode(w, h, 8, SDL_HWSURFACE|SDL_DOUBLEBUF);
 	if( NULL == m_pScreen ) return FALSE;
@@ -11,8 +11,8 @@ BOOL Painter::Init( int w, int h, const char* title )
 	if( title != NULL )
 		SDL_WM_SetCaption(title, 0);
 
-	SetCenter(Vector2(320, 240));
-	return true;
+	SetCenter(Vector2F(XScreenW/2, XScreenH/2));
+	return TRUE;
 }
 
 VOID Painter::Destroy()
@@ -32,39 +32,43 @@ VOID Painter::Clear()
 	SDL_FillRect(m_pScreen, 0, GetColor(0, 0, 0));
 }
 
-VOID Painter::DrawRect( const Vector2 &vPos, const Size &sSize, UINT32 uColor )
+VOID Painter::DrawRect( const Vector2F &vPos, const SizeN &sSize, UINT32 uColor )
 {
 	SDL_Rect rect;
-	rect.w = sSize.w;
-	rect.h = sSize.h;
-	rect.x = vPos.x - sSize.w / 2;
-	rect.y = vPos.y - sSize.h / 2;
+	rect.w = static_cast<UINT16>(sSize.w);
+	rect.h = static_cast<UINT16>(sSize.h);
+	rect.x = static_cast<INT16>(vPos.x - sSize.w / 2);
+	rect.y = static_cast<INT16>(vPos.y - sSize.h / 2);
 
 	SDL_FillRect(m_pScreen, &rect, uColor);
 }
 
-Uint32 Painter::GetColor( Uint8 u8R, Uint8 u8G, Uint8 u8B )
+UINT32 Painter::GetColor( UINT8 u8R, UINT8 u8G, UINT8 u8B )
 {
 	return SDL_MapRGB(m_pScreen->format, u8R, u8G, u8B);
 }
 
-VOID Painter::WorldDrawRect( const Vector2 &vWorldPos, const Size &sSize, UINT32 uColor )
+VOID Painter::WorldDrawRect( const Vector2F &vWorldPos, const SizeN &sSize, UINT32 uColor )
 {
-	Vector2 vPos = vWorldPos;
+	Vector2F vPos = vWorldPos;
 	WorldToScreen(&vPos);
 	ScreenToSDL(&vPos);
 
+	if( IsBetweenClose<FLOAT>(vPos.x, 0, XScreenW) && IsBetweenClose<FLOAT>(vPos.y, 0, XScreenH) )
+	{
+	}	
 	DrawRect(vPos, sSize, uColor);
+
 }
 
-VOID Painter::WorldToScreen( Vector2* pPt )
+VOID Painter::WorldToScreen( Vector2F* pPt )
 {
-	Vector2 vSize(m_pScreen->w, m_pScreen->h);
-	Vector2 vLeftBottom = m_vCenter - vSize / 2;
+	Vector2F vSize(FLOAT(m_pScreen->w), FLOAT(m_pScreen->h));
+	Vector2F vLeftBottom = m_vCenter - vSize / 2;
 	*pPt -= vLeftBottom;
 }
 
-VOID Painter::ScreenToSDL( Vector2* pPt )
+VOID Painter::ScreenToSDL( Vector2F* pPt )
 {
 	pPt->y = m_pScreen->h - pPt->y;
 }

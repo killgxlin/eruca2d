@@ -9,12 +9,12 @@
 #include "timer.h"
 #include "text.h"
 
-int APIENTRY _tWinMain(HINSTANCE hInstance,
+INT APIENTRY _tWinMain(HINSTANCE hInstance,
 					   HINSTANCE hPrevInstance,
 					   LPTSTR    lpCmdLine,
-					   int       nCmdShow)
+					   INT       nCmdShow)
 {
-	g_painter.Init(640, 480, "eruca2d");
+	g_painter.Init(XScreenW, XScreenH, "eruca2d");
 
 	Timer timer2;
 	timer2.Init();
@@ -23,8 +23,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	g_text.Init();
 
-	Level lvl;
-	lvl.Load();
+	g_level.Init();
 	
 	while( !g_keyboard.m_bKey[SDLK_ESCAPE] )
 	{
@@ -37,11 +36,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 		g_keyboard.Update();
 
-		lvl.Update(timer2.GetIntervalF());
+		g_level.Update(timer2.GetIntervalF());
 
 		g_painter.Clear();
 
-		lvl.Draw(&g_painter);
+		g_level.Draw(&g_painter);
 
 		g_text.AddText(g_painter.GetColor(255, 255, 255), "FPS    : %4.2f", g_framerate.GetFPS());
 		g_text.AddText(g_painter.GetColor(255, 255, 255), "custFPS: %4.2f", g_framerate.GetCustomFPS());
@@ -57,7 +56,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	}
 
-	lvl.UnLoad();
+	g_level.Destroy();
 
 	g_text.Destroy();
 

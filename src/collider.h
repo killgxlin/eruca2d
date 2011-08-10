@@ -1,5 +1,5 @@
-#ifndef COLLIDER_H
-#define COLLIDER_H
+#ifndef __COLLIDER_H__
+#define __COLLIDER_H__
 
 
 class GameObj;

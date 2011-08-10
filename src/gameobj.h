@@ -1,5 +1,5 @@
-#ifndef GAMEOBJ_H
-#define GAMEOBJ_H
+#ifndef __GAMEOBJ_H__
+#define __GAMEOBJ_H__
 
 class Sprite;
 class Painter;
@@ -13,14 +13,14 @@ struct tagCollideRes
 class GameObj
 {
 public:
-	virtual VOID	Update(float dt);
+	virtual VOID	Update(FLOAT dt);
 	virtual VOID	Draw(Painter* pScreen);
 	virtual VOID	Collide(GameObj* pRunner, tagCollideRes* pRes);
 
-	GameObj(const Vector2 &vPos, INT nCollidePri, UINT32 uCollideDirFlag)
+	GameObj(const Vector2F &vPos, INT nCollidePri, UINT32 uCollideDirFlag)
 		:m_vPos(vPos), m_nCollidePri(nCollidePri), m_uCollideDirFlag(uCollideDirFlag){}
 	virtual ~GameObj(){}
-	VOID			SetPos(const Vector2 &vPos) { m_vPos = vPos; }
+	VOID			SetPos(const Vector2F &vPos) { m_vPos = vPos; }
 	VOID			SetCollideDirFlag(UINT32 uFlag) { m_uCollideDirFlag = uFlag; }
 
 protected:
@@ -30,9 +30,9 @@ public:
 	INT				GetCollidePri() const		{ return m_nCollidePri; }
 	UINT32			GetCollideDirFlag() const	{ return m_uCollideDirFlag; }
 	AABBox			GetAABBox() const;
-	Vector2			GetPos() const				{ return m_vPos; }
+	Vector2F		GetPos() const				{ return m_vPos; }
 protected:
-	Vector2			m_vPos;				// 当前位置
+	Vector2F		m_vPos;				// 当前位置
 	INT				m_nCollidePri;		// 碰撞权限
 	UINT32			m_uCollideDirFlag;	// 碰撞的方向
 };
@@ -40,7 +40,7 @@ protected:
 class Tile : public GameObj
 {
 public:
-	Tile(/*const Vector2 &vPos*/);
+	Tile(/*const Vector2F &vPos*/);
 	~Tile();
 
 	virtual VOID	Collide(GameObj* pRunner, tagCollideRes* pRes);
@@ -51,9 +51,9 @@ class Player : public GameObj
 public:
 	Player();
 	~Player();
-	virtual VOID	Update(float dt);
+	virtual VOID	Update(FLOAT dt);
 
-	Vector2		m_vVel;
+	Vector2F		m_vVel;
 };
 
 #endif

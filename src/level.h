@@ -1,5 +1,5 @@
-#ifndef LEVEL_H
-#define LEVEL_H
+#ifndef __LEVEL_H__
+#define __LEVEL_H__
 
 #include "collider.h"
 
@@ -7,19 +7,44 @@ class Painter;
 class Tile;
 class Player;
 
+
+
+struct tagBlock
+{
+	Vector2N	vIdx;
+	list<Tile*>	lstTiles;
+
+	BOOL		Load(const Vector2N &vAbsIdx, const Vector2N &vOffset);
+
+	VOID		UnLoad();
+};
+
 class Level
 {
 public:
-	BOOL	Load();
-	VOID	UnLoad();
+	BOOL	Init();
+	VOID	Destroy();
 
 
-	VOID	Update(float dt);
+	VOID	Update(FLOAT dt);
 	VOID	Draw(Painter* pPainter);
 
-	list<Tile*>	m_lstTiles;
 	Player*		m_pPlayer;
+
+	// something new :)
+public:
+	Vector2N	ConvertToBlockIdx(const Vector2F &vPos);
+	VOID		RefreshBlocks(const Vector2N &vIdx);
+	BOOL AddObj(Tile* pObj);
+	VOID DelObj(Tile* pObj);
+
+	list<tagBlock*>	m_lstBlocks;
+	Vector2N	m_vLastIdx;
+	list<Tile*>	m_lstTiles;
 	Collider	m_collider;
+
 };
+
+extern 	Level g_level;
 
 #endif

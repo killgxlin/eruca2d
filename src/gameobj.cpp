@@ -5,7 +5,7 @@
 #include "keyboard.h"
 #include "painter.h"
 
-VOID GameObj::Update( float dt )
+VOID GameObj::Update( FLOAT dt )
 {
 	m_pSprite->Animate(dt);
 }
@@ -29,7 +29,7 @@ AABBox GameObj::GetAABBox() const
 	return m_pSprite->GetAABBox(m_vPos);
 }
 
-Tile::Tile( /*const Vector2 &vPos*/ ) :GameObj(Vector2(0,0), ECP_Tile, ECD_All)
+Tile::Tile( /*const Vector2F &vPos*/ ) :GameObj(Vector2F(0,0), ECP_Tile, ECD_All)
 {
 	m_pSprite = new SpriteTile(this);
 }
@@ -46,7 +46,7 @@ VOID Tile::Collide( GameObj* pRunner, tagCollideRes* pRes )
 
 	if( pRunner->GetCollidePri() == ECP_Player )
 	{
-		Vector2 vOffset(0, 0);
+		Vector2F vOffset(0, 0);
 
 		Player *pPlayer = dynamic_cast<Player *>(pRunner);
 		if( pRes->dwDirFlag & ECD_Top )
@@ -86,7 +86,7 @@ VOID Tile::Collide( GameObj* pRunner, tagCollideRes* pRes )
 	}
 }
 
-Player::Player() :GameObj(Vector2(0, 0), ECP_Player, ECD_None), m_vVel(0, 0)
+Player::Player() :GameObj(Vector2F(0, 0), ECP_Player, ECD_None), m_vVel(0, 0)
 {
 	m_pSprite = new SpritePlayer(this);
 }
@@ -96,13 +96,13 @@ Player::~Player()
 	delete m_pSprite;
 }
 
-VOID Player::Update( float dt )
+VOID Player::Update( FLOAT dt )
 {
 	GameObj::Update(dt);
 
-	Vector2 vOld = m_vVel;
+	Vector2F vOld = m_vVel;
 
-	m_vVel.y += XGravity * dt;
+//	m_vVel.y += XGravity * dt;
 
 	if( g_keyboard.m_bKey[SDLK_LEFT] )
 	{
@@ -121,24 +121,24 @@ VOID Player::Update( float dt )
 		m_vVel.y -= XCtrlAcc * dt;
 	}
 
-// 	if( m_vVel.Length() > XMaxPlayerSpeed )
-// 	{
-// 		m_vVel = vOld;
-// 	}
+	if( m_vVel.Length() > XMaxPlayerSpeed )
+	{
+		m_vVel = vOld;
+	}
 
-	Vector2 vOffset = m_vVel * dt;
+	Vector2F vOffset = m_vVel * dt;
 
 
 	m_vPos += vOffset;
 
-	if( m_vPos.x > 630 )
-	{
-		m_vPos.x = 10;
-	}
-	if( m_vPos.x < 10 )
-	{
-		m_vPos.x = 630;
-	}
+// 	if( m_vPos.x > XScreenW )
+// 	{
+// 		m_vPos.x = 0;
+// 	}
+// 	if( m_vPos.x < 0 )
+// 	{
+// 		m_vPos.x = XScreenW;
+// 	}
 
-	//g_painter.SetCenter(GetPos());
+	g_painter.SetCenter(GetPos());
 }

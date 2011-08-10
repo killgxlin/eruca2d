@@ -4,6 +4,7 @@
 #include <Windows.h>
 #include <tchar.h>
 #include <math.h>
+#include <assert.h>
 
 #include <SDL.h>
 #include <SDL_ttf.h>
@@ -37,28 +38,42 @@ enum ECollideDir
 	ECD_All		= ECD_Top | ECD_Down | ECD_Left | ECD_Right,
 };
 
-#define XMaxPlayerSpeed		400	//pixel per sec
+#define XMaxPlayerSpeed		100	//pixel per sec
 #define XGravity			-10	//pixel * pixel per sec
 #define XCtrlAcc			15	//
 
+#define XScreenW			400
+#define XScreenH			300
+
+#define XPlayerSize			20
+#define XTileSize			20
+
+template<typename T = FLOAT>
 class Size
 {
 public:
 	Size(void) {}
-	Size(FLOAT width, FLOAT height) : w(width), h(height) {}
+	Size(T width, T height) : w(width), h(height) {}
 
-	bool operator==(const Size& other) const;
-	bool operator!=(const Size& other) const;
+	BOOL operator==(const Size& other) const;
+	BOOL operator!=(const Size& other) const;
 
-	FLOAT w, h;
+	T w, h;
 };
+
+typedef Size<FLOAT>		SizeF;
+typedef Size<INT>		SizeN;
+typedef Size<UINT32>	SizeU;
+
+template<typename T = FLOAT>
 class Vector2
 {
 public:
 	Vector2(void) {}
-	Vector2(FLOAT x, FLOAT y) : x(x), y(y) {}
+	Vector2(T x, T y) : x(x), y(y) {}
 
-	Vector2& operator+=(const Vector2& vec)
+	template<typename TT>
+	Vector2<T>& operator+=(const Vector2<TT>& vec)
 	{
 		x += vec.x;
 		y += vec.y;
@@ -66,7 +81,8 @@ public:
 		return *this;
 	}
 
-	Vector2& operator-=(const Vector2& vec)
+	template<typename TT>
+	Vector2<T>& operator-=(const Vector2<TT>& vec)
 	{
 		x -= vec.x;
 		y -= vec.y;
@@ -74,48 +90,56 @@ public:
 		return *this;
 	}
 
-	Vector2	operator+(const Vector2& vec) const
+	template<typename TT>
+	Vector2<T>	operator+(const Vector2<TT>& vec) const
 	{
-		return Vector2(x + vec.x, y + vec.y);
+		return Vector2<T>(x + vec.x, y + vec.y);
 	}
 
-	Vector2	operator-(const Vector2& vec) const
+	template<typename TT>
+	Vector2<T>	operator-(const Vector2<TT>& vec) const
 	{
-		return Vector2(x - vec.x, y - vec.y);
+		return Vector2<T>(x - vec.x, y - vec.y);
 	}
 
-	Vector2	operator*(const Vector2& vec) const
+	template<typename TT>
+	Vector2<T>	operator*(const Vector2<TT>& vec) const
 	{
-		return Vector2(x * vec.x, y * vec.y);
+		return Vector2<T>(x * vec.x, y * vec.y);
 	}
 
-	Vector2	operator*(const FLOAT factor) const
+	Vector2<T>	operator*(const FLOAT factor) const
 	{
-		return Vector2(x * factor, y * factor);
+		return Vector2<T>(x * factor, y * factor);
 	}
 
-	Vector2	operator/(FLOAT factor) const
+	Vector2<T>	operator/(FLOAT factor) const
 	{
 		if( factor == 0.0f ) factor = 1.0f;
 
-		return Vector2(x / factor, y / factor);
+		return Vector2<T>(T(x / factor),T( y / factor));
 	}
 
-
-	bool	operator==(const Vector2& vec) const
+	template<typename TT>
+	BOOL	operator==(const Vector2<TT>& vec) const
 	{
 		return ((x == vec.x) && (y == vec.y));
 	}
 
-	bool	operator!=(const Vector2& vec) const
+	template<typename TT>
+	BOOL	operator!=(const Vector2<TT>& vec) const
 	{
 		return !(operator==(vec));
 	}
 
-	Size	asSize() const     { return Size(x, y); }
-	FLOAT	Length()const		{ return sqrt(x*x+y*y); }
-	FLOAT	x, y;
+	Size<T>	asSize() const		{ return Size(x, y); }
+	T		Length()const		{ return sqrt(x*x+y*y); }
+	T		x, y;
 };
+
+typedef Vector2<FLOAT>	Vector2F;
+typedef Vector2<INT>	Vector2N;
+typedef Vector2<UINT32>	Vector2U;
 
 
 template<typename T>
@@ -201,7 +225,7 @@ public:
 
 		return uFlag;
 	}
-	Vector2		vMin, vMax;
+	Vector2F		vMin, vMax;
 };
 
 #endif

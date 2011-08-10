@@ -7,7 +7,7 @@ FrameRate g_framerate;
 
 BOOL FrameRate::Init()
 {
-	m_uDt = 0.0f;
+	m_uDt = 0;
 	m_nFrames = 0;
 	m_nFrames = 0;
 	m_fSpeedRate = 1.0f;
@@ -30,7 +30,7 @@ VOID FrameRate::CountFrame( UINT32 dt )
 		m_fCurFPS = m_nFrames * 1000.0f / m_uDt;
 
 		// 清空时间和帧数
-		m_uDt = 0.0f;
+		m_uDt = 0;
 		m_nFrames = 0;
 	}
 
@@ -64,7 +64,7 @@ VOID FrameRate::EndFrame()
 
 VOID FrameRate::WaitFrame()
 {
-	INT nSleep = ceil(1000 / m_fCustomFPS) - m_timer.GetIntervalU();
+	INT nSleep = INT(ceil(1000 / m_fCustomFPS)) - m_timer.GetIntervalU();
 	if( nSleep > 0 ) SDL_Delay(nSleep);
 }
 

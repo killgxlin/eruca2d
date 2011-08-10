@@ -1,5 +1,5 @@
-#ifndef TEXT_H
-#define TEXT_H
+#ifndef __TEXT_H__
+#define __TEXT_H__
 
 class Painter;
 
@@ -15,12 +15,12 @@ public:
 	VOID	DrawTextAll();
 
 private:
-	VOID	DrawText(const Vector2 &vPos, UINT32 uColor, const char* szFormat, ...);
+	VOID	DrawText(const Vector2F &vPos, UINT32 uColor, const char* szFormat, ...);
 
 	TTF_Font*		m_pFont;
 	struct tagUnit
 	{
-		Uint32	uColor;
+		UINT32	uColor;
 		string	strMsg;
 	};
 

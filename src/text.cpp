@@ -37,22 +37,22 @@ BOOL Text::SetFont( const char* szPath )
 	return TRUE;
 }
 
-VOID Text::DrawText(const Vector2 &vPos, UINT32 uColor, const char* szFormat, ...)
+VOID Text::DrawText(const Vector2F &vPos, UINT32 uColor, const char* szFormat, ...)
 {
 	va_list argList;
 	va_start(argList, szFormat);
 	char buffer[1024];
-	vsprintf(buffer, szFormat, argList);
+	vsprintf_s(buffer, 1024, szFormat, argList);
 	va_end(argList);
 
 	SDL_Surface *text_surface = TTF_RenderText_Solid(m_pFont, buffer, *((SDL_Color*)&uColor));
 	if (text_surface != NULL)
 	{
 		SDL_Rect rect;
-		rect.x = vPos.x;
-		rect.y = vPos.y;
-		rect.w = text_surface->w;
-		rect.h = text_surface->h;
+		rect.x = UINT16(vPos.x);
+		rect.y = UINT16(vPos.y);
+		rect.w = INT16(text_surface->w);
+		rect.h = INT16(text_surface->h);
 
 		SDL_BlitSurface(text_surface, NULL, g_painter.GetScreen(), &rect);
 		SDL_FreeSurface(text_surface);
@@ -64,7 +64,7 @@ VOID Text::AddText( UINT32 uColor, const char* szFormat, ... )
 	va_list argList;
 	va_start(argList, szFormat);
 	char buffer[1024];
-	vsprintf(buffer, szFormat, argList);
+	vsprintf_s(buffer, 1024, szFormat, argList);
 	va_end(argList);
 
 	tagUnit unit;
@@ -76,7 +76,7 @@ VOID Text::AddText( UINT32 uColor, const char* szFormat, ... )
 
 VOID Text::DrawTextAll()
 {
-	Vector2 vPos(0, 0);
+	Vector2F vPos(0, 0);
 	INT nFontHight = TTF_FontHeight(m_pFont);
 	while( !m_lstUnits.empty() )
 	{

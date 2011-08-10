@@ -4,19 +4,19 @@
     <Solution>E:\eruca2d\build\vs2008\eruca2d.sln</Solution>
     <CollectionMethod>Sampling</CollectionMethod>
     <AllocationMethod>None</AllocationMethod>
-    <LaunchRuntimeControl>true</LaunchRuntimeControl>
-    <AddReport>true</AddReport>
+    <LaunchRuntimeControl>TRUE</LaunchRuntimeControl>
+    <AddReport>TRUE</AddReport>
     <UniqueReport>Timestamp</UniqueReport>
     <SamplingMethod>Cycles</SamplingMethod>
     <CycleCount>10000000</CycleCount>
     <PageFaultCount>10</PageFaultCount>
     <SysCallCount>10</SysCallCount>
     <SamplingCounter Name="" ReloadValue="00000000000f4240" DisplayName="" />
-    <RelocateBinaries>false</RelocateBinaries>
-    <HardwareCounters EnableHWCounters="false" />
+    <RelocateBinaries>FALSE</RelocateBinaries>
+    <HardwareCounters EnableHWCounters="FALSE" />
     <EtwSettings />
     <PdhSettings>
-      <PdhCountersEnabled>false</PdhCountersEnabled>
+      <PdhCountersEnabled>FALSE</PdhCountersEnabled>
       <PdhCountersRate>500</PdhCountersRate>
       <PdhCounters>
         <PdhCounter>\Memory\Pages/sec</PdhCounter>
@@ -25,31 +25,31 @@
       </PdhCounters>
     </PdhSettings>
   </Options>
-  <ExcludeSmallFuncs>true</ExcludeSmallFuncs>
+  <ExcludeSmallFuncs>TRUE</ExcludeSmallFuncs>
   <PreinstrumentEvent>
-    <InstrEventExclude>false</InstrEventExclude>
+    <InstrEventExclude>FALSE</InstrEventExclude>
   </PreinstrumentEvent>
   <PostinstrumentEvent>
-    <InstrEventExclude>false</InstrEventExclude>
+    <InstrEventExclude>FALSE</InstrEventExclude>
   </PostinstrumentEvent>
   <Binaries>
     <ProjBinary>
       <Path>e:\eruca2d\game\eruca2d.exe</Path>
       <ArgumentTimestamp>01/01/0001 00:00:00</ArgumentTimestamp>
-      <Instrument>true</Instrument>
-      <Sample>true</Sample>
-      <LaunchProject>true</LaunchProject>
+      <Instrument>TRUE</Instrument>
+      <Sample>TRUE</Sample>
+      <LaunchProject>TRUE</LaunchProject>
       <LaunchMethod>Executable</LaunchMethod>
       <ExecutablePath>e:\eruca2d\game\eruca2d.exe</ExecutablePath>
       <StartupDirectory>e:\eruca2d\game</StartupDirectory>
       <NetAppHost>IIS</NetAppHost>
       <NetBrowser>InternetExplorer</NetBrowser>
-      <ExcludeSmallFuncs>true</ExcludeSmallFuncs>
+      <ExcludeSmallFuncs>TRUE</ExcludeSmallFuncs>
       <PreinstrumentEvent>
-        <InstrEventExclude>false</InstrEventExclude>
+        <InstrEventExclude>FALSE</InstrEventExclude>
       </PreinstrumentEvent>
       <PostinstrumentEvent>
-        <InstrEventExclude>false</InstrEventExclude>
+        <InstrEventExclude>FALSE</InstrEventExclude>
       </PostinstrumentEvent>
       <ProjRef>{83B88ABC-A5D7-452B-B51D-7946537DF091}|eruca2d.vcproj</ProjRef>
       <ProjPath>E:\eruca2d\build\vs2008\eruca2d.vcproj</ProjPath>
