@@ -42,10 +42,12 @@ INT APIENTRY _tWinMain(HINSTANCE hInstance,
 
 		g_level.Draw(&g_painter);
 
-		g_text.AddText(g_painter.GetColor(255, 255, 255), "FPS    : %4.2f", g_framerate.GetFPS());
-		g_text.AddText(g_painter.GetColor(255, 255, 255), "custFPS: %4.2f", g_framerate.GetCustomFPS());
-		g_text.AddText(g_painter.GetColor(255, 255, 255), "factor : %4.2f", g_framerate.GetSpeedRate());
-		g_text.AddText(g_painter.GetColor(255, 255, 255), "draw ps: %4.2f", g_painter.GetDrawPerSec());
+		g_text.AddText(g_painter.GetColor(255, 255, 255), "FPS      : %4.2f", g_framerate.GetFPS());
+		g_text.AddText(g_painter.GetColor(255, 255, 255), "custFPS  : %4.2f", g_framerate.GetCustomFPS());
+		g_text.AddText(g_painter.GetColor(255, 255, 255), "factor   : %4.2f", g_framerate.GetSpeedRate());
+		g_text.AddText(g_painter.GetColor(255, 255, 255), "draw ps  : %4.2f", g_painter.GetDrawPerSec());
+		g_text.AddText(g_painter.GetColor(255, 255, 255), "refresh  : %4d", g_level.m_nRefreshTimes);
+		g_text.AddText(g_painter.GetColor(255, 255, 255), "refresh x: %4d", g_level.m_nNewXIdx);
 		
 		g_text.DrawTextAll();
 

@@ -42,11 +42,11 @@ enum ECollideDir
 #define XGravity			-10	//pixel * pixel per sec
 #define XCtrlAcc			15	//
 
-#define XScreenW			800
-#define XScreenH			600
+#define XScreenW			400
+#define XScreenH			(XScreenW * 3 / 4)
 
-#define XPlayerSize			20
-#define XTileSize			20
+#define XPlayerSize			(XScreenW / 40)
+#define XTileSize			XPlayerSize
 
 template<typename T = FLOAT>
 class Size

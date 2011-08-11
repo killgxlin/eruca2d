@@ -13,9 +13,9 @@ public:
 
 	VOID	AddText(UINT32 uColor, const char* szFormat, ...);
 	VOID	DrawTextAll();
+	VOID	DrawText(const Vector2F &vPos, UINT32 uColor, const char* szFormat, ...);
 
 private:
-	VOID	DrawText(const Vector2F &vPos, UINT32 uColor, const char* szFormat, ...);
 
 	TTF_Font*		m_pFont;
 	struct tagUnit

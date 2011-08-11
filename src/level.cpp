@@ -8,6 +8,8 @@
 
 BOOL Level::Init()
 {
+	m_nRefreshTimes = 0;
+
 	m_lstBlocks.clear();
 	m_lstTiles.clear();
 
@@ -66,11 +68,12 @@ VOID Level::Update( FLOAT dt )
 	m_collider.Collide();
 }
 
-struct TileDraw
+template<typename T>
+struct FuncDraw
 {
-	TileDraw(Painter* pPainter):m_pPainter(pPainter){}
+	FuncDraw(Painter* pPainter):m_pPainter(pPainter){}
 	Painter*	m_pPainter;
-	VOID operator()(Tile* pTile)
+	VOID operator()(T* pTile)
 	{
 		pTile->Draw(m_pPainter);
 	}
@@ -78,8 +81,10 @@ struct TileDraw
 
 VOID Level::Draw( Painter* pPainter )
 {
-	for_each(m_lstTiles.begin(), m_lstTiles.end(), TileDraw(pPainter));
+	for_each(m_lstTiles.begin(), m_lstTiles.end(), FuncDraw<Tile>(pPainter));
 	m_pPlayer->Draw(pPainter);
+
+	for_each(m_lstBlocks.begin(), m_lstBlocks.end(), FuncDraw<tagBlock>(pPainter));
 
 	Vector2N vIdx = ConvertToBlockIdx(m_pPlayer->GetPos());
 
@@ -90,6 +95,8 @@ VOID Level::Draw( Painter* pPainter )
 
 VOID Level::RefreshBlocks( const Vector2N &vIdx )
 {
+	++m_nRefreshTimes;
+
 	BOOL	bMat[3][3];
 	ZeroMemory(bMat, sizeof(bMat));
 
@@ -134,6 +141,7 @@ VOID Level::RefreshBlocks( const Vector2N &vIdx )
 				tagBlock* pNew = new tagBlock;
 				pNew->Load(vIdx, vOffset);
 				m_lstBlocks.push_back(pNew);
+				m_nNewXIdx = vIdx.x - 1;
 			}
 		}
 	}
@@ -161,7 +169,18 @@ VOID Level::DelObj( Tile* pObj )
 
 Vector2N Level::ConvertToBlockIdx( const Vector2F &vPos )
 {
-	return Vector2N(INT(vPos.x / XScreenW), INT(vPos.y / XScreenH));
+	Vector2N vIdx(INT(vPos.x / XScreenW), INT(vPos.y / XScreenH));
+
+	if( vPos.x < 0.0f )
+	{
+		vIdx.x -= 1;
+	}
+	if( vPos.y < 0.0f )
+	{
+		vIdx.y -= 1;
+	}
+
+	return vIdx;
 }
 
 Level g_level;
@@ -172,18 +191,37 @@ BOOL tagBlock::Load( const Vector2N &vCenterIdx, const Vector2N &vOffset )
 
 	Vector2F vOri(vIdx.x * XScreenW, vIdx.y * XScreenH);
 
-	for( FLOAT f=XTileSize/2; f<=XScreenW/2; f+=XTileSize )
+	for( FLOAT f=XTileSize/2; f<=XScreenW - XTileSize/2; f+=XTileSize )
 	{
 		Tile* pNew = new Tile;
 		pNew->SetPos(vOri + Vector2F(f, XTileSize/2));
 		pNew->SetCollideDirFlag(ECD_All);
 
+		static int i=0;
+		if( i++ %2 )
+		{
+			pNew->SetColor(255, 255, 255);
+		}
+
 		g_level.AddObj(pNew);
 		lstTiles.push_back(pNew);
 	}
 
-	lstTiles.front()->SetColor(255, 255, 255);
-	lstTiles.back()->SetColor(255, 255, 255);
+	for( FLOAT f=XTileSize/2; f<=XScreenH - XTileSize/2; f+=XTileSize )
+	{
+		Tile* pNew = new Tile;
+		pNew->SetPos(vOri + Vector2F(XTileSize/2, f));
+		pNew->SetCollideDirFlag(ECD_All);
+
+		static int i=0;
+		if( i++ %2 )
+		{
+			pNew->SetColor(255, 255, 255);
+		}
+
+		g_level.AddObj(pNew);
+		lstTiles.push_back(pNew);
+	}
 
 	return TRUE;
 }
@@ -197,4 +235,12 @@ VOID tagBlock::UnLoad()
 
 		lstTiles.pop_front();
 	}
+}
+
+VOID tagBlock::Draw( Painter* pPainter )
+{
+	Vector2F vCenter(vIdx.x*XScreenW, vIdx.y*XScreenH);
+	vCenter += Vector2F(XScreenW/2, XScreenH/2);
+
+	pPainter->WorldDrawText(vCenter, pPainter->GetColor(255, 255, 255),"%d, %d", vIdx.x, vIdx.y );
 }

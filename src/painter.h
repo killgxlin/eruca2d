@@ -27,6 +27,7 @@ private:
 public:
 	VOID		SetCenter(const Vector2F &vPos)	{ m_vCenter = vPos; }
 	VOID		WorldDrawRect(const Vector2F &vWorldPos, const SizeN &sSize, UINT32 uColor);
+	VOID		WorldDrawText(const Vector2F &vWorldPos, UINT32 uColor, const char* szFormat, ...);
 private:
 	VOID		WorldToScreen(Vector2F* pPt);
 	VOID		ScreenToSDL(Vector2F* pPt);

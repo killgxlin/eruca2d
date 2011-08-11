@@ -46,6 +46,7 @@ Tile::~Tile()
 
 VOID Tile::Collide( GameObj* pRunner, tagCollideRes* pRes )
 {
+	return;
 	GameObj::Collide(pRunner, pRes);
 	if( !pRes->dwDirFlag ) return;
 
@@ -135,15 +136,6 @@ VOID Player::Update( FLOAT dt )
 
 
 	m_vPos += vOffset;
-
-// 	if( m_vPos.x > XScreenW )
-// 	{
-// 		m_vPos.x = 0;
-// 	}
-// 	if( m_vPos.x < 0 )
-// 	{
-// 		m_vPos.x = XScreenW;
-// 	}
 
 	g_painter.SetCenter(GetPos());
 }

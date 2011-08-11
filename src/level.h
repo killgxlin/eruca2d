@@ -17,6 +17,7 @@ struct tagBlock
 	BOOL Load(const Vector2N &vCenterIdx, const Vector2N &vOffset);
 
 	VOID		UnLoad();
+	VOID		Draw(Painter* pPainter);
 };
 
 class Level
@@ -42,6 +43,9 @@ public:
 	Vector2N	m_vLastIdx;
 	list<Tile*>	m_lstTiles;
 	Collider	m_collider;
+
+	INT			m_nRefreshTimes;
+	INT			m_nNewXIdx;
 
 };
 

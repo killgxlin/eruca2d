@@ -1,6 +1,8 @@
 #include "common.h"
 #include "painter.h"
 
+#include "text.h"
+
 Painter g_painter;
 
 BOOL Painter::Init( INT w, INT h, const char* title )
@@ -59,11 +61,10 @@ VOID Painter::WorldDrawRect( const Vector2F &vWorldPos, const SizeN &sSize, UINT
 	WorldToScreen(&vPos);
 	ScreenToSDL(&vPos);
 
-	if( IsBetweenClose<FLOAT>(vPos.x, 0, XScreenW) && IsBetweenClose<FLOAT>(vPos.y, 0, XScreenH) )
+	if( IsBetweenClose<FLOAT>(vPos.x, -XTileSize/2, XScreenW+XTileSize/2) && IsBetweenClose<FLOAT>(vPos.y, -XTileSize/2, XScreenH+XTileSize/2) )
 	{
+		DrawRect(vPos, sSize, uColor);
 	}	
-	DrawRect(vPos, sSize, uColor);
-
 }
 
 VOID Painter::WorldToScreen( Vector2F* pPt )
@@ -87,4 +88,19 @@ VOID Painter::Update( DWORD dwDt )
 		m_dwDt = 0;
 		m_dwDrawTimes = 0;
 	}
+}
+
+VOID Painter::WorldDrawText( const Vector2F &vWorldPos, UINT32 uColor, const char* szFormat, ... )
+{
+	Vector2F vPos = vWorldPos;
+	WorldToScreen(&vPos);
+	ScreenToSDL(&vPos);
+
+	va_list argList;
+	va_start(argList, szFormat);
+	char buffer[1024];
+	vsprintf_s(buffer, 1024, szFormat, argList);
+	va_end(argList);
+
+	g_text.DrawText(vPos, uColor, buffer);
 }
