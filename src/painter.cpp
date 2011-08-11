@@ -61,7 +61,7 @@ VOID Painter::WorldDrawRect( const Vector2F &vWorldPos, const SizeN &sSize, UINT
 	WorldToScreen(&vPos);
 	ScreenToSDL(&vPos);
 
-	if( IsBetweenClose<FLOAT>(vPos.x, -XTileSize/2, XScreenW+XTileSize/2) && IsBetweenClose<FLOAT>(vPos.y, -XTileSize/2, XScreenH+XTileSize/2) )
+//	if( IsBetweenClose<FLOAT>(vPos.x, -XTileSize/2, XScreenW+XTileSize/2) && IsBetweenClose<FLOAT>(vPos.y, -XTileSize/2, XScreenH+XTileSize/2) )
 	{
 		DrawRect(vPos, sSize, uColor);
 	}	

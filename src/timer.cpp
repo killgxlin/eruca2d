@@ -70,5 +70,5 @@ VOID FrameRate::WaitFrame()
 
 VOID FrameRate::SetCustomFPS( FLOAT fCustom )
 {
-	m_fCustomFPS = Cut(fCustom, 10.0f, 200.0f);
+	m_fCustomFPS = Cut(fCustom, 10.0f, 1000.0f);
 }
