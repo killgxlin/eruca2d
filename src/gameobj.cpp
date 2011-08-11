@@ -29,6 +29,11 @@ AABBox GameObj::GetAABBox() const
 	return m_pSprite->GetAABBox(m_vPos);
 }
 
+VOID GameObj::SetColor( UINT8 u8R, UINT8 u8G, UINT8 u8B )
+{
+	m_pSprite->SetColor(u8R, u8G, u8B);
+}
+
 Tile::Tile( /*const Vector2F &vPos*/ ) :GameObj(Vector2F(0,0), ECP_Tile, ECD_All)
 {
 	m_pSprite = new SpriteTile(this);

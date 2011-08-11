@@ -5,6 +5,10 @@ Painter g_painter;
 
 BOOL Painter::Init( INT w, INT h, const char* title )
 {
+	m_fDrawPerSec	= 0.0f;
+	m_dwDt			= 0;
+	m_dwDrawTimes	= 0;
+
 	m_pScreen = SDL_SetVideoMode(w, h, 8, SDL_HWSURFACE|SDL_DOUBLEBUF);
 	if( NULL == m_pScreen ) return FALSE;
 
@@ -41,6 +45,7 @@ VOID Painter::DrawRect( const Vector2F &vPos, const SizeN &sSize, UINT32 uColor 
 	rect.y = static_cast<INT16>(vPos.y - sSize.h / 2);
 
 	SDL_FillRect(m_pScreen, &rect, uColor);
+	++m_dwDrawTimes;
 }
 
 UINT32 Painter::GetColor( UINT8 u8R, UINT8 u8G, UINT8 u8B )
@@ -71,4 +76,15 @@ VOID Painter::WorldToScreen( Vector2F* pPt )
 VOID Painter::ScreenToSDL( Vector2F* pPt )
 {
 	pPt->y = m_pScreen->h - pPt->y;
+}
+
+VOID Painter::Update( DWORD dwDt )
+{
+	m_dwDt += dwDt;
+	if( m_dwDt >= 1000 )
+	{
+		m_fDrawPerSec = m_dwDrawTimes * 1000.0f / m_dwDt;
+		m_dwDt = 0;
+		m_dwDrawTimes = 0;
+	}
 }

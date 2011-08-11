@@ -8,7 +8,7 @@ public:
 	VOID	Update();
 	
 public:
-	BOOL	m_bKey[SDLK_LALT];
+	BOOL	m_bKey[SDLK_LAST];
 };
 
 extern KeyBoard g_keyboard;

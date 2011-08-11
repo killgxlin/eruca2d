@@ -45,6 +45,7 @@ INT APIENTRY _tWinMain(HINSTANCE hInstance,
 		g_text.AddText(g_painter.GetColor(255, 255, 255), "FPS    : %4.2f", g_framerate.GetFPS());
 		g_text.AddText(g_painter.GetColor(255, 255, 255), "custFPS: %4.2f", g_framerate.GetCustomFPS());
 		g_text.AddText(g_painter.GetColor(255, 255, 255), "factor : %4.2f", g_framerate.GetSpeedRate());
+		g_text.AddText(g_painter.GetColor(255, 255, 255), "draw ps: %4.2f", g_painter.GetDrawPerSec());
 		
 		g_text.DrawTextAll();
 
@@ -54,6 +55,7 @@ INT APIENTRY _tWinMain(HINSTANCE hInstance,
 
 		g_framerate.WaitFrame();
 
+		g_painter.Update(timer2.GetIntervalU());
 	}
 
 	g_level.Destroy();

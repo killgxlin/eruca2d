@@ -42,8 +42,8 @@ enum ECollideDir
 #define XGravity			-10	//pixel * pixel per sec
 #define XCtrlAcc			15	//
 
-#define XScreenW			400
-#define XScreenH			300
+#define XScreenW			800
+#define XScreenH			600
 
 #define XPlayerSize			20
 #define XTileSize			20
@@ -174,7 +174,7 @@ public:
 	UINT32 IntersectTest(const AABBox &other, FLOAT &fDeep, DWORD dwColDirFlag)
 	{
 		UINT32 uFlag = ECD_None;
-		fDeep = 0;
+		fDeep = 99;
 
 		if( IsBetweenClose(other.vMin.x, this->vMin.x, this->vMax.x) || IsBetweenClose(other.vMax.x, this->vMin.x, this->vMax.x) )
 		{
@@ -182,7 +182,7 @@ public:
 			if( ECD_Top & dwColDirFlag && IsBetweenClose(other.vMin.y, this->vMin.y, this->vMax.y) && other.vMax.y > this->vMax.y )
 			{
 				FLOAT fCurDeep = this->vMax.y - other.vMin.y;
-				if( fDeep < fCurDeep )
+				if( fDeep > fCurDeep )
 				{
 					fDeep = fCurDeep;
 					uFlag = ECD_Top;
@@ -192,7 +192,7 @@ public:
 			if( ECD_Down & dwColDirFlag && IsBetweenClose(other.vMax.y, this->vMin.y, this->vMax.y) && other.vMin.y < this->vMin.y)
 			{
 				FLOAT fCurDeep = other.vMax.y - this->vMin.y;
-				if( fDeep < fCurDeep )
+				if( fDeep > fCurDeep )
 				{
 					fDeep = fCurDeep;
 					uFlag = ECD_Down;
@@ -205,7 +205,7 @@ public:
 			if( ECD_Left & dwColDirFlag && IsBetweenClose(other.vMax.x, this->vMin.x, this->vMax.x) && other.vMin.x < this->vMin.x)
 			{
 				FLOAT fCurDeep = other.vMax.x - this->vMin.x;
-				if( fDeep < fCurDeep )
+				if( fDeep > fCurDeep )
 				{
 					fDeep = fCurDeep;
 					uFlag = ECD_Left;
@@ -215,7 +215,7 @@ public:
 			if( ECD_Right & dwColDirFlag && IsBetweenClose(other.vMin.x, this->vMin.x, this->vMax.x) && other.vMax.x > this->vMax.x )
 			{
 				FLOAT fCurDeep = this->vMax.x - other.vMin.x;
-				if( fDeep < fCurDeep )
+				if( fDeep > fCurDeep )
 				{
 					fDeep = fCurDeep;
 					uFlag = ECD_Right;

@@ -12,7 +12,7 @@ BOOL Level::Init()
 	m_lstTiles.clear();
 
 	m_pPlayer = new Player;
-	m_pPlayer->SetPos(Vector2F(400, 20));
+	m_pPlayer->SetPos(Vector2F(400, 30));
 	m_collider.AddGameObj(m_pPlayer);
 
 	m_vLastIdx = ConvertToBlockIdx(m_pPlayer->GetPos());
@@ -132,7 +132,7 @@ VOID Level::RefreshBlocks( const Vector2N &vIdx )
 			{
 				Vector2N vOffset(i-1, j-1);
 				tagBlock* pNew = new tagBlock;
-				pNew->Load(vIdx + vOffset, vOffset);
+				pNew->Load(vIdx, vOffset);
 				m_lstBlocks.push_back(pNew);
 			}
 		}
@@ -161,30 +161,29 @@ VOID Level::DelObj( Tile* pObj )
 
 Vector2N Level::ConvertToBlockIdx( const Vector2F &vPos )
 {
-	return Vector2N(INT(vPos.x / XScreenW), INT(vPos.y / XScreenW));
+	return Vector2N(INT(vPos.x / XScreenW), INT(vPos.y / XScreenH));
 }
 
 Level g_level;
 
-BOOL tagBlock::Load( const Vector2N &vAbsIdx, const Vector2N &vOffset )
+BOOL tagBlock::Load( const Vector2N &vCenterIdx, const Vector2N &vOffset )
 {
-	vIdx = vAbsIdx;
+	vIdx = vCenterIdx + vOffset;
 
-	if( vOffset.x==1 )
-	{
-		return TRUE;
-	}
-	Vector2F vOri(vAbsIdx.x * XScreenW, vAbsIdx.y * XScreenH);
+	Vector2F vOri(vIdx.x * XScreenW, vIdx.y * XScreenH);
 
-	for( FLOAT f=XTileSize/2; f<=XScreenW-XTileSize/2; f+=XTileSize )
+	for( FLOAT f=XTileSize/2; f<=XScreenW/2; f+=XTileSize )
 	{
 		Tile* pNew = new Tile;
 		pNew->SetPos(vOri + Vector2F(f, XTileSize/2));
-		pNew->SetCollideDirFlag(ECD_Top | ECD_Down);
+		pNew->SetCollideDirFlag(ECD_All);
 
 		g_level.AddObj(pNew);
 		lstTiles.push_back(pNew);
 	}
+
+	lstTiles.front()->SetColor(255, 255, 255);
+	lstTiles.back()->SetColor(255, 255, 255);
 
 	return TRUE;
 }

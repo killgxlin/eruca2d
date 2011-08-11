@@ -14,7 +14,7 @@ struct tagBlock
 	Vector2N	vIdx;
 	list<Tile*>	lstTiles;
 
-	BOOL		Load(const Vector2N &vAbsIdx, const Vector2N &vOffset);
+	BOOL Load(const Vector2N &vCenterIdx, const Vector2N &vOffset);
 
 	VOID		UnLoad();
 };

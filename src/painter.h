@@ -18,6 +18,9 @@ public:
 
 	SDL_Surface*	GetScreen() { return m_pScreen; }
 
+	VOID			Update(DWORD dwDt);
+	FLOAT			GetDrawPerSec()	const	{ return m_fDrawPerSec; }
+
 private:
 	SDL_Surface*	m_pScreen;
 
@@ -29,6 +32,9 @@ private:
 	VOID		ScreenToSDL(Vector2F* pPt);
 	Vector2F	m_vCenter;
 
+	FLOAT		m_fDrawPerSec;
+	DWORD		m_dwDt;
+	DWORD		m_dwDrawTimes;
 };
 
 extern Painter g_painter;

@@ -31,6 +31,8 @@ public:
 	UINT32			GetCollideDirFlag() const	{ return m_uCollideDirFlag; }
 	AABBox			GetAABBox() const;
 	Vector2F		GetPos() const				{ return m_vPos; }
+
+	VOID			SetColor(UINT8 u8R, UINT8 u8G, UINT8 u8B);
 protected:
 	Vector2F		m_vPos;				// 当前位置
 	INT				m_nCollidePri;		// 碰撞权限
