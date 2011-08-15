@@ -46,7 +46,6 @@ Tile::~Tile()
 
 VOID Tile::Collide( GameObj* pRunner, tagCollideRes* pRes )
 {
-	return;
 	GameObj::Collide(pRunner, pRes);
 	if( !pRes->dwDirFlag ) return;
 
@@ -108,7 +107,7 @@ VOID Player::Update( FLOAT dt )
 
 	Vector2F vOld = m_vVel;
 
-//	m_vVel.y += XGravity * dt;
+	m_vVel.y += XGravity * dt;
 
 	if( g_keyboard.m_bKey[SDLK_LEFT] )
 	{

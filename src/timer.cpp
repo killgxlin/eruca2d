@@ -11,7 +11,7 @@ BOOL FrameRate::Init()
 	m_nFrames = 0;
 	m_nFrames = 0;
 	m_fSpeedRate = 1.0f;
-	SetCustomFPS(100);
+	SetCustomFPS(1000);
 	return m_timer.Init();
 }
 

@@ -42,7 +42,7 @@ enum ECollideDir
 #define XGravity			-10	//pixel * pixel per sec
 #define XCtrlAcc			15	//
 
-#define XScreenW			400
+#define XScreenW			640
 #define XScreenH			(XScreenW * 3 / 4)
 
 #define XPlayerSize			(XScreenW / 40)

@@ -14,7 +14,7 @@ BOOL Level::Init()
 	m_lstTiles.clear();
 
 	m_pPlayer = new Player;
-	m_pPlayer->SetPos(Vector2F(400, 30));
+	m_pPlayer->SetPos(Vector2F(XScreenW/2, XScreenH - XPlayerSize/2));
 	m_collider.AddGameObj(m_pPlayer);
 
 	m_vLastIdx = ConvertToBlockIdx(m_pPlayer->GetPos());
@@ -195,22 +195,6 @@ BOOL tagBlock::Load( const Vector2N &vCenterIdx, const Vector2N &vOffset )
 	{
 		Tile* pNew = new Tile;
 		pNew->SetPos(vOri + Vector2F(f, XTileSize/2));
-		pNew->SetCollideDirFlag(ECD_All);
-
-		static int i=0;
-		if( i++ %2 )
-		{
-			pNew->SetColor(255, 255, 255);
-		}
-
-		g_level.AddObj(pNew);
-		lstTiles.push_back(pNew);
-	}
-
-	for( FLOAT f=XTileSize/2; f<=XScreenH - XTileSize/2; f+=XTileSize )
-	{
-		Tile* pNew = new Tile;
-		pNew->SetPos(vOri + Vector2F(XTileSize/2, f));
 		pNew->SetCollideDirFlag(ECD_All);
 
 		static int i=0;
