@@ -53,7 +53,7 @@ VOID Collider::Collide()
 
 BOOL Collider::CalCollideOrder( GameObj* &pCaller, GameObj* &pArg )
 {
-	if( pCaller->GetCollidePri() == pArg->GetCollidePri() && pCaller->GetCollidePri() == ECP_Tile )
+	if( pCaller->GetCollidePri() == pArg->GetCollidePri() && pCaller->GetCollidePri() == ECP_Static )
 	{
 		return FALSE;
 	}

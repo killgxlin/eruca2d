@@ -25,7 +25,7 @@ INT APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	g_level.Init();
 	
-	while( !g_keyboard.m_bKey[SDLK_ESCAPE] )
+	while( !g_keyboard.FetchKey(SDLK_ESCAPE) )
 	{
 
 		timer2.Update();
@@ -47,7 +47,7 @@ INT APIENTRY _tWinMain(HINSTANCE hInstance,
 		g_text.AddText(g_painter.GetColor(255, 255, 255), "factor   : %4.2f", g_framerate.GetSpeedRate());
 		g_text.AddText(g_painter.GetColor(255, 255, 255), "draw ps  : %4.2f", g_painter.GetDrawPerSec());
 		g_text.AddText(g_painter.GetColor(255, 255, 255), "refresh  : %4d", g_level.m_nRefreshTimes);
-		g_text.AddText(g_painter.GetColor(255, 255, 255), "refresh x: %4d", g_level.m_nNewXIdx);
+		g_text.AddText(g_painter.GetColor(255, 255, 255), "zoom rate: %4.2f", g_painter.GetZoomRate());
 		
 		g_text.DrawTextAll();
 

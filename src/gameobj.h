@@ -6,8 +6,8 @@ class Painter;
 
 struct tagCollideRes 
 {
-	DWORD	dwDirFlag;
-	FLOAT	fDeep;
+	DWORD		dwDirFlag;
+	Vector2F	vCollidePos;
 };
 
 class GameObj
@@ -31,10 +31,12 @@ public:
 	UINT32			GetCollideDirFlag() const	{ return m_uCollideDirFlag; }
 	AABBox			GetAABBox() const;
 	Vector2F		GetPos() const				{ return m_vPos; }
+	Vector2F		GetPrePos() const			{ return m_vPrePos; }
 
 	VOID			SetColor(UINT8 u8R, UINT8 u8G, UINT8 u8B);
 protected:
 	Vector2F		m_vPos;				// 当前位置
+	Vector2F		m_vPrePos;
 	INT				m_nCollidePri;		// 碰撞权限
 	UINT32			m_uCollideDirFlag;	// 碰撞的方向
 };

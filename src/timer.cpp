@@ -34,21 +34,21 @@ VOID FrameRate::CountFrame( UINT32 dt )
 		m_nFrames = 0;
 	}
 
-	if( g_keyboard.m_bKey[SDLK_PAGEUP] )
+	if( g_keyboard.FetchKey(SDLK_PAGEUP) )
 	{
-		SetCustomFPS(GetCustomFPS() + 10);
+		SetCustomFPS(GetCustomFPS() + 100);
 	}
-	if( g_keyboard.m_bKey[SDLK_PAGEDOWN] )
+	if( g_keyboard.FetchKey(SDLK_PAGEDOWN) )
 	{
-		SetCustomFPS(GetCustomFPS() - 10);
+		SetCustomFPS(GetCustomFPS() - 100);
 	}
-	if( g_keyboard.m_bKey[SDLK_HOME] )
+	if( g_keyboard.FetchKey(SDLK_HOME) )
 	{
-		SetSpeedRate(GetSpeedRate() + 1.0f);
+		SetSpeedRate(GetSpeedRate() + 0.50f);
 	}
-	if( g_keyboard.m_bKey[SDLK_END] )
+	if( g_keyboard.FetchKey(SDLK_END) )
 	{
-		SetSpeedRate(GetSpeedRate() - 1.0f);
+		SetSpeedRate(GetSpeedRate() - 0.50f);
 	}
 }
 

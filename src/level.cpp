@@ -189,12 +189,28 @@ BOOL tagBlock::Load( const Vector2N &vCenterIdx, const Vector2N &vOffset )
 {
 	vIdx = vCenterIdx + vOffset;
 
-	Vector2F vOri(vIdx.x * XScreenW, vIdx.y * XScreenH);
+	Vector2F vOri(FLOAT(vIdx.x * XScreenW), FLOAT(vIdx.y * XScreenH));
 
 	for( FLOAT f=XTileSize/2; f<=XScreenW - XTileSize/2; f+=XTileSize )
 	{
 		Tile* pNew = new Tile;
 		pNew->SetPos(vOri + Vector2F(f, XTileSize/2));
+		pNew->SetCollideDirFlag(ECD_All);
+
+		static int i=0;
+		if( i++ %2 )
+		{
+			pNew->SetColor(255, 255, 255);
+		}
+
+		g_level.AddObj(pNew);
+		lstTiles.push_back(pNew);
+	}
+
+	for( FLOAT f=XTileSize/2; f<=XScreenH - XTileSize/2; f+=XTileSize )
+	{
+		Tile* pNew = new Tile;
+		pNew->SetPos(vOri + Vector2F(XTileSize/2, f));
 		pNew->SetCollideDirFlag(ECD_All);
 
 		static int i=0;
@@ -223,7 +239,7 @@ VOID tagBlock::UnLoad()
 
 VOID tagBlock::Draw( Painter* pPainter )
 {
-	Vector2F vCenter(vIdx.x*XScreenW, vIdx.y*XScreenH);
+	Vector2F vCenter(FLOAT(vIdx.x*XScreenW), FLOAT(vIdx.y*XScreenH));
 	vCenter += Vector2F(XScreenW/2, XScreenH/2);
 
 	pPainter->WorldDrawText(vCenter, pPainter->GetColor(255, 255, 255),"%d, %d", vIdx.x, vIdx.y );

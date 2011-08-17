@@ -12,7 +12,7 @@ public:
 
 	VOID			Clear();
 
-	VOID			DrawRect(const Vector2F &vPos, const SizeN &sSize, UINT32 uColor);
+	VOID DrawRect(const Vector2F &vPos, const Vector2F &sSize, UINT32 uColor);
 
 	UINT32			GetColor(UINT8 u8R, UINT8 u8G, UINT8 u8B);
 
@@ -28,14 +28,16 @@ public:
 	VOID		SetCenter(const Vector2F &vPos)	{ m_vCenter = vPos; }
 	VOID		WorldDrawRect(const Vector2F &vWorldPos, const SizeN &sSize, UINT32 uColor);
 	VOID		WorldDrawText(const Vector2F &vWorldPos, UINT32 uColor, const char* szFormat, ...);
+	FLOAT		GetZoomRate() const	{ return m_fZoomRate; }
 private:
-	VOID		WorldToScreen(Vector2F* pPt);
+	VOID WorldToScreen(Vector2F* pPt, Vector2F* pSize);
 	VOID		ScreenToSDL(Vector2F* pPt);
 	Vector2F	m_vCenter;
 
 	FLOAT		m_fDrawPerSec;
 	DWORD		m_dwDt;
 	DWORD		m_dwDrawTimes;
+	FLOAT		m_fZoomRate;
 };
 
 extern Painter g_painter;

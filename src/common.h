@@ -19,13 +19,14 @@ using std::map;
 using std::list;
 using std::pair;
 using std::string;
+using std::swap;
 using std::make_pair;
 using std::for_each;
 
 enum ECollidePriority
 {
-	ECP_Player	= 1,
-	ECP_Tile	= 2,
+	ECP_Dynamic	= 1,
+	ECP_Static	= 2,
 };
 
 enum ECollideDir
@@ -38,11 +39,11 @@ enum ECollideDir
 	ECD_All		= ECD_Top | ECD_Down | ECD_Left | ECD_Right,
 };
 
-#define XMaxPlayerSpeed		100	//pixel per sec
+#define XMaxPlayerSpeed		1000	//pixel per sec
 #define XGravity			-10	//pixel * pixel per sec
 #define XCtrlAcc			15	//
 
-#define XScreenW			640
+#define XScreenW			800
 #define XScreenH			(XScreenW * 3 / 4)
 
 #define XPlayerSize			(XScreenW / 40)
@@ -70,7 +71,9 @@ class Vector2
 {
 public:
 	Vector2(void) {}
-	Vector2(T x, T y) : x(x), y(y) {}
+	Vector2(T x_, T y_) : x(x_), y(y_) {}
+	template<typename TT>
+	Vector2(TT x_, TT y_) : x(T(x_)), y(T(y_)){}
 
 	template<typename TT>
 	Vector2<T>& operator+=(const Vector2<TT>& vec)
@@ -87,6 +90,23 @@ public:
 		x -= vec.x;
 		y -= vec.y;
 
+		return *this;
+	}
+
+	Vector2<T>& operator/=(const FLOAT factor)
+	{
+		if( factor != 0.0f )
+		{
+			x /= factor;
+			y /= factor;
+		}
+		return *this;
+	}
+
+	Vector2<T>& operator*=(const FLOAT factor)
+	{
+		x *= factor;
+		y *= factor;
 		return *this;
 	}
 
@@ -225,6 +245,83 @@ public:
 
 		return uFlag;
 	}
+	float IntersectMovingAABB( const AABBox &movingBox, const Vector2F &d, DWORD &dwDirFlag ) 
+	{
+			const float kNoIntersection = 1e30f;
+
+			dwDirFlag = ECD_None;
+
+			float	tEnter = 0.0f;
+			float	tLeave = 1.0f;
+
+			float	xEnter = 0.0f;
+			float	xLeave = 1.0f;
+			float	yEnter = 0.0f;
+			float	yLeave = 1.0f;
+
+			bool	bTop	= false;
+			bool	bRight	= false;
+
+			if (d.x == 0.0f) 
+			{
+				if ( (this->vMin.x >= movingBox.vMax.x) || (this->vMax.x <= movingBox.vMin.x) ) 
+					return kNoIntersection;
+			} 
+			else 
+			{
+				float	oneOverD = 1.0f / d.x;
+
+				xEnter = (this->vMin.x - movingBox.vMax.x) * oneOverD;
+				xLeave = (this->vMax.x - movingBox.vMin.x) * oneOverD;
+
+				if (xEnter > xLeave) 
+				{
+					bRight = true;
+					swap(xEnter, xLeave);
+				}
+
+				if (xEnter > tEnter) tEnter = xEnter;
+				if (xLeave < tLeave) tLeave = xLeave;
+
+				if (tEnter > tLeave) return kNoIntersection;
+			}
+
+			if (d.y == 0.0f) 
+			{
+				if ( (this->vMin.y >= movingBox.vMax.y) || (this->vMax.y <= movingBox.vMin.y) ) 
+					return kNoIntersection;
+			} 
+			else 
+			{
+				float	oneOverD = 1.0f / d.y;
+
+				yEnter = (this->vMin.y - movingBox.vMax.y) * oneOverD;
+				yLeave = (this->vMax.y - movingBox.vMin.y) * oneOverD;
+
+				if (yEnter > yLeave) 
+				{
+					bTop = true;
+					swap(yEnter, yLeave);
+				}
+
+				if (yEnter > tEnter) tEnter = yEnter;
+				if (yLeave < tLeave) tLeave = yLeave;
+
+				if (tEnter > tLeave) return kNoIntersection;
+			}
+
+			if( xEnter > yEnter )
+			{
+				dwDirFlag = bRight ? ECD_Right : ECD_Left;
+			}
+			else
+			{
+				dwDirFlag = bTop ? ECD_Top : ECD_Down;
+			}
+
+			return tEnter;
+	}
+
 	Vector2F		vMin, vMax;
 };
 

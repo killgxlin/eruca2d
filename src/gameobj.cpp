@@ -8,6 +8,7 @@
 VOID GameObj::Update( FLOAT dt )
 {
 	m_pSprite->Animate(dt);
+	m_vPrePos = m_vPos;
 }
 
 VOID GameObj::Draw( Painter* pScreen )
@@ -20,8 +21,18 @@ VOID GameObj::Collide( GameObj* pRunner, tagCollideRes* pRes )
 	AABBox thisBox = GetAABBox();
 	AABBox thatBox = pRunner->GetAABBox();
 
-	
-	pRes->dwDirFlag = thisBox.IntersectTest(thatBox, pRes->fDeep, GetCollideDirFlag());
+	Vector2F vD = pRunner->GetPos() - pRunner->GetPrePos();
+
+	FLOAT fT = thisBox.IntersectMovingAABB(thatBox, vD, pRes->dwDirFlag);
+	if( fT >= 0.0f && fT <= 1.0f )
+	{
+		pRes->vCollidePos = pRunner->GetPrePos() + vD * fT;
+	}
+	else
+	{
+		pRes->vCollidePos = pRunner->GetPos();
+	}
+
 }
 
 AABBox GameObj::GetAABBox() const
@@ -34,7 +45,7 @@ VOID GameObj::SetColor( UINT8 u8R, UINT8 u8G, UINT8 u8B )
 	m_pSprite->SetColor(u8R, u8G, u8B);
 }
 
-Tile::Tile( /*const Vector2F &vPos*/ ) :GameObj(Vector2F(0,0), ECP_Tile, ECD_All)
+Tile::Tile( /*const Vector2F &vPos*/ ) :GameObj(Vector2F(0,0), ECP_Static, ECD_All)
 {
 	m_pSprite = new SpriteTile(this);
 }
@@ -49,16 +60,13 @@ VOID Tile::Collide( GameObj* pRunner, tagCollideRes* pRes )
 	GameObj::Collide(pRunner, pRes);
 	if( !pRes->dwDirFlag ) return;
 
-	if( pRunner->GetCollidePri() == ECP_Player )
+	if( pRunner->GetCollidePri() == ECP_Dynamic )
 	{
-		Vector2F vOffset(0, 0);
-
 		Player *pPlayer = dynamic_cast<Player *>(pRunner);
 		if( pRes->dwDirFlag & ECD_Top )
 		{
 			if( pPlayer->m_vVel.y < 0 )
 			{
-				vOffset.y += pRes->fDeep ;
 				pPlayer->m_vVel.y *= -1;
 			}
 		}
@@ -66,7 +74,6 @@ VOID Tile::Collide( GameObj* pRunner, tagCollideRes* pRes )
 		{
 			if( pPlayer->m_vVel.y > 0 )
 			{
-				vOffset.y -= pRes->fDeep;
 				pPlayer->m_vVel.y *= -1;
 			}
 		}
@@ -74,7 +81,6 @@ VOID Tile::Collide( GameObj* pRunner, tagCollideRes* pRes )
 		{
 			if( pPlayer->m_vVel.x > 0 )
 			{
-				vOffset.x -= pRes->fDeep;
 				pPlayer->m_vVel.x *= -1;
 			}
 		}
@@ -82,16 +88,15 @@ VOID Tile::Collide( GameObj* pRunner, tagCollideRes* pRes )
 		{
 			if( pPlayer->m_vVel.x < 0 )
 			{
-				vOffset.x += pRes->fDeep;
 				pPlayer->m_vVel.x *= -1;
 			}
 		}
 
-		pPlayer->SetPos(pPlayer->GetPos() + vOffset);
+		pPlayer->SetPos(pRes->vCollidePos);
 	}
 }
 
-Player::Player() :GameObj(Vector2F(0, 0), ECP_Player, ECD_None), m_vVel(0, 0)
+Player::Player() :GameObj(Vector2F(0, 0), ECP_Dynamic, ECD_None), m_vVel(0, 0)
 {
 	m_pSprite = new SpritePlayer(this);
 }
