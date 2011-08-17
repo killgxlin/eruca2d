@@ -2,8 +2,6 @@
 #include "gameobj.h"
 
 #include "sprite.h"
-#include "keyboard.h"
-#include "painter.h"
 
 VOID GameObj::Update( FLOAT dt )
 {

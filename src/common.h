@@ -43,7 +43,7 @@ enum ECollideDir
 #define XGravity			-10	//pixel * pixel per sec
 #define XCtrlAcc			15	//
 
-#define XScreenW			800
+#define XScreenW			640
 #define XScreenH			(XScreenW * 3 / 4)
 
 #define XPlayerSize			(XScreenW / 40)
@@ -324,5 +324,9 @@ public:
 
 	Vector2F		vMin, vMax;
 };
+
+#include "keyboard.h"
+#include "text.h"
+#include "painter.h"
 
 #endif

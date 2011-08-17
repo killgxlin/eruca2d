@@ -50,11 +50,11 @@ public:
 	VOID	EndFrame();
 	VOID	WaitFrame();
 
-	VOID	SetCustomFPS(FLOAT fCustom);
+	VOID	ModCustomFPS(FLOAT fMod)	{ m_fCustomFPS = Cut(m_fCustomFPS + fMod, 10.0f, 1000.0f); }
 	FLOAT	GetCustomFPS() const		{ return m_fCustomFPS; }
 	FLOAT	GetFPS() const				{ return m_fCurFPS; }
 
-	VOID	SetSpeedRate(FLOAT fRate)	{ m_fSpeedRate = Cut(fRate, 0.5f, 10.0f); }
+	VOID	ModSpeedRate(FLOAT fMod)	{ m_fSpeedRate = Cut(m_fSpeedRate + fMod, 0.5f, 10.0f); }
 	FLOAT	GetSpeedRate() const		{ return m_fSpeedRate; }
 private:
 	UINT32	m_uDt;

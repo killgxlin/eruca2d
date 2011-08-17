@@ -1,8 +1,6 @@
 #include "common.h"
 #include "timer.h"
 
-#include "keyboard.h"
-
 FrameRate g_framerate;
 
 BOOL FrameRate::Init()
@@ -11,7 +9,7 @@ BOOL FrameRate::Init()
 	m_nFrames = 0;
 	m_nFrames = 0;
 	m_fSpeedRate = 1.0f;
-	SetCustomFPS(1000);
+	ModCustomFPS(1000);
 	return m_timer.Init();
 }
 
@@ -36,20 +34,24 @@ VOID FrameRate::CountFrame( UINT32 dt )
 
 	if( g_keyboard.FetchKey(SDLK_PAGEUP) )
 	{
-		SetCustomFPS(GetCustomFPS() + 100);
+		ModCustomFPS(100);
 	}
 	if( g_keyboard.FetchKey(SDLK_PAGEDOWN) )
 	{
-		SetCustomFPS(GetCustomFPS() - 100);
+		ModCustomFPS(- 100);
 	}
 	if( g_keyboard.FetchKey(SDLK_HOME) )
 	{
-		SetSpeedRate(GetSpeedRate() + 0.50f);
+		ModSpeedRate(0.50f);
 	}
 	if( g_keyboard.FetchKey(SDLK_END) )
 	{
-		SetSpeedRate(GetSpeedRate() - 0.50f);
+		ModSpeedRate(-0.50f);
 	}
+
+	g_text.AddText(g_painter.GetColor(255, 0, 0), "FPS      : %4.2f", g_framerate.GetFPS());
+	g_text.AddText(g_painter.GetColor(255, 0, 0), "custFPS  : %4.2f", g_framerate.GetCustomFPS());
+	g_text.AddText(g_painter.GetColor(255, 0, 0), "factor   : %4.2f", g_framerate.GetSpeedRate());
 }
 
 VOID FrameRate::BeginFrame()
@@ -68,7 +70,3 @@ VOID FrameRate::WaitFrame()
 	if( nSleep > 0 ) SDL_Delay(nSleep);
 }
 
-VOID FrameRate::SetCustomFPS( FLOAT fCustom )
-{
-	m_fCustomFPS = Cut(fCustom, 10.0f, 1000.0f);
-}

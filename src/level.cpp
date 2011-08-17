@@ -55,6 +55,11 @@ VOID Level::Update( FLOAT dt )
 {
 	dt *= g_framerate.GetSpeedRate();
 
+	for_each(m_lstTiles.begin(), m_lstTiles.end(), TileUpdate(dt));
+	m_pPlayer->Update(dt);
+
+	m_collider.Collide();
+
 	Vector2N vNewIdx = ConvertToBlockIdx(m_pPlayer->GetPos());
 	if( m_vLastIdx != vNewIdx )
 	{
@@ -62,10 +67,11 @@ VOID Level::Update( FLOAT dt )
 		m_vLastIdx = vNewIdx;
 	}
 
-	for_each(m_lstTiles.begin(), m_lstTiles.end(), TileUpdate(dt));
-	m_pPlayer->Update(dt);
+	Vector2N vIdx = ConvertToBlockIdx(m_pPlayer->GetPos());
+	g_text.AddText(g_painter.GetColor(255, 0, 0), "block of player:%4d ,%4d", vIdx.x, vIdx.y);
+	g_text.AddText(g_painter.GetColor(255, 0, 0), "vel of player:%4.2f ,%4.2f, %4.2f", m_pPlayer->m_vVel.x, m_pPlayer->m_vVel.y, m_pPlayer->m_vVel.Length());
+	g_text.AddText(g_painter.GetColor(255, 0, 0), "refresh  : %4d", g_level.m_nRefreshTimes);
 
-	m_collider.Collide();
 }
 
 template<typename T>
@@ -85,12 +91,6 @@ VOID Level::Draw( Painter* pPainter )
 	m_pPlayer->Draw(pPainter);
 
 	for_each(m_lstBlocks.begin(), m_lstBlocks.end(), FuncDraw<tagBlock>(pPainter));
-
-	Vector2N vIdx = ConvertToBlockIdx(m_pPlayer->GetPos());
-
-	g_text.AddText(g_painter.GetColor(255, 255, 255), "vel of player:%4.2f ,%4.2f, %4.2f", m_pPlayer->m_vVel.x, m_pPlayer->m_vVel.y, m_pPlayer->m_vVel.Length());
-	g_text.AddText(g_painter.GetColor(255, 255, 255), "block of player:%4d ,%4d", vIdx.x, vIdx.y);
-	
 }
 
 VOID Level::RefreshBlocks( const Vector2N &vIdx )
@@ -98,7 +98,7 @@ VOID Level::RefreshBlocks( const Vector2N &vIdx )
 	++m_nRefreshTimes;
 
 	BOOL	bMat[3][3];
-	ZeroMemory(bMat, sizeof(bMat));
+	memset(bMat, 0, sizeof(bMat));
 
 	list<tagBlock*>	lstNeedDel;
 
@@ -200,7 +200,7 @@ BOOL tagBlock::Load( const Vector2N &vCenterIdx, const Vector2N &vOffset )
 		static int i=0;
 		if( i++ %2 )
 		{
-			pNew->SetColor(255, 255, 255);
+			pNew->SetColor(255, 0, 0);
 		}
 
 		g_level.AddObj(pNew);
@@ -216,7 +216,7 @@ BOOL tagBlock::Load( const Vector2N &vCenterIdx, const Vector2N &vOffset )
 		static int i=0;
 		if( i++ %2 )
 		{
-			pNew->SetColor(255, 255, 255);
+			pNew->SetColor(255, 0, 0);
 		}
 
 		g_level.AddObj(pNew);
@@ -242,5 +242,5 @@ VOID tagBlock::Draw( Painter* pPainter )
 	Vector2F vCenter(FLOAT(vIdx.x*XScreenW), FLOAT(vIdx.y*XScreenH));
 	vCenter += Vector2F(XScreenW/2, XScreenH/2);
 
-	pPainter->WorldDrawText(vCenter, pPainter->GetColor(255, 255, 255),"%d, %d", vIdx.x, vIdx.y );
+	pPainter->WorldDrawText(vCenter, pPainter->GetColor(255, 0, 0),"%d, %d", vIdx.x, vIdx.y );
 }

@@ -12,11 +12,11 @@ VOID Sprite::Draw(Painter* pPainter, const Vector2F &vPos)
 
 AABBox Sprite::GetAABBox( const Vector2F &vPos )
 {
-	Vector2N vSize(m_Size.w, m_Size.h);
+	Vector2N vHalfSize(m_Size.w/2, m_Size.h/2);
 	
 	AABBox aabb;
-	aabb.vMin = vPos - vSize / 2;
-	aabb.vMax = vPos + vSize / 2;
+	aabb.vMin = vPos - vHalfSize;
+	aabb.vMax = vPos + vHalfSize;
 	
 	return aabb;
 }

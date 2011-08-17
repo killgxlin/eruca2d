@@ -2,7 +2,8 @@
 #include "collider.h"
 
 #include "gameobj.h"
-
+#include "text.h"
+#include "painter.h"
 
 BOOL Collider::AddGameObj( GameObj* pObj )
 {
@@ -49,6 +50,8 @@ VOID Collider::Collide()
 	{
 		itr->first->Collide(itr->second, &result);
 	}
+
+	g_text.AddText(g_painter.GetColor(255, 0, 0), "col num  : %d", m_lstCollidePairs.size());
 }
 
 BOOL Collider::CalCollideOrder( GameObj* &pCaller, GameObj* &pArg )

@@ -1,9 +1,6 @@
 #include "common.h"
 #include "painter.h"
 
-#include "text.h"
-#include "keyboard.h"
-
 Painter g_painter;
 
 BOOL Painter::Init( INT w, INT h, const char* title )
@@ -11,9 +8,9 @@ BOOL Painter::Init( INT w, INT h, const char* title )
 	m_fDrawPerSec	= 0.0f;
 	m_dwDt			= 0;
 	m_dwDrawTimes	= 0;
-	m_fZoomRate			= 2.0f;
+	m_fZoomRate		= 2.0f;
 
-	m_pScreen = SDL_SetVideoMode(w, h, 8, SDL_HWSURFACE|SDL_DOUBLEBUF);
+	m_pScreen = SDL_SetVideoMode(w, h, 32, SDL_HWSURFACE|SDL_DOUBLEBUF);
 	if( NULL == m_pScreen ) return FALSE;
 
 	if( title != NULL )
@@ -64,7 +61,7 @@ VOID Painter::WorldDrawRect( const Vector2F &vWorldPos, const SizeN &sSize, UINT
 	WorldToScreen(&vPos, &vSize);
 	ScreenToSDL(&vPos);
 
-//	if( IsBetweenClose<FLOAT>(vPos.x, -XTileSize/2, XScreenW+XTileSize/2) && IsBetweenClose<FLOAT>(vPos.y, -XTileSize/2, XScreenH+XTileSize/2) )
+	if( IsBetweenClose<FLOAT>(vPos.x, -XTileSize/2, XScreenW+XTileSize/2) && IsBetweenClose<FLOAT>(vPos.y, -XTileSize/2, XScreenH+XTileSize/2) )
 	{
 		DrawRect(vPos, vSize, uColor);
 	}	
@@ -102,14 +99,15 @@ VOID Painter::Update( DWORD dwDt )
 	}
 	if( g_keyboard.GetKey(SDLK_INSERT) )
 	{
-		m_fZoomRate += 0.01f;
-		m_fZoomRate = Cut(m_fZoomRate, 0.5f, 2.0f);
+		ModZoomRate(0.01f);
 	}
 	if( g_keyboard.GetKey(SDLK_DELETE) )
 	{
-		m_fZoomRate -= 0.01f;
-		m_fZoomRate = Cut(m_fZoomRate, 0.5f, 2.0f);
+		ModZoomRate(-0.01f);
 	}
+
+	g_text.AddText(g_painter.GetColor(255, 0, 0), "draw ps  : %4.2f", g_painter.GetDrawPerSec());
+	g_text.AddText(g_painter.GetColor(255, 0, 0), "zoom rate: %4.2f", g_painter.GetZoomRate());
 }
 
 VOID Painter::WorldDrawText( const Vector2F &vWorldPos, UINT32 uColor, const char* szFormat, ... )
