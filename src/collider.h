@@ -21,7 +21,7 @@ public:
 private:
 	BOOL	CalCollideOrder(GameObj* &pCaller, GameObj* &pArg);
 
-	vector<CollidePair>	m_lstCollidePairs;
+	list<CollidePair>	m_lstCollidePairs;
 	list<GameObj*>		m_lstObjs;
 };
 

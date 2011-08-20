@@ -54,17 +54,26 @@ UINT32 Painter::GetColor( UINT8 u8R, UINT8 u8G, UINT8 u8B )
 	return SDL_MapRGB(m_pScreen->format, u8R, u8G, u8B);
 }
 
-VOID Painter::WorldDrawRect( const Vector2F &vWorldPos, const SizeN &sSize, UINT32 uColor )
+VOID Painter::WorldDrawRect( const Vector2F &vWorldPos, const Vector2F &vSize, UINT32 uColor )
 {
 	Vector2F vPos = vWorldPos;
-	Vector2F vSize(sSize.w, sSize.h);
-	WorldToScreen(&vPos, &vSize);
+	Vector2F vLSize = vSize;
+	WorldToScreen(&vPos, &vLSize);
 	ScreenToSDL(&vPos);
 
-	if( IsBetweenClose<FLOAT>(vPos.x, -XTileSize/2, XScreenW+XTileSize/2) && IsBetweenClose<FLOAT>(vPos.y, -XTileSize/2, XScreenH+XTileSize/2) )
+	AABBox rectBox(vPos, vLSize);
+	AABBox m_screenBox;
+	m_screenBox.AddPoint(Vector2F(0, 0));
+	m_screenBox.AddPoint(Vector2F(XScreenW, XScreenH));
+
+	if( m_screenBox.IntersectBox(rectBox) )
 	{
-		DrawRect(vPos, vSize, uColor);
-	}	
+		DrawRect(vPos, vLSize, uColor);
+	}
+	else
+	{
+		rectBox.vMax.x = 0;
+	}
 }
 
 VOID Painter::WorldToScreen( Vector2F* pPt, Vector2F* pSize )

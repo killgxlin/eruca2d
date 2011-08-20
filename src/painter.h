@@ -10,7 +10,7 @@ public:
 
 	VOID			Flush();
 	VOID			Clear();
-	VOID			WorldDrawRect(const Vector2F &vWorldPos, const SizeN &sSize, UINT32 uColor);
+	VOID WorldDrawRect(const Vector2F &vWorldPos, const Vector2F &vSize, UINT32 uColor);
 	VOID			WorldDrawText(const Vector2F &vWorldPos, UINT32 uColor, const char* szFormat, ...);
 
 	VOID			SetCenter(const Vector2F &vPos)			{ m_vCenter = vPos; }

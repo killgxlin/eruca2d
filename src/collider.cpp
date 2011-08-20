@@ -31,22 +31,14 @@ VOID Collider::DelGameObj( GameObj* pObj )
 	list<GameObj*>::iterator go_itr = std::find(m_lstObjs.begin(), m_lstObjs.end(), pObj);
 	if( go_itr != m_lstObjs.end() ) m_lstObjs.erase(go_itr);
 
-	list<vector<CollidePair>::iterator> lst2Del;
-
-	vector<CollidePair>::iterator cp_itr = m_lstCollidePairs.begin();
+	list<CollidePair>::iterator cp_itr = m_lstCollidePairs.begin();
 	while( cp_itr != m_lstCollidePairs.end() )
 	{
-		vector<CollidePair>::iterator cur_itr = cp_itr++;
+		list<CollidePair>::iterator cur_itr = cp_itr++;
 		if( cur_itr->first == pObj || cur_itr->second == pObj )
 		{
-			lst2Del.push_back(cur_itr);
+			m_lstCollidePairs.erase(cur_itr);
 		}
-	}
-
-	while( !lst2Del.empty() )
-	{
-		m_lstCollidePairs.erase(lst2Del.front());
-		lst2Del.pop_front();
 	}
 }
 
@@ -57,11 +49,27 @@ bool cmp(const CollidePair &lhs, const CollidePair &rhs)
 
 VOID Collider::Collide()
 {
-	std::sort(m_lstCollidePairs.begin(), m_lstCollidePairs.end(), cmp);
+	vector<CollidePair> vecTmp;
+
+	for(list<CollidePair>::iterator itr = m_lstCollidePairs.begin();
+		itr != m_lstCollidePairs.end();
+		++itr)
+	{
+		AABBox movBox = itr->second->GetMoveBox();
+		AABBox staBox = itr->first->GetAABBox();
+
+		if( movBox.IntersectBox(staBox) )
+		{
+			itr->fLen2 = (itr->first->GetPrePos() - itr->second->GetPrePos()).Length2();
+			vecTmp.push_back(*itr);
+		}
+	}
+
+	std::sort(vecTmp.begin(), vecTmp.end(), cmp);
 
 	tagCollideRes result;
-	for(vector<CollidePair>::iterator itr = m_lstCollidePairs.begin();
-		itr != m_lstCollidePairs.end();
+	for(vector<CollidePair>::iterator itr = vecTmp.begin();
+		itr != vecTmp.end();
 		++itr)
 	{
 		itr->first->Collide(itr->second, &result);
