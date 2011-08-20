@@ -11,12 +11,13 @@ BOOL Collider::AddGameObj( GameObj* pObj )
 		itr != m_lstObjs.end();
 		++itr)
 	{
-		GameObj* pCaller = (*itr);
-		GameObj* pArg = pObj;
+		CollidePair pair;
+		pair.first = (*itr);
+		pair.second = pObj;
 
-		if( CalCollideOrder(pCaller, pArg) )
+		if( CalCollideOrder(pair.first, pair.second) )
 		{
-			m_lstCollidePairs.push_back(make_pair(pCaller, pArg));
+			m_lstCollidePairs.push_back(pair);
 		}
 	}
 
@@ -30,21 +31,36 @@ VOID Collider::DelGameObj( GameObj* pObj )
 	list<GameObj*>::iterator go_itr = std::find(m_lstObjs.begin(), m_lstObjs.end(), pObj);
 	if( go_itr != m_lstObjs.end() ) m_lstObjs.erase(go_itr);
 
-	list<CollidePair>::iterator cp_itr = m_lstCollidePairs.begin();
+	list<vector<CollidePair>::iterator> lst2Del;
+
+	vector<CollidePair>::iterator cp_itr = m_lstCollidePairs.begin();
 	while( cp_itr != m_lstCollidePairs.end() )
 	{
-		list<CollidePair>::iterator cur_itr = cp_itr++;
+		vector<CollidePair>::iterator cur_itr = cp_itr++;
 		if( cur_itr->first == pObj || cur_itr->second == pObj )
 		{
-			m_lstCollidePairs.erase(cur_itr);
+			lst2Del.push_back(cur_itr);
 		}
 	}
+
+	while( !lst2Del.empty() )
+	{
+		m_lstCollidePairs.erase(lst2Del.front());
+		lst2Del.pop_front();
+	}
+}
+
+bool cmp(const CollidePair &lhs, const CollidePair &rhs)
+{
+	return lhs.fLen2 < rhs.fLen2;
 }
 
 VOID Collider::Collide()
 {
+	std::sort(m_lstCollidePairs.begin(), m_lstCollidePairs.end(), cmp);
+
 	tagCollideRes result;
-	for(list<CollidePair>::iterator itr = m_lstCollidePairs.begin();
+	for(vector<CollidePair>::iterator itr = m_lstCollidePairs.begin();
 		itr != m_lstCollidePairs.end();
 		++itr)
 	{

@@ -8,7 +8,7 @@ BOOL Painter::Init( INT w, INT h, const char* title )
 	m_fDrawPerSec	= 0.0f;
 	m_dwDt			= 0;
 	m_dwDrawTimes	= 0;
-	m_fZoomRate		= 2.0f;
+	m_fZoomRate		= 1.0f;
 
 	m_pScreen = SDL_SetVideoMode(w, h, 32, SDL_HWSURFACE|SDL_DOUBLEBUF);
 	if( NULL == m_pScreen ) return FALSE;

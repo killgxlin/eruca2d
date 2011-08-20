@@ -4,11 +4,15 @@
 
 class GameObj;
 
+struct CollidePair : public pair<GameObj*, GameObj*>
+{
+	FLOAT	fLen2;
+};
 
 
 class Collider
 {
-	typedef pair<GameObj*, GameObj*> CollidePair;
+	
 public:
 	BOOL	AddGameObj(GameObj* pObj);
 	VOID	DelGameObj(GameObj* pObj);
@@ -17,7 +21,7 @@ public:
 private:
 	BOOL	CalCollideOrder(GameObj* &pCaller, GameObj* &pArg);
 
-	list<CollidePair>	m_lstCollidePairs;
+	vector<CollidePair>	m_lstCollidePairs;
 	list<GameObj*>		m_lstObjs;
 };
 

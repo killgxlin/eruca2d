@@ -11,11 +11,14 @@
 
 
 #include <map>
+#include <vector>
 #include <list>
 #include <string>
 #include <algorithm>
 
 using std::map;
+using std::vector;
+using std::multimap;
 using std::list;
 using std::pair;
 using std::string;
@@ -154,6 +157,7 @@ public:
 
 	Size<T>	asSize() const		{ return Size(x, y); }
 	T		Length()const		{ return sqrt(x*x+y*y); }
+	T		Length2() const		{ return x*x + y*y; }
 	T		x, y;
 };
 
@@ -321,6 +325,8 @@ public:
 
 			return tEnter;
 	}
+
+	VOID	Add(const AABBox &box);
 
 	Vector2F		vMin, vMax;
 };

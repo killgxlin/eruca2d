@@ -15,6 +15,7 @@ BOOL Level::Init()
 
 	m_pPlayer = new Player;
 	m_pPlayer->SetPos(Vector2F(XScreenW/2, XScreenH - XPlayerSize/2));
+	m_pPlayer->m_vVel = Vector2F(800, 600);
 	m_collider.AddGameObj(m_pPlayer);
 
 	m_vLastIdx = ConvertToBlockIdx(m_pPlayer->GetPos());
@@ -191,7 +192,7 @@ BOOL tagBlock::Load( const Vector2N &vCenterIdx, const Vector2N &vOffset )
 
 	Vector2F vOri(FLOAT(vIdx.x * XScreenW), FLOAT(vIdx.y * XScreenH));
 
-	for( FLOAT f=XTileSize/2; f<=XScreenW - XTileSize/2; f+=XTileSize )
+	for( FLOAT f=XTileSize/2; f<=XScreenW/2 - XTileSize/2; f+=XTileSize )
 	{
 		Tile* pNew = new Tile;
 		pNew->SetPos(vOri + Vector2F(f, XTileSize/2));
@@ -207,7 +208,7 @@ BOOL tagBlock::Load( const Vector2N &vCenterIdx, const Vector2N &vOffset )
 		lstTiles.push_back(pNew);
 	}
 
-	for( FLOAT f=XTileSize/2; f<=XScreenH - XTileSize/2; f+=XTileSize )
+	for( FLOAT f=XTileSize/2; f<=XScreenH/2 - XTileSize/2; f+=XTileSize )
 	{
 		Tile* pNew = new Tile;
 		pNew->SetPos(vOri + Vector2F(XTileSize/2, f));
