@@ -45,6 +45,7 @@ enum ECollideDir
 #define XMaxPlayerSpeed		1000	//pixel per sec
 #define XGravity			-10	//pixel * pixel per sec
 #define XCtrlAcc			15	//
+#define XJumpSpeed			50
 
 #define XScreenW			640
 #define XScreenH			(XScreenW * 3 / 4)
@@ -321,5 +322,6 @@ public:
 #include "keyboard.h"
 #include "text.h"
 #include "painter.h"
+#include "timer.h"
 
 #endif

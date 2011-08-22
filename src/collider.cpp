@@ -2,8 +2,6 @@
 #include "collider.h"
 
 #include "gameobj.h"
-#include "text.h"
-#include "painter.h"
 
 BOOL Collider::AddGameObj( GameObj* pObj )
 {

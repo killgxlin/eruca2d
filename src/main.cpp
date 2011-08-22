@@ -4,7 +4,6 @@
 #include "sprite.h"
 #include "gameobj.h"
 #include "level.h"
-#include "timer.h"
 
 INT APIENTRY _tWinMain(HINSTANCE hInstance,
 					   HINSTANCE hPrevInstance,

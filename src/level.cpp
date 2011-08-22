@@ -2,9 +2,6 @@
 #include "level.h"
 
 #include "gameobj.h"
-#include "painter.h"
-#include "text.h"
-#include "timer.h"
 
 BOOL Level::Init()
 {
@@ -15,7 +12,7 @@ BOOL Level::Init()
 
 	m_pPlayer = new Player;
 	m_pPlayer->SetPos(Vector2F(XPlayerSize + XPlayerSize/2, XPlayerSize + XPlayerSize/2));
-
+	m_pPlayer->m_vVel = Vector2F(600, 800);
 	m_collider.AddGameObj(m_pPlayer);
 
 	m_vLastIdx = ConvertToBlockIdx(m_pPlayer->GetPos());

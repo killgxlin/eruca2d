@@ -42,11 +42,11 @@ VOID FrameRate::CountFrame( UINT32 dt )
 	}
 	if( g_keyboard.FetchKey(SDLK_HOME) )
 	{
-		ModSpeedRate(0.50f);
+		ModSpeedRate(GetSpeedRate());
 	}
 	if( g_keyboard.FetchKey(SDLK_END) )
 	{
-		ModSpeedRate(-0.50f);
+		ModSpeedRate(-GetSpeedRate()/2);
 	}
 
 	g_text.AddText(g_painter.GetColor(255, 0, 0), "FPS      : %4.2f", g_framerate.GetFPS());

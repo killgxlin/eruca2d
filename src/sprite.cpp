@@ -1,8 +1,6 @@
 #include "common.h"
 #include "sprite.h"
 
-#include "painter.h"
-
 #include "gameobj.h"
 
 VOID Sprite::Draw(Painter* pPainter, const Vector2F &vPos)
