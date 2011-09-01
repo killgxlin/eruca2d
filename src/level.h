@@ -18,6 +18,8 @@ struct tagBlock
 
 	VOID		UnLoad();
 	VOID		Draw(Painter* pPainter);
+
+
 };
 
 class Level

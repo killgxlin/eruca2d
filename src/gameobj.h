@@ -59,6 +59,7 @@ public:
 	virtual VOID	Update(FLOAT dt);
 
 	Vector2F		m_vVel;
+	bool			m_bLand;
 };
 
 #endif

@@ -74,8 +74,10 @@ VOID Tile::Collide( GameObj* pRunner, tagCollideRes* pRes )
 		{
 			if( pPlayer->m_vVel.y < 0 )
 			{
-				pPlayer->m_vVel.y *= -1;
+				pPlayer->m_vVel.y *= 0;
 			}
+//			pRes->vCollidePos = GetPos() + Vector2F(0, XTileSize + 0.1f);
+			pPlayer->m_bLand = true;
 		}
 		if( pRes->dwDirFlag & ECD_Down )
 		{
@@ -130,9 +132,13 @@ VOID Player::Update( FLOAT dt )
 	{
 		m_vVel.x += XCtrlAcc * dt;
 	}
-	if( g_keyboard.GetKey(SDLK_UP) )
+	if( g_keyboard.FetchKey(SDLK_UP) )
 	{
-		m_vVel.y += XCtrlAcc * dt;
+		if( m_bLand )
+		{
+			m_vVel.y = m_vVel.x;
+			m_bLand = false;
+		}
 	}
 	if( g_keyboard.GetKey(SDLK_DOWN) )
 	{
@@ -144,10 +150,22 @@ VOID Player::Update( FLOAT dt )
 		m_vVel = vOld;
 	}
 
+	if( m_bLand )
+	{
+		m_vVel.y = 0;
+		m_vVel.x++;
+		if( m_vVel.x > 100 )
+		{
+			m_vVel.x = 100;
+		}
+	}
+
 	Vector2F vOffset = m_vVel * dt;
 
 
 	m_vPos += vOffset;
 
 	g_painter.SetCenter(GetPos());
+
+	m_bLand = false;
 }

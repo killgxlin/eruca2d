@@ -252,6 +252,10 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath="..\..\src\doc.txt"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
