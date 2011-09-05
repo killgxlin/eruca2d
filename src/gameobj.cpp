@@ -2,8 +2,6 @@
 #include "gameobj.h"
 
 #include "sprite.h"
-#include "keyboard.h"
-#include "painter.h"
 
 VOID GameObj::Update( FLOAT dt )
 {
@@ -45,6 +43,15 @@ VOID GameObj::SetColor( UINT8 u8R, UINT8 u8G, UINT8 u8B )
 	m_pSprite->SetColor(u8R, u8G, u8B);
 }
 
+AABBox GameObj::GetMoveBox() const
+{
+	AABBox curBox = m_pSprite->GetAABBox(m_vPos);
+	AABBox preBox = m_pSprite->GetAABBox(m_vPrePos);
+	curBox.AddBox(preBox);
+	
+	return curBox;
+}
+
 Tile::Tile( /*const Vector2F &vPos*/ ) :GameObj(Vector2F(0,0), ECP_Static, ECD_All)
 {
 	m_pSprite = new SpriteTile(this);
@@ -67,8 +74,10 @@ VOID Tile::Collide( GameObj* pRunner, tagCollideRes* pRes )
 		{
 			if( pPlayer->m_vVel.y < 0 )
 			{
-				pPlayer->m_vVel.y *= -1;
+				pPlayer->m_vVel.y *= 0;
 			}
+//			pRes->vCollidePos = GetPos() + Vector2F(0, XTileSize + 0.1f);
+			pPlayer->m_bLand = true;
 		}
 		if( pRes->dwDirFlag & ECD_Down )
 		{
@@ -93,6 +102,7 @@ VOID Tile::Collide( GameObj* pRunner, tagCollideRes* pRes )
 		}
 
 		pPlayer->SetPos(pRes->vCollidePos);
+		SetColor(255, 255, 255);
 	}
 }
 
@@ -114,26 +124,36 @@ VOID Player::Update( FLOAT dt )
 
 	m_vVel.y += XGravity * dt;
 
-	if( g_keyboard.m_bKey[SDLK_LEFT] )
+	if( g_keyboard.GetKey(SDLK_LEFT) )
 	{
 		m_vVel.x -= XCtrlAcc * dt;
 	}
-	if( g_keyboard.m_bKey[SDLK_RIGHT] )
+	if( g_keyboard.GetKey(SDLK_RIGHT) )
 	{
 		m_vVel.x += XCtrlAcc * dt;
 	}
-	if( g_keyboard.m_bKey[SDLK_UP] )
+	if( g_keyboard.FetchKey(SDLK_UP) )
 	{
-		m_vVel.y += XCtrlAcc * dt;
+		if( m_bLand )
+		{
+			m_vVel.y = m_vVel.x;
+			m_bLand = false;
+		}
 	}
-	if( g_keyboard.m_bKey[SDLK_DOWN] )
+	if( g_keyboard.GetKey(SDLK_DOWN) )
 	{
 		m_vVel.y -= XCtrlAcc * dt;
 	}
 
-	if( m_vVel.Length() > XMaxPlayerSpeed )
+	if( m_vVel.x > XMaxPlayerSpeedX )
 	{
-		m_vVel = vOld;
+		m_vVel.x = XMaxPlayerSpeedX;
+	}
+
+	if( m_bLand )
+	{
+		m_vVel.y = 0;
+		m_vVel.x++;
 	}
 
 	Vector2F vOffset = m_vVel * dt;
@@ -141,5 +161,8 @@ VOID Player::Update( FLOAT dt )
 
 	m_vPos += vOffset;
 
-	g_painter.SetCenter(GetPos());
+
+	m_bLand = false;
+
+	g_text.AddText(g_painter.GetColor(255, 0, 0), "offset  : %4.2f %4.2f", vOffset.x, vOffset.y);
 }

@@ -4,7 +4,7 @@
 class KeyBoard
 {
 public:
-	KeyBoard(){ ZeroMemory(m_bKey, sizeof(m_bKey)); }
+	KeyBoard(){ memset(m_bKey, 0, sizeof(m_bKey)); }
 	VOID	Update();
 	
 	BOOL	FetchKey(UINT16 uKey)
@@ -18,7 +18,7 @@ public:
 		return m_bKey[uKey];
 	}
 public:
-	BOOL	m_bKey[SDLK_LAST];
+	bool	m_bKey[SDLK_LAST];
 };
 
 extern KeyBoard g_keyboard;

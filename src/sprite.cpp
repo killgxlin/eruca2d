@@ -1,8 +1,6 @@
 #include "common.h"
 #include "sprite.h"
 
-#include "painter.h"
-
 #include "gameobj.h"
 
 VOID Sprite::Draw(Painter* pPainter, const Vector2F &vPos)
@@ -12,20 +10,14 @@ VOID Sprite::Draw(Painter* pPainter, const Vector2F &vPos)
 
 AABBox Sprite::GetAABBox( const Vector2F &vPos )
 {
-	Vector2N vSize(m_Size.w, m_Size.h);
-	
-	AABBox aabb;
-	aabb.vMin = vPos - vSize / 2;
-	aabb.vMax = vPos + vSize / 2;
-	
-	return aabb;
+	return AABBox(vPos, m_Size);
 }
 
 VOID SpritePlayer::Animate( FLOAT dt )
 {
 	Player* pPlayer = dynamic_cast<Player*>(m_pGameObj);
 
-	FLOAT fPct = pPlayer->m_vVel.Length() / FLOAT(XMaxPlayerSpeed);
+	FLOAT fPct = pPlayer->m_vVel.Length() / FLOAT(XMaxPlayerSpeedX);
 	
 	if( fPct > 1.0f )
 	{

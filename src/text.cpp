@@ -1,14 +1,12 @@
 #include "common.h"
 #include "text.h"
 
-#include "painter.h"
-
-
 BOOL Text::Init()
 {
 	if( TTF_Init() == -1 ) return FALSE;
 	
 	m_lstUnits.clear();
+	m_bDrawText = true;
 
 	return SetFont("font.ttf");
 }
@@ -39,13 +37,15 @@ BOOL Text::SetFont( const char* szPath )
 
 VOID Text::DrawText(const Vector2F &vPos, UINT32 uColor, const char* szFormat, ...)
 {
+	if( !m_bDrawText ) return;
+
 	va_list argList;
 	va_start(argList, szFormat);
 	char buffer[1024];
 	vsprintf_s(buffer, 1024, szFormat, argList);
 	va_end(argList);
 
-	SDL_Surface *text_surface = TTF_RenderText_Solid(m_pFont, buffer, *((SDL_Color*)&uColor));
+	SDL_Surface *text_surface = TTF_RenderText_Solid(m_pFont, buffer, *((SDL_Color*)&uColor));//*((SDL_Color*)&uColor));
 	if (text_surface != NULL)
 	{
 		SDL_Rect rect;
@@ -61,6 +61,8 @@ VOID Text::DrawText(const Vector2F &vPos, UINT32 uColor, const char* szFormat, .
 
 VOID Text::AddText( UINT32 uColor, const char* szFormat, ... )
 {
+	if( !m_bDrawText ) return;
+
 	va_list argList;
 	va_start(argList, szFormat);
 	char buffer[1024];
@@ -76,6 +78,11 @@ VOID Text::AddText( UINT32 uColor, const char* szFormat, ... )
 
 VOID Text::DrawTextAll()
 {
+	if( g_keyboard.FetchKey(SDLK_F11) )
+	{
+		DrawSwitch();
+	}
+
 	Vector2F vPos(0, 0);
 	INT nFontHight = TTF_FontHeight(m_pFont);
 	while( !m_lstUnits.empty() )

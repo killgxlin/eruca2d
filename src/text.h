@@ -13,6 +13,9 @@ public:
 
 	VOID	AddText(UINT32 uColor, const char* szFormat, ...);
 	VOID	DrawTextAll();
+
+	VOID	DrawSwitch() { m_bDrawText = !m_bDrawText; }
+
 	VOID	DrawText(const Vector2F &vPos, UINT32 uColor, const char* szFormat, ...);
 
 private:
@@ -24,7 +27,8 @@ private:
 		string	strMsg;
 	};
 
-	list<tagUnit>	m_lstUnits;;
+	list<tagUnit>	m_lstUnits;
+	bool			m_bDrawText;
 };
 
 extern Text g_text;

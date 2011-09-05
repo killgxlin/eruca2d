@@ -11,11 +11,14 @@
 
 
 #include <map>
+#include <vector>
 #include <list>
 #include <string>
 #include <algorithm>
 
 using std::map;
+using std::vector;
+using std::multimap;
 using std::list;
 using std::pair;
 using std::string;
@@ -39,9 +42,10 @@ enum ECollideDir
 	ECD_All		= ECD_Top | ECD_Down | ECD_Left | ECD_Right,
 };
 
-#define XMaxPlayerSpeed		1000	//pixel per sec
+#define XMaxPlayerSpeedX	1000	//pixel per sec
 #define XGravity			-10	//pixel * pixel per sec
 #define XCtrlAcc			15	//
+#define XJumpSpeed			50
 
 #define XScreenW			800
 #define XScreenH			(XScreenW * 3 / 4)
@@ -154,6 +158,7 @@ public:
 
 	Size<T>	asSize() const		{ return Size(x, y); }
 	T		Length()const		{ return sqrt(x*x+y*y); }
+	T		Length2() const		{ return x*x + y*y; }
 	T		x, y;
 };
 
@@ -191,60 +196,6 @@ T		Cut(T val, T min, T max)
 class AABBox
 {
 public:
-	UINT32 IntersectTest(const AABBox &other, FLOAT &fDeep, DWORD dwColDirFlag)
-	{
-		UINT32 uFlag = ECD_None;
-		fDeep = 99;
-
-		if( IsBetweenClose(other.vMin.x, this->vMin.x, this->vMax.x) || IsBetweenClose(other.vMax.x, this->vMin.x, this->vMax.x) )
-		{
-			// top
-			if( ECD_Top & dwColDirFlag && IsBetweenClose(other.vMin.y, this->vMin.y, this->vMax.y) && other.vMax.y > this->vMax.y )
-			{
-				FLOAT fCurDeep = this->vMax.y - other.vMin.y;
-				if( fDeep > fCurDeep )
-				{
-					fDeep = fCurDeep;
-					uFlag = ECD_Top;
-				}				
-			}
-			// down
-			if( ECD_Down & dwColDirFlag && IsBetweenClose(other.vMax.y, this->vMin.y, this->vMax.y) && other.vMin.y < this->vMin.y)
-			{
-				FLOAT fCurDeep = other.vMax.y - this->vMin.y;
-				if( fDeep > fCurDeep )
-				{
-					fDeep = fCurDeep;
-					uFlag = ECD_Down;
-				}
-			}
-		}
-		if( IsBetweenClose(other.vMin.y, this->vMin.y, this->vMax.y) || IsBetweenClose(other.vMax.y, this->vMin.y, this->vMax.y) )
-		{
-			// left
-			if( ECD_Left & dwColDirFlag && IsBetweenClose(other.vMax.x, this->vMin.x, this->vMax.x) && other.vMin.x < this->vMin.x)
-			{
-				FLOAT fCurDeep = other.vMax.x - this->vMin.x;
-				if( fDeep > fCurDeep )
-				{
-					fDeep = fCurDeep;
-					uFlag = ECD_Left;
-				}
-			}
-			// right
-			if( ECD_Right & dwColDirFlag && IsBetweenClose(other.vMin.x, this->vMin.x, this->vMax.x) && other.vMax.x > this->vMax.x )
-			{
-				FLOAT fCurDeep = this->vMax.x - other.vMin.x;
-				if( fDeep > fCurDeep )
-				{
-					fDeep = fCurDeep;
-					uFlag = ECD_Right;
-				}
-			}
-		}
-
-		return uFlag;
-	}
 	float IntersectMovingAABB( const AABBox &movingBox, const Vector2F &d, DWORD &dwDirFlag ) 
 	{
 			const float kNoIntersection = 1e30f;
@@ -322,7 +273,55 @@ public:
 			return tEnter;
 	}
 
+	AABBox(const Vector2F &vCenter, const Vector2F &vSize)
+	{
+		Vector2F vHalf = vSize/2;
+		vMin = vCenter - vHalf;
+		vMax = vCenter + vHalf;
+	}
+
+	BOOL	IntersectPoint(const Vector2F &vPoint)
+	{
+		return IsBetweenClose(vPoint.x, vMin.x, vMax.x) || IsBetweenClose(vPoint.y, vMin.y, vMax.y);
+	}
+
+	BOOL	IntersectBox(const AABBox &other)
+	{
+		return IntersectPoint(other.vMin) || IntersectPoint(other.vMax);
+	}
+
+	VOID	AddPoint(const Vector2F &vPoint)
+	{
+		if( vPoint.x < vMin.x )
+		{
+			vMin.x = vPoint.x;
+		}
+		if( vPoint.x > vMax.x )
+		{
+			vMax.x = vPoint.x;
+		}
+		if( vPoint.y < vMin.y )
+		{
+			vMin.y = vPoint.y;
+		}
+		if( vPoint.y > vMax.y )
+		{
+			vMax.y = vPoint.y;
+		}
+	}
+
+	VOID	AddBox(const AABBox &vBox)
+	{
+		AddPoint(vBox.vMin);
+		AddPoint(vBox.vMax);
+	}
+	AABBox():vMax(-9999999.0f, -9999999.0f),vMin(9999999.0f, 9999999.0f){}
 	Vector2F		vMin, vMax;
 };
+
+#include "keyboard.h"
+#include "text.h"
+#include "painter.h"
+#include "timer.h"
 
 #endif

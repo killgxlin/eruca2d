@@ -30,6 +30,7 @@ public:
 	INT				GetCollidePri() const		{ return m_nCollidePri; }
 	UINT32			GetCollideDirFlag() const	{ return m_uCollideDirFlag; }
 	AABBox			GetAABBox() const;
+	AABBox			GetMoveBox() const;
 	Vector2F		GetPos() const				{ return m_vPos; }
 	Vector2F		GetPrePos() const			{ return m_vPrePos; }
 
@@ -58,6 +59,7 @@ public:
 	virtual VOID	Update(FLOAT dt);
 
 	Vector2F		m_vVel;
+	bool			m_bLand;
 };
 
 #endif

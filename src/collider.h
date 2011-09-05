@@ -4,11 +4,15 @@
 
 class GameObj;
 
+struct CollidePair : public pair<GameObj*, GameObj*>
+{
+	FLOAT	fLen2;
+};
 
 
 class Collider
 {
-	typedef pair<GameObj*, GameObj*> CollidePair;
+	
 public:
 	BOOL	AddGameObj(GameObj* pObj);
 	VOID	DelGameObj(GameObj* pObj);
