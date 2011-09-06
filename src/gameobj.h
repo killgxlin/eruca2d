@@ -60,6 +60,8 @@ public:
 
 	Vector2F		m_vVel;
 	bool			m_bLand;
+	float			m_fJump;
+	bool			m_bJmpPressed;
 };
 
 #endif

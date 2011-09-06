@@ -11,7 +11,7 @@ BOOL Level::Init()
 	m_lstTiles.clear();
 
 	m_pPlayer = new Player;
-	m_pPlayer->SetPos(Vector2F(XPlayerSize + XPlayerSize/2, XPlayerSize + XPlayerSize/2));
+	m_pPlayer->SetPos(Vector2F(XPlayerSize*2 + XPlayerSize/2, XPlayerSize*2 + XPlayerSize/2));
 	m_pPlayer->m_vVel = Vector2F(0, 0);
 	m_collider.AddGameObj(m_pPlayer);
 
@@ -68,6 +68,7 @@ VOID Level::Update( FLOAT dt )
 	g_painter.SetCenter(m_pPlayer->GetPos());
 
 	Vector2N vIdx = ConvertToBlockIdx(m_pPlayer->GetPos());
+	g_text.AddText(g_painter.GetColor(255, 0, 0), "player on land :%4d", m_pPlayer->m_bLand);
 	g_text.AddText(g_painter.GetColor(255, 0, 0), "block of player:%4d ,%4d", vIdx.x, vIdx.y);
 	g_text.AddText(g_painter.GetColor(255, 0, 0), "pos of player  :%4.2f ,%4.2f", m_pPlayer->GetPos().x, m_pPlayer->GetPos().y);
 	g_text.AddText(g_painter.GetColor(255, 0, 0), "vel of player  :%4.2f ,%4.2f, %4.2f", m_pPlayer->m_vVel.x, m_pPlayer->m_vVel.y, m_pPlayer->m_vVel.Length());
