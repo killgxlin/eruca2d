@@ -47,7 +47,7 @@ enum ECollideDir
 #define XCtrlAcc			500	//
 #define XJumpSpeed			50
 
-#define XScreenW			800
+#define XScreenW			640
 #define XScreenH			(XScreenW * 3 / 4)
 
 #define XPlayerSize			(XScreenW / 40)
@@ -196,60 +196,6 @@ T		Cut(T val, T min, T max)
 class AABBox
 {
 public:
-	UINT32 IntersectTest(const AABBox &other, FLOAT &fDeep, DWORD dwColDirFlag)
-	{
-		UINT32 uFlag = ECD_None;
-		fDeep = 99;
-
-		if( IsBetweenClose(other.vMin.x, this->vMin.x, this->vMax.x) || IsBetweenClose(other.vMax.x, this->vMin.x, this->vMax.x) )
-		{
-			// top
-			if( ECD_Top & dwColDirFlag && IsBetweenClose(other.vMin.y, this->vMin.y, this->vMax.y) && other.vMax.y > this->vMax.y )
-			{
-				FLOAT fCurDeep = this->vMax.y - other.vMin.y;
-				if( fDeep > fCurDeep )
-				{
-					fDeep = fCurDeep;
-					uFlag = ECD_Top;
-				}				
-			}
-			// down
-			if( ECD_Down & dwColDirFlag && IsBetweenClose(other.vMax.y, this->vMin.y, this->vMax.y) && other.vMin.y < this->vMin.y)
-			{
-				FLOAT fCurDeep = other.vMax.y - this->vMin.y;
-				if( fDeep > fCurDeep )
-				{
-					fDeep = fCurDeep;
-					uFlag = ECD_Down;
-				}
-			}
-		}
-		if( IsBetweenClose(other.vMin.y, this->vMin.y, this->vMax.y) || IsBetweenClose(other.vMax.y, this->vMin.y, this->vMax.y) )
-		{
-			// left
-			if( ECD_Left & dwColDirFlag && IsBetweenClose(other.vMax.x, this->vMin.x, this->vMax.x) && other.vMin.x < this->vMin.x)
-			{
-				FLOAT fCurDeep = other.vMax.x - this->vMin.x;
-				if( fDeep > fCurDeep )
-				{
-					fDeep = fCurDeep;
-					uFlag = ECD_Left;
-				}
-			}
-			// right
-			if( ECD_Right & dwColDirFlag && IsBetweenClose(other.vMin.x, this->vMin.x, this->vMax.x) && other.vMax.x > this->vMax.x )
-			{
-				FLOAT fCurDeep = this->vMax.x - other.vMin.x;
-				if( fDeep > fCurDeep )
-				{
-					fDeep = fCurDeep;
-					uFlag = ECD_Right;
-				}
-			}
-		}
-
-		return uFlag;
-	}
 	float IntersectMovingAABB( const AABBox &movingBox, const Vector2F &d, DWORD &dwDirFlag ) 
 	{
 			const float kNoIntersection = 1e30f;

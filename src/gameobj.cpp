@@ -126,7 +126,6 @@ VOID Tile::Collide( GameObj* pRunner, tagCollideRes* pRes )
 		}
 		
 		pPlayer->SetPos(pRes->vCollidePos);
-
 		SetColor(255, 255, 255);
 	}
 }
@@ -201,8 +200,6 @@ VOID Player::Update( FLOAT dt )
 		m_vVel.y = 0;
 //		m_vVel.x++;
 	}
-
-
 	Vector2F vOffset = m_vVel * dt;
 
 
