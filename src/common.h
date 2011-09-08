@@ -196,6 +196,64 @@ T		Cut(T val, T min, T max)
 class AABBox
 {
 public:
+	BOOL IntersectRegion(const AABBox &other, AABBox &result)
+	{
+		result.vMin.x = Max(this->vMin.x, other.vMin.x);
+		result.vMax.x = Min(this->vMax.x, other.vMax.x);
+		result.vMin.y = Max(this->vMin.y, other.vMin.y);
+		result.vMax.y = Min(this->vMax.y, other.vMax.y);
+
+		if( result.vMin.x >= result.vMax.x || result.vMin.y >= result.vMax.y )
+		{
+			return FALSE;
+		}
+		else
+		{
+			return TRUE;
+		}
+	}
+	DWORD IntersectTest(const AABBox &other, FLOAT &fDeep, DWORD dwDirFlag)
+	{
+		AABBox intersect;
+		if( !IntersectRegion(other, intersect) )
+		{
+			return ECD_None;
+		}
+
+		DWORD dwResult = ECD_None;
+
+		Vector2F vCenter = (this->vMin + this->vMax) / 2;
+		if( intersect.vMax.x - intersect.vMin.x >= intersect.vMax.y - intersect.vMin.y )
+		{
+			if( vCenter.y > intersect.vMax.y )
+			{
+				dwResult |= ECD_Down;
+			}
+			else if( vCenter.y < intersect.vMin.y )
+			{
+				dwResult |= ECD_Top;
+			}
+			else
+			{
+				assert(0);
+			}
+			fDeep = intersect.vMax.y - intersect.vMin.y;
+		}
+		else
+		{
+			if( vCenter.x > intersect.vMax.x )
+			{
+				dwResult |= ECD_Left;
+			}
+			else if( vCenter.x < intersect.vMin.x )
+			{
+				dwResult |= ECD_Right;
+			}
+			fDeep = intersect.vMax.x - intersect.vMin.x;
+		}
+
+		return dwResult;
+	}
 	float IntersectMovingAABB( const AABBox &movingBox, const Vector2F &d, DWORD &dwDirFlag ) 
 	{
 			const float kNoIntersection = 1e30f;

@@ -19,37 +19,37 @@ VOID GameObj::Collide( GameObj* pRunner, tagCollideRes* pRes )
 	AABBox thisBox = GetAABBox();
 	AABBox thatBox = pRunner->GetAABBox();
 
-// 	pRes->vCollidePos = pRunner->GetPos();
-// 
-// 	FLOAT fDeep = 0.0f;
-// 	pRes->dwDirFlag = thisBox.IntersectTest(thatBox, fDeep, pRunner->GetCollideDirFlag());
-// 	if( pRes->dwDirFlag & ECD_Top )
-// 	{
-// 		pRes->vCollidePos.y += fDeep;
-// 	}
-// 	else if( pRes->dwDirFlag & ECD_Down )
-// 	{
-// 		pRes->vCollidePos.y -= fDeep;
-// 	}
-// 	else if( pRes->dwDirFlag & ECD_Left )
-// 	{
-// 		pRes->vCollidePos.x -= fDeep;
-// 	}
-// 	else if( pRes->dwDirFlag & ECD_Right )
-// 	{
-// 		pRes->vCollidePos.x += fDeep;
-// 	}
-	Vector2F vD = pRunner->GetPos() - pRunner->GetPrePos();
+	pRes->vCollidePos = pRunner->GetPos();
 
-	FLOAT fT = thisBox.IntersectMovingAABB(thatBox, vD, pRes->dwDirFlag);
-	if( fT >= 0.0f && fT <= 1.0f )
+	FLOAT fDeep = 0.0f;
+	pRes->dwDirFlag = thisBox.IntersectTest(thatBox, fDeep, pRunner->GetCollideDirFlag());
+	if( pRes->dwDirFlag & ECD_Top )
 	{
-		pRes->vCollidePos = pRunner->GetPrePos() + vD * fT;
+		pRes->vCollidePos.y += fDeep;
 	}
-	else
+	else if( pRes->dwDirFlag & ECD_Down )
 	{
-		pRes->vCollidePos = pRunner->GetPos();
+		pRes->vCollidePos.y -= fDeep;
 	}
+	else if( pRes->dwDirFlag & ECD_Left )
+	{
+		pRes->vCollidePos.x -= fDeep;
+	}
+	else if( pRes->dwDirFlag & ECD_Right )
+	{
+		pRes->vCollidePos.x += fDeep;
+	}
+// 	Vector2F vD = pRunner->GetPos() - pRunner->GetPrePos();
+// 
+// 	FLOAT fT = thisBox.IntersectMovingAABB(thatBox, vD, pRes->dwDirFlag);
+// 	if( fT >= 0.0f && fT <= 1.0f )
+// 	{
+// 		pRes->vCollidePos = pRunner->GetPrePos() + vD * fT;
+// 	}
+// 	else
+// 	{
+// 		pRes->vCollidePos = pRunner->GetPos();
+// 	}
 
 }
 

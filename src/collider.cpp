@@ -63,7 +63,7 @@ VOID Collider::Collide()
 		}
 	}
 
-	std::sort(vecTmp.begin(), vecTmp.end(), cmp);
+//	std::sort(vecTmp.begin(), vecTmp.end(), cmp);
 
 	tagCollideRes result;
 	for(vector<CollidePair>::iterator itr = vecTmp.begin();
@@ -71,7 +71,7 @@ VOID Collider::Collide()
 		++itr)
 	{
 		itr->first->Collide(itr->second, &result);
-		if( result.dwDirFlag ) break;
+	//	if( result.dwDirFlag ) break;
 	}
 
 	g_text.AddText(g_painter.GetColor(255, 0, 0), "col num  : %d", m_lstCollidePairs.size());
