@@ -148,6 +148,15 @@ VOID Player::Update( FLOAT dt )
 
 	m_vVel.y += XGravity * dt;
 
+	if( g_keyboard.GetKey(SDLK_z) )
+	{
+		m_pSprite->SetSizeFactor(m_pSprite->GetSizeFactor() - 0.1f);
+	}
+	if( g_keyboard.GetKey(SDLK_x) )
+	{
+		m_pSprite->SetSizeFactor(m_pSprite->GetSizeFactor() + 0.1f);
+	}
+
 	if( g_keyboard.GetKey(SDLK_LEFT) )
 	{
 		m_vVel.x -= XCtrlAcc * dt;

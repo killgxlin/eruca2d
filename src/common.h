@@ -203,7 +203,7 @@ public:
 		result.vMin.y = Max(this->vMin.y, other.vMin.y);
 		result.vMax.y = Min(this->vMax.y, other.vMax.y);
 
-		if( result.vMin.x >= result.vMax.x || result.vMin.y >= result.vMax.y )
+		if( result.vMin.x > result.vMax.x || result.vMin.y > result.vMax.y )
 		{
 			return FALSE;
 		}
