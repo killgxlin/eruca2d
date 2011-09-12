@@ -38,8 +38,8 @@ public:
 public:
 	Vector2N	ConvertToBlockIdx(const Vector2F &vPos);
 	VOID		RefreshBlocks(const Vector2N &vIdx);
-	BOOL AddObj(Tile* pObj);
-	VOID DelObj(Tile* pObj);
+	BOOL		AddObj(Tile* pObj);
+	VOID		DelObj(Tile* pObj);
 
 	list<tagBlock*>	m_lstBlocks;
 	Vector2N	m_vLastIdx;
