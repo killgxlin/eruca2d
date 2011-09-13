@@ -92,36 +92,36 @@ VOID Tile::Collide( GameObj* pRunner, tagCollideRes* pRes )
 		Player *pPlayer = dynamic_cast<Player *>(pRunner);
 		if( pRes->dwDirFlag & ECD_Top )
 		{
-			if( pPlayer->m_vVel.y < 0 )
+			if( pPlayer->m_Move.m_vVel.y < 0 )
 			{
-				pPlayer->m_vVel.y *= 0;
+				pPlayer->m_Move.m_vVel.y *= 0;
 			}
 			pRes->vCollidePos.x = pPlayer->GetPos().x;
-			pPlayer->m_bLand = true;
-			pPlayer->m_fJump = 0.0f;
+			pPlayer->m_Move.m_bLand = true;
+			pPlayer->m_Move.m_fJump = 0.0f;
 		}
 		if( pRes->dwDirFlag & ECD_Down )
 		{
 			pRes->vCollidePos.x = pPlayer->GetPos().x;
-			if( pPlayer->m_vVel.y > 0 )
+			if( pPlayer->m_Move.m_vVel.y > 0 )
 			{
-				pPlayer->m_vVel.y *= -1;
+				pPlayer->m_Move.m_vVel.y *= -1;
 			}
 		}
 		if( pRes->dwDirFlag & ECD_Left )
 		{
 			pRes->vCollidePos.y = pPlayer->GetPos().y;
-			if( pPlayer->m_vVel.x > 0 )
+			if( pPlayer->m_Move.m_vVel.x > 0 )
 			{
-				pPlayer->m_vVel.x *= -1;
+				pPlayer->m_Move.m_vVel.x *= 0;
 			}
 		}
 		if( pRes->dwDirFlag & ECD_Right )
 		{
 			pRes->vCollidePos.y = pPlayer->GetPos().y;
-			if( pPlayer->m_vVel.x < 0 )
+			if( pPlayer->m_Move.m_vVel.x < 0 )
 			{
-				pPlayer->m_vVel.x *= -1;
+				pPlayer->m_Move.m_vVel.x *= 0;
 			}
 		}
 		
@@ -130,8 +130,19 @@ VOID Tile::Collide( GameObj* pRunner, tagCollideRes* pRes )
 	}
 }
 
-Player::Player() :GameObj(Vector2F(0, 0), ECP_Dynamic, ECD_None), m_vVel(0, 0), m_fJump(0.0f), m_bJmpPressed(false)
+Player::Player() :GameObj(Vector2F(0, 0), ECP_Dynamic, ECD_None)
 {
+	m_Move.m_bJmpPressed = false;
+	m_Move.m_bLand = false;
+	m_Move.m_fJump = 0.0f;
+	m_Move.m_bJmpPress = false;
+	m_Move.m_vVel = Vector2F(0,0);
+	m_Move.m_vAcc = Vector2F(0,0);
+
+	m_Move.m_pPlayer = this;
+
+	m_Listener.m_pPlayer = this;
+
 	m_pSprite = new SpritePlayer(this);
 }
 
@@ -144,78 +155,107 @@ VOID Player::Update( FLOAT dt )
 {
 	GameObj::Update(dt);
 
-	Vector2F vOld = m_vVel;
+	m_Listener.Listen();
 
-	m_vVel.y += XGravity * dt;
+
+	m_Move.UpdateMove(dt);
+
+}
+
+VOID tagMoveData::UpdateMove( FLOAT dt )
+{
+	m_pPlayer->m_Move.m_vVel += m_vAcc*dt;
+
+	if( abs(m_pPlayer->m_Move.m_vVel.x) > XMaxPlayerSpeedX )
+	{
+		m_pPlayer->m_Move.m_vVel.x = m_pPlayer->m_Move.m_vVel.x > 0 ? XMaxPlayerSpeedX : -XMaxPlayerSpeedX;
+	}
+
+	if( m_pPlayer->m_Move.m_fJump >= 0.0f )
+	{
+		if( m_pPlayer->m_Move.m_bJmpPress )
+		{
+			if( !m_pPlayer->m_Move.m_bJmpPressed && m_pPlayer->m_Move.m_bLand)
+			{
+				m_pPlayer->m_Move.m_vVel.y = XCtrlAcc/4;
+				m_pPlayer->m_Move.m_bLand = false;	
+			}
+
+			m_pPlayer->m_Move.m_fJump += dt;
+			if( m_pPlayer->m_Move.m_fJump >= 0.5f )
+			{
+				m_pPlayer->m_Move.m_vVel.y = 0;
+				m_pPlayer->m_Move.m_fJump = -1.0f;
+			}
+
+			m_pPlayer->m_Move.m_bJmpPressed = true;
+		}
+		else
+		{
+			m_pPlayer->m_Move.m_vVel.y = 0;
+			m_pPlayer->m_Move.m_fJump = -1.0f;
+
+			m_pPlayer->m_Move.m_bJmpPressed = false;
+		}
+	}
+
+	if( m_pPlayer->m_Move.m_bLand )
+	{
+		m_pPlayer->m_Move.m_vVel.y = 0;
+	}
+
+	Vector2F vOffset = m_pPlayer->m_Move.m_vVel * dt;
+	m_pPlayer->SetPos(m_pPlayer->GetPos()+vOffset);
+	m_pPlayer->m_Move.m_bLand = false;
+}
+
+VOID tagListener::Listen()
+{
+	m_pPlayer->m_Move.m_vAcc = Vector2F(0, XGravity);
 
 	if( g_keyboard.GetKey(SDLK_z) )
 	{
-		m_pSprite->SetSizeFactor(m_pSprite->GetSizeFactor() - 0.1f);
+		m_pPlayer->m_pSprite->SetSizeFactor(m_pPlayer->m_pSprite->GetSizeFactor() - 0.1f);
 	}
+
 	if( g_keyboard.GetKey(SDLK_x) )
 	{
-		m_pSprite->SetSizeFactor(m_pSprite->GetSizeFactor() + 0.1f);
+		m_pPlayer->m_pSprite->SetSizeFactor(m_pPlayer->m_pSprite->GetSizeFactor() + 0.1f);
 	}
 
 	if( g_keyboard.GetKey(SDLK_LEFT) )
 	{
-		m_vVel.x -= XCtrlAcc * dt;
+		m_pPlayer->m_Move.m_vAcc.x = -XCtrlAcc;
 	}
+
 	if( g_keyboard.GetKey(SDLK_RIGHT) )
 	{
-		m_vVel.x += XCtrlAcc * dt;
+		m_pPlayer->m_Move.m_vAcc.x = XCtrlAcc;
 	}
 
 	if( g_keyboard.GetKey(SDLK_DOWN) )
 	{
-		m_vVel.y -= XCtrlAcc * dt;
+		m_pPlayer->m_Move.m_vAcc.y = XCtrlAcc;
 	}
 
-	if( m_vVel.x > XMaxPlayerSpeedX )
+	if( g_keyboard.GetKey(SDLK_UP) )
 	{
-		m_vVel.x = XMaxPlayerSpeedX;
+		m_pPlayer->m_Move.m_bJmpPress = true;
+	}
+	else
+	{
+		m_pPlayer->m_Move.m_bJmpPress = false;
 	}
 
-	if( m_fJump >= 0.0f )
+	if( m_pPlayer->m_Move.m_vAcc.x == 0.0f )
 	{
-		if( g_keyboard.GetKey(SDLK_UP) )
+		if( m_pPlayer->m_Move.m_vVel.x > 0.0f )
 		{
-			if( !m_bJmpPressed && m_bLand)
-			{
-				m_vVel.y = XCtrlAcc;
-				m_bLand = false;	
-			}
-
-			m_fJump += dt;
-			if( m_fJump >= 0.5f )
-			{
-				m_vVel.y = 0;
-				m_fJump = -1.0f;
-			}
-
-			m_bJmpPressed = true;
+			m_pPlayer->m_Move.m_vAcc.x = -XCtrlAcc;
 		}
-		else
+		else if( m_pPlayer->m_Move.m_vVel.x < 0.0f )
 		{
-			m_vVel.y = 0;
-			m_fJump = -1.0f;
-
-			m_bJmpPressed = false;
+			m_pPlayer->m_Move.m_vAcc.x = XCtrlAcc;
 		}
 	}
-
-	if( m_bLand )
-	{
-		m_vVel.y = 0;
-//		m_vVel.x++;
-	}
-	Vector2F vOffset = m_vVel * dt;
-
-
-	m_vPos += vOffset;
-
-
-	m_bLand = false;
-
-	g_text.AddText(g_painter.GetColor(255, 0, 0), "offset  : %4.2f %4.2f", vOffset.x, vOffset.y);
 }

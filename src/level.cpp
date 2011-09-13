@@ -12,7 +12,7 @@ BOOL Level::Init()
 
 	m_pPlayer = new Player;
 	m_pPlayer->SetPos(Vector2F(XPlayerSize*2 + XPlayerSize/2, XPlayerSize*2 + XPlayerSize/2));
-	m_pPlayer->m_vVel = Vector2F(0, 0);
+	m_pPlayer->m_Move.m_vVel = Vector2F(0, 0);
 	m_collider.AddGameObj(m_pPlayer);
 
 	m_vLastIdx = ConvertToBlockIdx(m_pPlayer->GetPos());
@@ -68,10 +68,10 @@ VOID Level::Update( FLOAT dt )
 	g_painter.SetCenter(m_pPlayer->GetPos());
 
 	Vector2N vIdx = ConvertToBlockIdx(m_pPlayer->GetPos());
-	g_text.AddText(g_painter.GetColor(255, 0, 0), "player on land :%4d", m_pPlayer->m_bLand);
+	g_text.AddText(g_painter.GetColor(255, 0, 0), "player on land :%4d", m_pPlayer->m_Move.m_bLand);
 	g_text.AddText(g_painter.GetColor(255, 0, 0), "block of player:%4d ,%4d", vIdx.x, vIdx.y);
 	g_text.AddText(g_painter.GetColor(255, 0, 0), "pos of player  :%4.2f ,%4.2f", m_pPlayer->GetPos().x, m_pPlayer->GetPos().y);
-	g_text.AddText(g_painter.GetColor(255, 0, 0), "vel of player  :%4.2f ,%4.2f, %4.2f", m_pPlayer->m_vVel.x, m_pPlayer->m_vVel.y, m_pPlayer->m_vVel.Length());
+	g_text.AddText(g_painter.GetColor(255, 0, 0), "vel of player  :%4.2f ,%4.2f, %4.2f", m_pPlayer->m_Move.m_vVel.x, m_pPlayer->m_Move.m_vVel.y, m_pPlayer->m_Move.m_vVel.Length());
 	g_text.AddText(g_painter.GetColor(255, 0, 0), "refresh        : %4d", g_level.m_nRefreshTimes);
 
 }
@@ -209,21 +209,21 @@ BOOL tagBlock::Load( const Vector2N &vCenterIdx, const Vector2N &vOffset )
 		lstTiles.push_back(pNew);
 	}
 
-// 	for( FLOAT f=XTileSize/2; f<=XScreenH - XTileSize/2; f+=XTileSize )
-// 	{
-// 		Tile* pNew = new Tile;
-// 		pNew->SetPos(vOri + Vector2F(XTileSize/2, f));
-// 		pNew->SetCollideDirFlag(ECD_All);
-// 
-// 		static int i=0;
-// 		if( i++ %2 )
-// 		{
-// 			pNew->SetColor(255, 0, 0);
-// 		}
-// 
-// 		g_level.AddObj(pNew);
-// 		lstTiles.push_back(pNew);
-// 	}
+	for( FLOAT f=XTileSize/2; f<=XScreenH - XTileSize/2; f+=XTileSize )
+	{
+		Tile* pNew = new Tile;
+		pNew->SetPos(vOri + Vector2F(XTileSize/2, f));
+		pNew->SetCollideDirFlag(ECD_All);
+
+		static int i=0;
+		if( i++ %2 )
+		{
+			pNew->SetColor(255, 0, 0);
+		}
+
+		g_level.AddObj(pNew);
+		lstTiles.push_back(pNew);
+	}
 
 	return TRUE;
 }

@@ -51,17 +51,41 @@ public:
 	virtual VOID	Collide(GameObj* pRunner, tagCollideRes* pRes);
 };
 
+class Player;
+
+struct tagMoveData
+{
+	Vector2F		m_vVel;
+	Vector2F		m_vAcc;
+	bool			m_bLand;
+	float			m_fJump;
+	bool			m_bJmpPress;
+	bool			m_bJmpPressed;
+
+	Player*			m_pPlayer;
+
+	VOID			UpdateMove( FLOAT dt );
+
+};
+
+struct tagListener
+{
+	VOID Listen();
+
+	Player* m_pPlayer;
+};
+
 class Player : public GameObj
 {
+	friend struct tagListener;
+
 public:
 	Player();
 	~Player();
 	virtual VOID	Update(FLOAT dt);
 
-	Vector2F		m_vVel;
-	bool			m_bLand;
-	float			m_fJump;
-	bool			m_bJmpPressed;
+	tagListener		m_Listener;
+	tagMoveData		m_Move;
 };
 
 #endif

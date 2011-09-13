@@ -63,7 +63,7 @@ VOID Collider::Collide()
 		}
 	}
 
-//	std::sort(vecTmp.begin(), vecTmp.end(), cmp);
+ 	std::sort(vecTmp.begin(), vecTmp.end(), cmp);
 
 	tagCollideRes result;
 	for(vector<CollidePair>::iterator itr = vecTmp.begin();

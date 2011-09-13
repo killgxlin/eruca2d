@@ -42,9 +42,9 @@ enum ECollideDir
 	ECD_All		= ECD_Top | ECD_Down | ECD_Left | ECD_Right,
 };
 
-#define XMaxPlayerSpeedX	1000	//pixel per sec
+#define XMaxPlayerSpeedX	500	//pixel per sec
 #define XGravity			-2000	//pixel * pixel per sec
-#define XCtrlAcc			500	//
+#define XCtrlAcc			2000	//
 #define XJumpSpeed			50
 
 #define XScreenW			640
@@ -203,7 +203,7 @@ public:
 		result.vMin.y = Max(this->vMin.y, other.vMin.y);
 		result.vMax.y = Min(this->vMax.y, other.vMax.y);
 
-		if( result.vMin.x > result.vMax.x || result.vMin.y > result.vMax.y )
+		if( result.vMin.x >= result.vMax.x || result.vMin.y >= result.vMax.y )
 		{
 			return FALSE;
 		}

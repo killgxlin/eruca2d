@@ -17,7 +17,7 @@ VOID SpritePlayer::Animate( FLOAT dt )
 {
 	Player* pPlayer = dynamic_cast<Player*>(m_pGameObj);
 
-	FLOAT fPct = pPlayer->m_vVel.Length() / FLOAT(XMaxPlayerSpeedX);
+	FLOAT fPct = pPlayer->m_Move.m_vVel.Length() / FLOAT(XMaxPlayerSpeedX);
 	
 	if( fPct > 1.0f )
 	{
