@@ -8,12 +8,10 @@ BOOL Level::Init()
 	m_nRefreshTimes = 0;
 
 	m_lstBlocks.clear();
-	m_lstTiles.clear();
 
 	m_pPlayer = new Player;
 	m_pPlayer->SetPos(Vector2F(XPlayerSize*2 + XPlayerSize/2, XPlayerSize*2 + XPlayerSize/2));
 	m_pPlayer->m_Move.m_vVel = Vector2F(0, 0);
-	m_collider.AddGameObj(m_pPlayer);
 
 	m_vLastIdx = ConvertToBlockIdx(m_pPlayer->GetPos());
 	RefreshBlocks(m_vLastIdx);
@@ -31,32 +29,40 @@ VOID Level::Destroy()
 		m_lstBlocks.pop_front();
 	}
 
-	assert( m_lstTiles.empty() );
-
-	m_collider.DelGameObj(m_pPlayer);
 	delete m_pPlayer;
 	m_pPlayer = NULL;
 
 }
 
-struct TileUpdate
+struct BlockUpdate
 {
-	TileUpdate(FLOAT dt):m_dt(dt){}
-	VOID operator()(Tile* pTile)
+	BlockUpdate(float dt):m_fDt(dt){}
+	VOID	operator()(tagBlock* pBlock)
 	{
-		pTile->Update(m_dt);
+		pBlock->Update(m_fDt);
 	}
-	FLOAT m_dt;
+
+	float	m_fDt;
+};
+
+struct BlockCollide
+{
+	BlockCollide(GameObj* pObj):m_pObj(pObj){}
+	VOID	operator()(tagBlock* pBlock)
+	{
+		pBlock->Collide(m_pObj);
+	}
+	GameObj*	m_pObj;
 };
 
 VOID Level::Update( FLOAT dt )
 {
 	dt *= g_framerate.GetSpeedRate();
 
-	for_each(m_lstTiles.begin(), m_lstTiles.end(), TileUpdate(dt));
+	ForEachBlock(BlockUpdate(dt));
 	m_pPlayer->Update(dt);
 
-	m_collider.Collide();
+	ForEachBlock(BlockCollide(m_pPlayer));
 
 	Vector2N vNewIdx = ConvertToBlockIdx(m_pPlayer->GetPos());
 	if( m_vLastIdx != vNewIdx )
@@ -76,23 +82,21 @@ VOID Level::Update( FLOAT dt )
 
 }
 
-template<typename T>
-struct FuncDraw
+struct BlockDraw
 {
-	FuncDraw(Painter* pPainter):m_pPainter(pPainter){}
-	Painter*	m_pPainter;
-	VOID operator()(T* pTile)
+	BlockDraw(Painter* pPainter):m_pPainter(pPainter){}
+	VOID	operator()(tagBlock* pBlock)
 	{
-		pTile->Draw(m_pPainter);
+		pBlock->Draw(m_pPainter);
 	}
+
+	Painter*	m_pPainter;
 };
 
 VOID Level::Draw( Painter* pPainter )
 {
-	for_each(m_lstTiles.begin(), m_lstTiles.end(), FuncDraw<Tile>(pPainter));
+	ForEachBlock(BlockDraw(pPainter));
 	m_pPlayer->Draw(pPainter);
-
-	for_each(m_lstBlocks.begin(), m_lstBlocks.end(), FuncDraw<tagBlock>(pPainter));
 }
 
 VOID Level::RefreshBlocks( const Vector2N &vIdx )
@@ -101,6 +105,7 @@ VOID Level::RefreshBlocks( const Vector2N &vIdx )
 
 	BOOL	bMat[3][3];
 	memset(bMat, 0, sizeof(bMat));
+	memset(m_matBlocks, 0, sizeof(m_matBlocks));
 
 	list<tagBlock*>	lstNeedDel;
 
@@ -112,6 +117,7 @@ VOID Level::RefreshBlocks( const Vector2N &vIdx )
 		{
 			Vector2N vOffset = (*itr)->vIdx - vIdx;
 			bMat[vOffset.x+1][vOffset.y+1] = TRUE;
+			m_matBlocks[vOffset.x+1][vOffset.y+1] = (*itr);
 		}
 		else
 		{
@@ -144,29 +150,11 @@ VOID Level::RefreshBlocks( const Vector2N &vIdx )
 				pNew->Load(vIdx, vOffset);
 				m_lstBlocks.push_back(pNew);
 				m_nNewXIdx = vIdx.x - 1;
+				m_matBlocks[i][j] = pNew;
 			}
 		}
 	}
 	
-}
-
-BOOL Level::AddObj( Tile* pObj )
-{
-	m_lstTiles.push_back(pObj);
-	m_collider.AddGameObj(pObj);
-
-	return TRUE;
-}
-
-VOID Level::DelObj( Tile* pObj )
-{
-	list<Tile*>::iterator itr_del = std::find(m_lstTiles.begin(), m_lstTiles.end(), pObj);
-	if( itr_del != m_lstTiles.end() )
-	{
-		m_lstTiles.erase(itr_del);
-	}
-
-	m_collider.DelGameObj(pObj);
 }
 
 Vector2N Level::ConvertToBlockIdx( const Vector2F &vPos )
@@ -205,14 +193,13 @@ BOOL tagBlock::Load( const Vector2N &vCenterIdx, const Vector2N &vOffset )
 			pNew->SetColor(255, 0, 0);
 		}
 
-		g_level.AddObj(pNew);
-		lstTiles.push_back(pNew);
+		vecTiles.push_back(pNew);
 	}
 
-	for( FLOAT f=XTileSize/2; f<=XScreenH - XTileSize/2; f+=XTileSize )
+//	for( FLOAT f=XTileSize/2; f<=XScreenH - XTileSize/2; f+=XTileSize )
 	{
 		Tile* pNew = new Tile;
-		pNew->SetPos(vOri + Vector2F(XTileSize/2, f));
+		pNew->SetPos(vOri + Vector2F(XTileSize/2, XTileSize*2/*f*/));
 		pNew->SetCollideDirFlag(ECD_All);
 
 		static int i=0;
@@ -221,28 +208,100 @@ BOOL tagBlock::Load( const Vector2N &vCenterIdx, const Vector2N &vOffset )
 			pNew->SetColor(255, 0, 0);
 		}
 
-		g_level.AddObj(pNew);
-		lstTiles.push_back(pNew);
+		vecTiles.push_back(pNew);
 	}
 
 	return TRUE;
 }
 
+struct TileDelete
+{
+	void operator()(Tile* pTile)
+	{
+		delete pTile;
+	}
+};
+
 VOID tagBlock::UnLoad()
 {
-	while( !lstTiles.empty() )
-	{
-		g_level.DelObj(lstTiles.front());
-		delete lstTiles.front();
+	for_each(vecTiles.begin(), vecTiles.end(), TileDelete());
 
-		lstTiles.pop_front();
-	}
+	vecTiles.clear();
 }
+
+struct TileDraw
+{
+	TileDraw(Painter* pPainter):m_pPainter(pPainter){}
+	Painter*	m_pPainter;
+	VOID operator()(Tile* pTile)
+	{
+		pTile->Draw(m_pPainter);
+	}
+};
 
 VOID tagBlock::Draw( Painter* pPainter )
 {
+	for_each(vecTiles.begin(), vecTiles.end(), TileDraw(pPainter));
+
 	Vector2F vCenter(FLOAT(vIdx.x*XScreenW), FLOAT(vIdx.y*XScreenH));
 	vCenter += Vector2F(XScreenW/2, XScreenH/2);
 
 	pPainter->WorldDrawText(vCenter, pPainter->GetColor(255, 0, 0),"%d, %d", vIdx.x, vIdx.y );
+}
+
+struct TileUpdate
+{
+	TileUpdate(FLOAT dt):m_dt(dt){}
+	VOID operator()(Tile* pTile)
+	{
+		pTile->m_fDist = -1.0f;
+		pTile->Update(m_dt);
+	}
+	FLOAT m_dt;
+};
+
+VOID tagBlock::Update( float dt )
+{
+	for_each(vecTiles.begin(), vecTiles.end(), TileUpdate(dt));
+}
+
+
+struct TileCollide
+{
+	TileCollide(GameObj* pObj, tagCollideRes* pResult):m_pObj(pObj), m_pResult(pResult){}
+	VOID operator()(Tile* pTile)
+	{
+		pTile->Collide(m_pObj, m_pResult);
+	}
+	GameObj* m_pObj;
+	tagCollideRes* m_pResult;
+};
+
+struct TileCmp
+{
+	TileCmp(GameObj* pObj):m_pObj(pObj){}
+	bool	operator()(Tile* pLhs, Tile* pRhs)
+	{
+		if( pLhs->m_fDist < 0.0f )
+		{
+			pLhs->m_fDist = (m_pObj->GetPrePos() - pLhs->GetPrePos()).Length2();
+		}
+		if( pRhs->m_fDist < 0.0f )
+		{
+			pRhs->m_fDist = (m_pObj->GetPrePos() - pRhs->GetPrePos()).Length2();
+		}
+
+		return pLhs->m_fDist < pRhs->m_fDist;
+	}
+
+	GameObj*	m_pObj;
+};
+
+VOID tagBlock::Collide( GameObj* pObj )
+{
+	std::sort(vecTiles.begin(), vecTiles.end(), TileCmp(pObj));
+
+	tagCollideRes result;
+	
+	for_each(vecTiles.begin(), vecTiles.end(), TileCollide(pObj, &result));
 }

@@ -49,6 +49,7 @@ public:
 	~Tile();
 
 	virtual VOID	Collide(GameObj* pRunner, tagCollideRes* pRes);
+	float		m_fDist;
 };
 
 class Player;

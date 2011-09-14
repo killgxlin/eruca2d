@@ -157,7 +157,6 @@ VOID Player::Update( FLOAT dt )
 
 	m_Listener.Listen();
 
-
 	m_Move.UpdateMove(dt);
 
 }
@@ -168,7 +167,7 @@ VOID tagMoveData::UpdateMove( FLOAT dt )
 
 	if( abs(m_pPlayer->m_Move.m_vVel.x) > XMaxPlayerSpeedX )
 	{
-		m_pPlayer->m_Move.m_vVel.x = m_pPlayer->m_Move.m_vVel.x > 0 ? XMaxPlayerSpeedX : -XMaxPlayerSpeedX;
+		m_pPlayer->m_Move.m_vVel.x = float(m_pPlayer->m_Move.m_vVel.x > 0 ? XMaxPlayerSpeedX : -XMaxPlayerSpeedX);
 	}
 
 	if( m_pPlayer->m_Move.m_fJump >= 0.0f )
