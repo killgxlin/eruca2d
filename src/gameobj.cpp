@@ -3,6 +3,8 @@
 
 #include "sprite.h"
 
+tagPlayerListener g_playerListener;
+
 VOID GameObj::Update( FLOAT dt )
 {
 	m_pSprite->Animate(dt);
@@ -141,7 +143,8 @@ Player::Player() :GameObj(Vector2F(0, 0), ECP_Dynamic, ECD_None)
 
 	m_Move.m_pPlayer = this;
 
-	m_Listener.m_pPlayer = this;
+	m_pListener = &g_playerListener;
+	m_pListener->m_pPlayer = this;
 
 	m_pSprite = new SpritePlayer(this);
 }
@@ -155,7 +158,7 @@ VOID Player::Update( FLOAT dt )
 {
 	GameObj::Update(dt);
 
-	m_Listener.Listen();
+	m_pListener->Listen();
 
 	m_Move.UpdateMove(dt);
 
@@ -208,7 +211,7 @@ VOID tagMoveData::UpdateMove( FLOAT dt )
 	m_pPlayer->m_Move.m_bLand = false;
 }
 
-VOID tagListener::Listen()
+VOID tagPlayerListener::Listen()
 {
 	m_pPlayer->m_Move.m_vAcc = Vector2F(0, XGravity);
 

@@ -69,24 +69,32 @@ struct tagMoveData
 
 };
 
-struct tagListener
+struct tagListenIF
 {
-	VOID Listen();
+public:
+	virtual VOID	Listen() = 0;
+	Player*		m_pPlayer;
+};
 
-	Player* m_pPlayer;
+struct tagPlayerListener : public tagListenIF
+{
+	VOID		Listen();
+
 };
 
 class Player : public GameObj
 {
-	friend struct tagListener;
+	friend struct tagPlayerListener;
 
 public:
 	Player();
 	~Player();
 	virtual VOID	Update(FLOAT dt);
 
-	tagListener		m_Listener;
+	tagListenIF*	m_pListener;
 	tagMoveData		m_Move;
 };
+
+extern tagPlayerListener g_playerListener;
 
 #endif
