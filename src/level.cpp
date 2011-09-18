@@ -11,7 +11,7 @@ BOOL Level::Init()
 
 	m_pPlayer = new Player;
 	m_pPlayer->SetPos(Vector2F(XPlayerSize*2 + XPlayerSize/2, XPlayerSize*2 + XPlayerSize/2));
-	m_pPlayer->m_Move.m_vVel = Vector2F(0, 0);
+	m_pPlayer->m_vVel = Vector2F(0, 0);
 
 	m_vLastIdx = ConvertToBlockIdx(m_pPlayer->GetPos());
 	RefreshBlocks(m_vLastIdx);
@@ -74,10 +74,10 @@ VOID Level::Update( FLOAT dt )
 	g_painter.SetCenter(m_pPlayer->GetPos());
 
 	Vector2N vIdx = ConvertToBlockIdx(m_pPlayer->GetPos());
-	g_text.AddText(g_painter.GetColor(255, 0, 0), "player on land :%4d", m_pPlayer->m_Move.m_bLand);
+	g_text.AddText(g_painter.GetColor(255, 0, 0), "player on land :%4d", m_pPlayer->m_bLand);
 	g_text.AddText(g_painter.GetColor(255, 0, 0), "block of player:%4d ,%4d", vIdx.x, vIdx.y);
 	g_text.AddText(g_painter.GetColor(255, 0, 0), "pos of player  :%4.2f ,%4.2f", m_pPlayer->GetPos().x, m_pPlayer->GetPos().y);
-	g_text.AddText(g_painter.GetColor(255, 0, 0), "vel of player  :%4.2f ,%4.2f, %4.2f", m_pPlayer->m_Move.m_vVel.x, m_pPlayer->m_Move.m_vVel.y, m_pPlayer->m_Move.m_vVel.Length());
+	g_text.AddText(g_painter.GetColor(255, 0, 0), "vel of player  :%4.2f ,%4.2f, %4.2f", m_pPlayer->m_vVel.x, m_pPlayer->m_vVel.y, m_pPlayer->m_vVel.Length());
 	g_text.AddText(g_painter.GetColor(255, 0, 0), "refresh        : %4d", g_level.m_nRefreshTimes);
 
 }
@@ -183,7 +183,7 @@ BOOL tagBlock::Load( const Vector2N &vCenterIdx, const Vector2N &vOffset )
 
 	for( FLOAT f=XTileSize/2; f<=XScreenW - XTileSize/2; f+=XTileSize )
 	{
-		Tile* pNew = new Tile;
+		Terrain* pNew = new Terrain;
 		pNew->SetPos(vOri + Vector2F(f, XTileSize/2));
 		pNew->SetCollideDirFlag(ECD_Top);
 
@@ -198,7 +198,7 @@ BOOL tagBlock::Load( const Vector2N &vCenterIdx, const Vector2N &vOffset )
 
 //	for( FLOAT f=XTileSize/2; f<=XScreenH - XTileSize/2; f+=XTileSize )
 	{
-		Tile* pNew = new Tile;
+		Terrain* pNew = new Terrain;
 		pNew->SetPos(vOri + Vector2F(XTileSize/2, XTileSize*2/*f*/));
 		pNew->SetCollideDirFlag(ECD_All);
 
@@ -216,7 +216,7 @@ BOOL tagBlock::Load( const Vector2N &vCenterIdx, const Vector2N &vOffset )
 
 struct TileDelete
 {
-	void operator()(Tile* pTile)
+	void operator()(Terrain* pTile)
 	{
 		delete pTile;
 	}
@@ -233,7 +233,7 @@ struct TileDraw
 {
 	TileDraw(Painter* pPainter):m_pPainter(pPainter){}
 	Painter*	m_pPainter;
-	VOID operator()(Tile* pTile)
+	VOID operator()(Terrain* pTile)
 	{
 		pTile->Draw(m_pPainter);
 	}
@@ -252,7 +252,7 @@ VOID tagBlock::Draw( Painter* pPainter )
 struct TileUpdate
 {
 	TileUpdate(FLOAT dt):m_dt(dt){}
-	VOID operator()(Tile* pTile)
+	VOID operator()(Terrain* pTile)
 	{
 		pTile->m_fDist = -1.0f;
 		pTile->Update(m_dt);
@@ -269,7 +269,7 @@ VOID tagBlock::Update( float dt )
 struct TileCollide
 {
 	TileCollide(GameObj* pObj, tagCollideRes* pResult):m_pObj(pObj), m_pResult(pResult){}
-	VOID operator()(Tile* pTile)
+	VOID operator()(Terrain* pTile)
 	{
 		pTile->Collide(m_pObj, m_pResult);
 	}
@@ -280,7 +280,7 @@ struct TileCollide
 struct TileCmp
 {
 	TileCmp(GameObj* pObj):m_pObj(pObj){}
-	bool	operator()(Tile* pLhs, Tile* pRhs)
+	bool	operator()(Terrain* pLhs, Terrain* pRhs)
 	{
 		if( pLhs->m_fDist < 0.0f )
 		{

@@ -78,16 +78,16 @@ VOID Collider::Collide()
 
 BOOL Collider::CalCollideOrder( GameObj* &pCaller, GameObj* &pArg )
 {
-	if( pCaller->GetCollidePri() == pArg->GetCollidePri() && pCaller->GetCollidePri() == ECP_Static )
-	{
-		return FALSE;
-	}
-	if( pCaller->GetCollidePri() < pArg->GetCollidePri() )
-	{
-		GameObj* pTmp = pCaller;
-		pCaller = pArg;
-		pArg = pTmp;
-	}
+// 	if( pCaller->GetCollidePri() == pArg->GetCollidePri() && pCaller->GetCollidePri() == ECP_Static )
+// 	{
+// 		return FALSE;
+// 	}
+// 	if( pCaller->GetCollidePri() < pArg->GetCollidePri() )
+// 	{
+// 		GameObj* pTmp = pCaller;
+// 		pCaller = pArg;
+// 		pArg = pTmp;
+// 	}
 
 	return TRUE;
 }

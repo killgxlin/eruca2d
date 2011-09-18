@@ -4,7 +4,7 @@
 #include "collider.h"
 
 class Painter;
-class Tile;
+class Terrain;
 class Player;
 
 
@@ -12,7 +12,7 @@ class Player;
 struct tagBlock
 {
 	Vector2N		vIdx;
-	vector<Tile*>	vecTiles;
+	vector<Terrain*>	vecTiles;
 
 	BOOL		Load(const Vector2N &vCenterIdx, const Vector2N &vOffset);
 	VOID		UnLoad();

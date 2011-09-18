@@ -10,6 +10,20 @@ struct tagCollideRes
 	Vector2F	vCollidePos;
 };
 
+union tagInputMap
+{
+	struct  
+	{
+		BYTE	bJump:1,
+				bLeft:1,
+				bRight:1,
+				bZoomIn:1,
+				bZoomOut:1,
+				bFire:1;
+	};
+	BYTE		byData;
+};
+
 class GameObj
 {
 public:
@@ -17,17 +31,16 @@ public:
 	virtual VOID	Draw(Painter* pScreen);
 	virtual VOID	Collide(GameObj* pRunner, tagCollideRes* pRes);
 
-	GameObj(const Vector2F &vPos, INT nCollidePri, UINT32 uCollideDirFlag)
-		:m_vPos(vPos), m_nCollidePri(nCollidePri), m_uCollideDirFlag(uCollideDirFlag){}
+	GameObj(const Vector2F &vPos, UINT32 uCollideDirFlag)
+		:m_vPos(vPos), m_uCollideDirFlag(uCollideDirFlag){}
 	virtual ~GameObj(){}
 	VOID			SetPos(const Vector2F &vPos) { m_vPos = vPos; }
 	VOID			SetCollideDirFlag(UINT32 uFlag) { m_uCollideDirFlag = uFlag; }
-
+	Sprite*			GetSprite() const { return m_pSprite; }
 protected:
 	Sprite*			m_pSprite;
 	// motion and collide
 public:
-	INT				GetCollidePri() const		{ return m_nCollidePri; }
 	UINT32			GetCollideDirFlag() const	{ return m_uCollideDirFlag; }
 	AABBox			GetAABBox() const;
 	AABBox			GetMoveBox() const;
@@ -38,15 +51,14 @@ public:
 protected:
 	Vector2F		m_vPos;				// 当前位置
 	Vector2F		m_vPrePos;
-	INT				m_nCollidePri;		// 碰撞权限
 	UINT32			m_uCollideDirFlag;	// 碰撞的方向
 };
 
-class Tile : public GameObj
+class Terrain : public GameObj
 {
 public:
-	Tile(/*const Vector2F &vPos*/);
-	~Tile();
+	Terrain(/*const Vector2F &vPos*/);
+	~Terrain();
 
 	virtual VOID	Collide(GameObj* pRunner, tagCollideRes* pRes);
 	float		m_fDist;
@@ -54,47 +66,39 @@ public:
 
 class Player;
 
-struct tagMoveData
+struct tagPhysic
 {
 	Vector2F		m_vVel;
 	Vector2F		m_vAcc;
 	bool			m_bLand;
 	float			m_fJump;
-	bool			m_bJmpPress;
 	bool			m_bJmpPressed;
 
 	Player*			m_pPlayer;
 
-	VOID			UpdateMove( FLOAT dt );
+	VOID			UpdatePhysic( FLOAT dt );
 
 };
 
-struct tagListenIF
+class Movable : public GameObj, public tagPhysic
 {
 public:
-	virtual VOID	Listen() = 0;
-	Player*		m_pPlayer;
+	Movable(const Vector2F &vPos, DWORD dwDirFlag)
+		:GameObj(vPos, dwDirFlag){}
 };
 
-struct tagPlayerListener : public tagListenIF
-{
-	VOID		Listen();
-
-};
-
-class Player : public GameObj
+class Player : public Movable
 {
 	friend struct tagPlayerListener;
 
 public:
 	Player();
 	~Player();
+	VOID			Listen();
 	virtual VOID	Update(FLOAT dt);
 
-	tagListenIF*	m_pListener;
-	tagMoveData		m_Move;
+	tagInputMap		m_Input;
 };
 
-extern tagPlayerListener g_playerListener;
 
 #endif
