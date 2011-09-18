@@ -1,5 +1,6 @@
 #include "common.h"
 #include "gameobj.h"
+#include "level.h"
 
 #include "sprite.h"
 
@@ -72,9 +73,9 @@ AABBox GameObj::GetMoveBox() const
 	return curBox;
 }
 
-Terrain::Terrain( /*const Vector2F &vPos*/ ) :GameObj(Vector2F(0,0), ECD_All)
+Terrain::Terrain( /*const Vector2F &vPos*/ ) :GameObj(Vector2F(0,0), ECD_All, EGOT_Terrain)
 {
-	m_pSprite = new SpriteTile(this);
+	m_pSprite = new SpriteTerrain(this);
 }
 
 Terrain::~Terrain()
@@ -82,53 +83,67 @@ Terrain::~Terrain()
 	delete m_pSprite;
 }
 
-VOID Terrain::Collide( GameObj* pRunner, tagCollideRes* pRes )
+VOID Terrain::Collide( Movable* pMover, tagCollideRes* pRes )
 {
-	GameObj::Collide(pRunner, pRes);
+	GameObj::Collide(pMover, pRes);
 	if( !pRes->dwDirFlag ) return;
 
-		Player *pPlayer = dynamic_cast<Player *>(pRunner);
-		if( pRes->dwDirFlag & ECD_Top )
+	switch( pMover->GetType() )
+	{
+	case EGOT_Player:
 		{
-			if( pPlayer->m_vVel.y < 0 )
+			Player *pPlayer = dynamic_cast<Player *>(pMover);
+			if( pRes->dwDirFlag & ECD_Top )
 			{
-				pPlayer->m_vVel.y *= 0;
+				if( pPlayer->m_vVel.y < 0 )
+				{
+					pPlayer->m_vVel.y *= 0;
+				}
+				pRes->vCollidePos.x = pPlayer->GetPos().x;
+				pPlayer->m_bLand = true;
+				pPlayer->m_fJump = 0.0f;
 			}
-			pRes->vCollidePos.x = pPlayer->GetPos().x;
-			pPlayer->m_bLand = true;
-			pPlayer->m_fJump = 0.0f;
-		}
-		if( pRes->dwDirFlag & ECD_Down )
-		{
-			pRes->vCollidePos.x = pPlayer->GetPos().x;
-			if( pPlayer->m_vVel.y > 0 )
+			if( pRes->dwDirFlag & ECD_Down )
 			{
-				pPlayer->m_vVel.y *= -1;
+				pRes->vCollidePos.x = pPlayer->GetPos().x;
+				if( pPlayer->m_vVel.y > 0 )
+				{
+					pPlayer->m_vVel.y *= -1;
+				}
 			}
-		}
-		if( pRes->dwDirFlag & ECD_Left )
-		{
-			pRes->vCollidePos.y = pPlayer->GetPos().y;
-			if( pPlayer->m_vVel.x > 0 )
+			if( pRes->dwDirFlag & ECD_Left )
 			{
-				pPlayer->m_vVel.x *= 0;
+				pRes->vCollidePos.y = pPlayer->GetPos().y;
+				if( pPlayer->m_vVel.x > 0 )
+				{
+					pPlayer->m_vVel.x *= 0;
+				}
 			}
-		}
-		if( pRes->dwDirFlag & ECD_Right )
-		{
-			pRes->vCollidePos.y = pPlayer->GetPos().y;
-			if( pPlayer->m_vVel.x < 0 )
+			if( pRes->dwDirFlag & ECD_Right )
 			{
-				pPlayer->m_vVel.x *= 0;
+				pRes->vCollidePos.y = pPlayer->GetPos().y;
+				if( pPlayer->m_vVel.x < 0 )
+				{
+					pPlayer->m_vVel.x *= 0;
+				}
 			}
-		}
-		
-		pPlayer->SetPos(pRes->vCollidePos);
-		SetColor(255, 255, 255);
 
+			pPlayer->SetPos(pRes->vCollidePos);
+			SetColor(255, 255, 255);
+		}
+		break;
+	case EGOT_Arrow:
+		{
+			Arrow* pArrow = dynamic_cast<Arrow *>(pMover);
+			pArrow->m_vVel = Vector2F(0, 0);
+			pArrow->m_vAcc = Vector2F(0, 0);
+			SetColor(255, 255, 255);
+		}
+		break;
+	}
 }
 
-Player::Player() :Movable(Vector2F(0, 0), ECD_None)
+Player::Player() :Movable(Vector2F(0, 0), ECD_None, EGOT_Player)
 {
 	m_bJmpPressed = false;
 	m_bLand = false;
@@ -136,7 +151,7 @@ Player::Player() :Movable(Vector2F(0, 0), ECD_None)
 	m_vVel = Vector2F(0,0);
 	m_vAcc = Vector2F(0,0);
 
-	m_pPlayer = this;
+	m_pMover = this;
 
 	m_pSprite = new SpritePlayer(this);
 }
@@ -148,44 +163,51 @@ Player::~Player()
 
 VOID Player::Update( FLOAT dt )
 {
-	GameObj::Update(dt);
+	HandleInput();
 
-	Listen();
-	UpdatePhysic(dt);
-
+	Movable::Update(dt);
+	
+	if( m_Input.bFire )
+	{
+		Arrow* pArrow = new Arrow;
+		pArrow->SetPos(GetPos());
+		pArrow->m_vVel.x = XMaxPlayerSpeedX*2;
+		pArrow->m_vVel.y = XMaxPlayerSpeedX/2;
+		g_level.m_lstArrows.push_back(pArrow);
+	}
 }
 
-VOID Player::Listen()
+VOID Player::HandleInput()
 {
 	m_Input.bJump	= g_keyboard.GetKey(SDLK_UP);
 	m_Input.bLeft	= g_keyboard.GetKey(SDLK_LEFT);
 	m_Input.bRight	= g_keyboard.GetKey(SDLK_RIGHT);
 	m_Input.bZoomIn	= g_keyboard.GetKey(SDLK_z);
 	m_Input.bZoomOut= g_keyboard.GetKey(SDLK_x);
-	m_Input.bFire	= g_keyboard.GetKey(SDLK_SPACE);
+	m_Input.bFire	= g_keyboard.FetchKey(SDLK_SPACE);
 
 }
 
-VOID tagPhysic::UpdatePhysic( FLOAT dt )
+VOID Player::UpdatePhysic( float dt )
 {
-	m_vAcc = Vector2F(0, XGravity);
+	m_vAcc = XGravity;
 
-	if( m_pPlayer->m_Input.bZoomIn )
+	if( m_pMover->m_Input.bZoomIn )
 	{
-		m_pPlayer->GetSprite()->SetSizeFactor(m_pPlayer->GetSprite()->GetSizeFactor() - 0.1f);
+		m_pMover->GetSprite()->SetSizeFactor(m_pMover->GetSprite()->GetSizeFactor() - 0.1f);
 	}
 
-	if( m_pPlayer->m_Input.bZoomOut )
+	if( m_pMover->m_Input.bZoomOut )
 	{
-		m_pPlayer->GetSprite()->SetSizeFactor(m_pPlayer->GetSprite()->GetSizeFactor() + 0.1f);
+		m_pMover->GetSprite()->SetSizeFactor(m_pMover->GetSprite()->GetSizeFactor() + 0.1f);
 	}
 
-	if( m_pPlayer->m_Input.bLeft )
+	if( m_pMover->m_Input.bLeft )
 	{
 		m_vAcc.x = -XCtrlAcc;
 	}
 
-	if( m_pPlayer->m_Input.bRight )
+	if( m_pMover->m_Input.bRight )
 	{
 		m_vAcc.x = XCtrlAcc;
 	}
@@ -210,11 +232,11 @@ VOID tagPhysic::UpdatePhysic( FLOAT dt )
 
 	if( m_fJump >= 0.0f )
 	{
-		if( m_pPlayer->m_Input.bJump )
+		if( m_pMover->m_Input.bJump )
 		{
 			if( !m_bJmpPressed && m_bLand)
 			{
-				m_vVel.y = XCtrlAcc/4;
+				m_vVel.y = XJumpSpeed;
 				m_bLand = false;	
 			}
 
@@ -242,7 +264,45 @@ VOID tagPhysic::UpdatePhysic( FLOAT dt )
 	}
 
 	Vector2F vOffset = m_vVel * dt;
-	m_pPlayer->SetPos(m_pPlayer->GetPos()+vOffset);
+	m_pMover->SetPos(m_pMover->GetPos()+vOffset);
 	m_bLand = false;
 }
 
+Arrow::Arrow() :Movable(Vector2F(0, 0), ECD_All, EGOT_Arrow)
+{
+	m_pMover = this;
+	m_pSprite = new SpriteArrow(this);
+}
+
+Arrow::~Arrow()
+{
+	delete m_pSprite;
+	m_pSprite = NULL;
+}
+
+VOID Arrow::Collide( GameObj* pRunner, tagCollideRes* pRes )
+{
+	
+}
+
+VOID Arrow::Update( FLOAT dt )
+{
+	Movable::Update(dt);
+}
+
+VOID Arrow::UpdatePhysic( FLOAT dt )
+{
+	m_vAcc = XGravity;
+
+	m_vVel += m_vAcc*dt;
+
+	Vector2F vOffset = m_vVel * dt;
+	m_pMover->SetPos(m_pMover->GetPos()+vOffset);
+	m_bLand = false;
+}
+
+VOID Movable::Update( float dt )
+{
+	GameObj::Update(dt);
+	UpdatePhysic(dt);
+}

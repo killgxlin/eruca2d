@@ -26,11 +26,6 @@ using std::swap;
 using std::make_pair;
 using std::for_each;
 
-enum ECollidePriority
-{
-	ECP_Dynamic	= 1,
-	ECP_Static	= 2,
-};
 
 enum ECollideDir
 {
@@ -43,15 +38,16 @@ enum ECollideDir
 };
 
 #define XMaxPlayerSpeedX	500	//pixel per sec
-#define XGravity			-2000	//pixel * pixel per sec
+#define XGravity			Vector2F(0, -1000)	//pixel * pixel per sec
 #define XCtrlAcc			2000	//
-#define XJumpSpeed			50
+#define XJumpSpeed			500
 
 #define XScreenW			640
 #define XScreenH			(XScreenW * 3 / 4)
 
 #define XPlayerSize			(XScreenW / 40)
-#define XTileSize			XPlayerSize
+#define XTerrainSize		XPlayerSize
+#define XArrowSize			(XPlayerSize / 2)
 
 template<typename T = FLOAT>
 class Size

@@ -41,10 +41,16 @@ private:
 	INT				m_nCounter;
 };
 
-class SpriteTile : public Sprite
+class SpriteTerrain : public Sprite
 {
 public:
-	SpriteTile(GameObj* pGameObj):Sprite(pGameObj, XTileSize, XTileSize, 120, 120, 120){}
+	SpriteTerrain(GameObj* pGameObj):Sprite(pGameObj, XTerrainSize, XTerrainSize, 120, 120, 120){}
 };
 
+class SpriteArrow : public Sprite
+{
+public:
+	SpriteArrow(GameObj* pGameObj):Sprite(pGameObj, XArrowSize, XArrowSize, 255, 120, 120){}
+
+};
 #endif

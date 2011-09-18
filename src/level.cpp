@@ -47,13 +47,25 @@ struct BlockUpdate
 
 struct BlockCollide
 {
-	BlockCollide(GameObj* pObj):m_pObj(pObj){}
+	BlockCollide(Movable* pMover):m_pMover(pMover){}
 	VOID	operator()(tagBlock* pBlock)
 	{
-		pBlock->Collide(m_pObj);
+		pBlock->Collide(m_pMover);
 	}
-	GameObj*	m_pObj;
+	Movable*	m_pMover;
 };
+
+struct ArrowUpdate
+{
+	ArrowUpdate(float dt):m_fDt(dt){}
+	VOID	operator()(Arrow* pArrow)
+	{
+		pArrow->Update(m_fDt);
+	}
+
+	float	m_fDt;
+};
+
 
 VOID Level::Update( FLOAT dt )
 {
@@ -61,8 +73,17 @@ VOID Level::Update( FLOAT dt )
 
 	ForEachBlock(BlockUpdate(dt));
 	m_pPlayer->Update(dt);
+	for_each(m_lstArrows.begin(), m_lstArrows.end(), ArrowUpdate(dt));
 
 	ForEachBlock(BlockCollide(m_pPlayer));
+	for(list<Arrow*>::iterator itr = m_lstArrows.begin();
+		itr != m_lstArrows.end();
+		++itr)
+	{
+		ForEachBlock(BlockCollide(*itr));
+	}
+	
+	
 
 	Vector2N vNewIdx = ConvertToBlockIdx(m_pPlayer->GetPos());
 	if( m_vLastIdx != vNewIdx )
@@ -93,10 +114,21 @@ struct BlockDraw
 	Painter*	m_pPainter;
 };
 
+struct ArrowDraw
+{
+	ArrowDraw(Painter* pPainter):m_pPainter(pPainter){}
+	Painter*	m_pPainter;
+	VOID	operator()(Arrow* pArrow)
+	{
+		pArrow->Draw(m_pPainter);
+	}
+};
+
 VOID Level::Draw( Painter* pPainter )
 {
 	ForEachBlock(BlockDraw(pPainter));
 	m_pPlayer->Draw(pPainter);
+	for_each(m_lstArrows.begin(), m_lstArrows.end(), ArrowDraw(pPainter));
 }
 
 VOID Level::RefreshBlocks( const Vector2N &vIdx )
@@ -181,10 +213,10 @@ BOOL tagBlock::Load( const Vector2N &vCenterIdx, const Vector2N &vOffset )
 
 	Vector2F vOri(FLOAT(vIdx.x * XScreenW), FLOAT(vIdx.y * XScreenH));
 
-	for( FLOAT f=XTileSize/2; f<=XScreenW - XTileSize/2; f+=XTileSize )
+	for( FLOAT f=XTerrainSize/2; f<=XScreenW - XTerrainSize/2; f+=XTerrainSize )
 	{
 		Terrain* pNew = new Terrain;
-		pNew->SetPos(vOri + Vector2F(f, XTileSize/2));
+		pNew->SetPos(vOri + Vector2F(f, XTerrainSize/2));
 		pNew->SetCollideDirFlag(ECD_Top);
 
 		static int i=0;
@@ -193,13 +225,13 @@ BOOL tagBlock::Load( const Vector2N &vCenterIdx, const Vector2N &vOffset )
 			pNew->SetColor(255, 0, 0);
 		}
 
-		vecTiles.push_back(pNew);
+		vecTerrains.push_back(pNew);
 	}
 
-//	for( FLOAT f=XTileSize/2; f<=XScreenH - XTileSize/2; f+=XTileSize )
+//	for( FLOAT f=XTerrainSize/2; f<=XScreenH - XTerrainSize/2; f+=XTerrainSize )
 	{
 		Terrain* pNew = new Terrain;
-		pNew->SetPos(vOri + Vector2F(XTileSize/2, XTileSize*2/*f*/));
+		pNew->SetPos(vOri + Vector2F(XTerrainSize/2, XTerrainSize*2/*f*/));
 		pNew->SetCollideDirFlag(ECD_All);
 
 		static int i=0;
@@ -208,40 +240,40 @@ BOOL tagBlock::Load( const Vector2N &vCenterIdx, const Vector2N &vOffset )
 			pNew->SetColor(255, 0, 0);
 		}
 
-		vecTiles.push_back(pNew);
+		vecTerrains.push_back(pNew);
 	}
 
 	return TRUE;
 }
 
-struct TileDelete
+struct TerrainDelete
 {
-	void operator()(Terrain* pTile)
+	void operator()(Terrain* pTerrain)
 	{
-		delete pTile;
+		delete pTerrain;
 	}
 };
 
 VOID tagBlock::UnLoad()
 {
-	for_each(vecTiles.begin(), vecTiles.end(), TileDelete());
+	for_each(vecTerrains.begin(), vecTerrains.end(), TerrainDelete());
 
-	vecTiles.clear();
+	vecTerrains.clear();
 }
 
-struct TileDraw
+struct TerrainDraw
 {
-	TileDraw(Painter* pPainter):m_pPainter(pPainter){}
+	TerrainDraw(Painter* pPainter):m_pPainter(pPainter){}
 	Painter*	m_pPainter;
-	VOID operator()(Terrain* pTile)
+	VOID operator()(Terrain* pTerrain)
 	{
-		pTile->Draw(m_pPainter);
+		pTerrain->Draw(m_pPainter);
 	}
 };
 
 VOID tagBlock::Draw( Painter* pPainter )
 {
-	for_each(vecTiles.begin(), vecTiles.end(), TileDraw(pPainter));
+	for_each(vecTerrains.begin(), vecTerrains.end(), TerrainDraw(pPainter));
 
 	Vector2F vCenter(FLOAT(vIdx.x*XScreenW), FLOAT(vIdx.y*XScreenH));
 	vCenter += Vector2F(XScreenW/2, XScreenH/2);
@@ -249,37 +281,37 @@ VOID tagBlock::Draw( Painter* pPainter )
 	pPainter->WorldDrawText(vCenter, pPainter->GetColor(255, 0, 0),"%d, %d", vIdx.x, vIdx.y );
 }
 
-struct TileUpdate
+struct TerrainUpdate
 {
-	TileUpdate(FLOAT dt):m_dt(dt){}
-	VOID operator()(Terrain* pTile)
+	TerrainUpdate(FLOAT dt):m_dt(dt){}
+	VOID operator()(Terrain* pTerrain)
 	{
-		pTile->m_fDist = -1.0f;
-		pTile->Update(m_dt);
+		pTerrain->m_fDist = -1.0f;
+		pTerrain->Update(m_dt);
 	}
 	FLOAT m_dt;
 };
 
 VOID tagBlock::Update( float dt )
 {
-	for_each(vecTiles.begin(), vecTiles.end(), TileUpdate(dt));
+	for_each(vecTerrains.begin(), vecTerrains.end(), TerrainUpdate(dt));
 }
 
 
-struct TileCollide
+struct TerrainCollide
 {
-	TileCollide(GameObj* pObj, tagCollideRes* pResult):m_pObj(pObj), m_pResult(pResult){}
-	VOID operator()(Terrain* pTile)
+	TerrainCollide(Movable* pMover, tagCollideRes* pResult):m_pMover(pMover), m_pResult(pResult){}
+	VOID operator()(Terrain* pTerrain)
 	{
-		pTile->Collide(m_pObj, m_pResult);
+		pTerrain->Collide(m_pMover, m_pResult);
 	}
-	GameObj* m_pObj;
+	Movable* m_pMover;
 	tagCollideRes* m_pResult;
 };
 
-struct TileCmp
+struct TerrainCmp
 {
-	TileCmp(GameObj* pObj):m_pObj(pObj){}
+	TerrainCmp(GameObj* pObj):m_pObj(pObj){}
 	bool	operator()(Terrain* pLhs, Terrain* pRhs)
 	{
 		if( pLhs->m_fDist < 0.0f )
@@ -297,11 +329,11 @@ struct TileCmp
 	GameObj*	m_pObj;
 };
 
-VOID tagBlock::Collide( GameObj* pObj )
+VOID tagBlock::Collide( Movable* pMover )
 {
-	std::sort(vecTiles.begin(), vecTiles.end(), TileCmp(pObj));
+	std::sort(vecTerrains.begin(), vecTerrains.end(), TerrainCmp(pMover));
 
 	tagCollideRes result;
 	
-	for_each(vecTiles.begin(), vecTiles.end(), TileCollide(pObj, &result));
+	for_each(vecTerrains.begin(), vecTerrains.end(), TerrainCollide(pMover, &result));
 }

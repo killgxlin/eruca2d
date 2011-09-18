@@ -6,20 +6,22 @@
 class Painter;
 class Terrain;
 class Player;
+class Movable;
+class Arrow;
 
 
 
 struct tagBlock
 {
 	Vector2N		vIdx;
-	vector<Terrain*>	vecTiles;
+	vector<Terrain*>	vecTerrains;
 
 	BOOL		Load(const Vector2N &vCenterIdx, const Vector2N &vOffset);
 	VOID		UnLoad();
 
 	VOID		Draw(Painter* pPainter);
 	VOID		Update(float dt);
-	VOID		Collide(GameObj* pObj);
+	VOID		Collide(Movable* pMover);
 
 };
 
@@ -61,6 +63,7 @@ public:
 			func(m_matBlocks[nX][nY]);
 		}
 	}
+	list<Arrow*>	m_lstArrows;
 };
 
 extern 	Level g_level;
