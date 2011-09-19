@@ -17,14 +17,12 @@ struct tagCollideRes
 struct tagPhysic
 {
 	Vector2F		m_vVel;
-	Vector2F		m_vAcc;
 	bool			m_bLand;
-	float			m_fJump;
-	bool			m_bJmpPressed;
+
 
 	Movable*		m_pMover;
 
-	virtual VOID	UpdatePhysic( FLOAT dt ) = 0;
+	virtual VOID	UpdatePhysic( FLOAT dt );
 
 };
 
@@ -116,6 +114,9 @@ public:
 	virtual VOID	HandleInput();
 	virtual VOID	UpdatePhysic(float dt);
 	virtual VOID	Update(FLOAT dt);
+
+	float			m_fJump;
+	bool			m_bJmpPressed;
 
 };
 

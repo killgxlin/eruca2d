@@ -136,7 +136,7 @@ VOID Terrain::Collide( Movable* pMover, tagCollideRes* pRes )
 		{
 			Arrow* pArrow = dynamic_cast<Arrow *>(pMover);
 			pArrow->m_vVel = Vector2F(0, 0);
-			pArrow->m_vAcc = Vector2F(0, 0);
+			pArrow->m_bLand = true;
 			SetColor(255, 255, 255);
 		}
 		break;
@@ -149,7 +149,6 @@ Player::Player() :Movable(Vector2F(0, 0), ECD_None, EGOT_Player)
 	m_bLand = false;
 	m_fJump = 0.0f;
 	m_vVel = Vector2F(0,0);
-	m_vAcc = Vector2F(0,0);
 
 	m_pMover = this;
 
@@ -163,7 +162,6 @@ Player::~Player()
 
 VOID Player::Update( FLOAT dt )
 {
-	HandleInput();
 
 	Movable::Update(dt);
 	
@@ -190,7 +188,7 @@ VOID Player::HandleInput()
 
 VOID Player::UpdatePhysic( float dt )
 {
-	m_vAcc = XGravity;
+	Vector2F vAcc = XGravity;
 
 	if( m_pMover->m_Input.bZoomIn )
 	{
@@ -204,26 +202,26 @@ VOID Player::UpdatePhysic( float dt )
 
 	if( m_pMover->m_Input.bLeft )
 	{
-		m_vAcc.x = -XCtrlAcc;
+		vAcc.x = -XCtrlAcc;
 	}
 
 	if( m_pMover->m_Input.bRight )
 	{
-		m_vAcc.x = XCtrlAcc;
+		vAcc.x = XCtrlAcc;
 	}
 
-	if( m_vAcc.x == 0.0f )
+	if( vAcc.x == 0.0f )
 	{
 		if( m_vVel.x > 0.0f )
 		{
-			m_vAcc.x = -XCtrlAcc;
+			vAcc.x = -XCtrlAcc;
 		}
 		else if( m_vVel.x < 0.0f )
 		{
-			m_vAcc.x = XCtrlAcc;
+			vAcc.x = XCtrlAcc;
 		}
 	}
-	m_vVel += m_vAcc*dt;
+	m_vVel += vAcc*dt;
 
 	if( abs(m_vVel.x) > XMaxPlayerSpeedX )
 	{
@@ -263,14 +261,13 @@ VOID Player::UpdatePhysic( float dt )
 		m_vVel.y = 0;
 	}
 
-	Vector2F vOffset = m_vVel * dt;
-	m_pMover->SetPos(m_pMover->GetPos()+vOffset);
-	m_bLand = false;
+	Movable::UpdatePhysic(dt);
 }
 
 Arrow::Arrow() :Movable(Vector2F(0, 0), ECD_All, EGOT_Arrow)
 {
 	m_pMover = this;
+	m_bLand = false;
 	m_pSprite = new SpriteArrow(this);
 }
 
@@ -282,7 +279,12 @@ Arrow::~Arrow()
 
 VOID Arrow::Collide( GameObj* pRunner, tagCollideRes* pRes )
 {
-	
+	if( pRunner->GetType() == EGOT_Player )
+	{
+		list<Arrow*>::iterator itr = find(g_level.m_lstArrows.begin(), g_level.m_lstArrows.end(), this);
+		g_level.m_lstArrows.erase(itr);
+		delete this;
+	}
 }
 
 VOID Arrow::Update( FLOAT dt )
@@ -292,17 +294,27 @@ VOID Arrow::Update( FLOAT dt )
 
 VOID Arrow::UpdatePhysic( FLOAT dt )
 {
-	m_vAcc = XGravity;
+	Vector2F vAcc = XGravity;
 
-	m_vVel += m_vAcc*dt;
+	m_vVel += vAcc*dt;
+	if( m_bLand )
+	{
+		m_vVel = Vector2F(0, 0);
+	}
 
-	Vector2F vOffset = m_vVel * dt;
-	m_pMover->SetPos(m_pMover->GetPos()+vOffset);
-	m_bLand = false;
+	Movable::UpdatePhysic(dt);
 }
 
 VOID Movable::Update( float dt )
 {
 	GameObj::Update(dt);
+	HandleInput();
 	UpdatePhysic(dt);
+}
+
+VOID tagPhysic::UpdatePhysic( FLOAT dt )
+{
+	Vector2F vOffset = m_vVel * dt;
+	m_pMover->SetPos(m_pMover->GetPos()+vOffset);
+	m_bLand = false;
 }
