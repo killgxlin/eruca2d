@@ -1,5 +1,6 @@
 #include "common.h"
 #include "painter.h"
+#include "SDL_gfxPrimitives.h"
 
 Painter g_painter;
 
@@ -9,6 +10,8 @@ BOOL Painter::Init( INT w, INT h, const char* title )
 	m_dwDt			= 0;
 	m_dwDrawTimes	= 0;
 	m_fZoomRate		= 1.0f;
+	m_screenBox.AddPoint(Vector2F(0, 0));
+	m_screenBox.AddPoint(Vector2F(XScreenW, XScreenH));
 
 	m_pScreen = SDL_SetVideoMode(w, h, 32, SDL_HWSURFACE|SDL_DOUBLEBUF);
 	if( NULL == m_pScreen ) return FALSE;
@@ -46,40 +49,53 @@ VOID Painter::DrawRect( const Vector2F &vPos, const Vector2F &sSize, UINT32 uCol
 	rect.y = static_cast<INT16>(vPos.y - sSize.y / 2);
 
 	SDL_FillRect(m_pScreen, &rect, uColor);
+	
 	++m_dwDrawTimes;
 }
 
 UINT32 Painter::GetColor( UINT8 u8R, UINT8 u8G, UINT8 u8B )
 {
-	return SDL_MapRGB(m_pScreen->format, u8R, u8G, u8B);
+	return SDL_MapRGBA(m_pScreen->format, u8R, u8G, u8B, 255);
 }
 
 VOID Painter::WorldDrawRect( const Vector2F &vWorldPos, const Vector2F &vSize, UINT32 uColor )
 {
-	Vector2F vPos = vWorldPos;
-	Vector2F vLSize = vSize;
-	WorldToScreen(&vPos, &vLSize);
-	ScreenToSDL(&vPos);
-
-	AABBox rectBox(vPos, vLSize);
-	AABBox m_screenBox;
-	m_screenBox.AddPoint(Vector2F(0, 0));
-	m_screenBox.AddPoint(Vector2F(XScreenW, XScreenH));
-
-	if( m_screenBox.IntersectBox(rectBox) )
 	{
-		DrawRect(vPos, vLSize, uColor);
+		Vector2F vPos = vWorldPos;
+		Vector2F vLSize = vSize;
+
+		WorldToScreen(m_vCenter, &vPos, &vLSize);
+		ScreenToSDL(&vPos);
+
+		AABBox rectBox(vPos, vLSize);
+
+		if( m_screenBox.IntersectBox(rectBox) )
+		{
+			DrawRect(vPos, vLSize, uColor);
+		}
 	}
-	else
+
+	if( m_vOtherCenter != m_vCenter )
 	{
-		rectBox.vMax.x = 0;
+		Vector2F vPos = vWorldPos;
+		Vector2F vLSize = vSize;
+
+		WorldToScreen(m_vOtherCenter, &vPos, &vLSize);
+		ScreenToSDL(&vPos);
+
+		AABBox rectBox(vPos, vLSize);
+
+		if( m_screenBox.IntersectBox(rectBox) )
+		{
+			DrawRect(vPos, vLSize, uColor);
+		}
 	}
 }
 
-VOID Painter::WorldToScreen( Vector2F* pPt, Vector2F* pSize )
+VOID Painter::WorldToScreen( const Vector2F &vCenter, Vector2F* pPt, Vector2F* pSize )
 {
 	Vector2F vSize(FLOAT(m_pScreen->w), FLOAT(m_pScreen->h));
-	Vector2F vLeftBottom = m_vCenter - vSize / 2;
+	Vector2F vLeftBottom = vCenter - vSize / 2;
 	*pPt -= vLeftBottom;
 
 	Vector2F vVec = *pPt - vSize / 2;
@@ -121,15 +137,77 @@ VOID Painter::Update( DWORD dwDt )
 
 VOID Painter::WorldDrawText( const Vector2F &vWorldPos, UINT32 uColor, const char* szFormat, ... )
 {
-	Vector2F vPos = vWorldPos;
-	WorldToScreen(&vPos, NULL);
-	ScreenToSDL(&vPos);
-
 	va_list argList;
 	va_start(argList, szFormat);
 	char buffer[1024];
 	vsprintf_s(buffer, 1024, szFormat, argList);
 	va_end(argList);
 
+	Vector2F vPos = vWorldPos;
+	WorldToScreen(m_vCenter, &vPos, NULL);
+	ScreenToSDL(&vPos);
 	g_text.DrawText(vPos, uColor, buffer);
+
+	if( m_vOtherCenter != m_vCenter )
+	{
+		Vector2F vPos = vWorldPos;
+		WorldToScreen(m_vCenter, &vPos, NULL);
+		ScreenToSDL(&vPos);
+		g_text.DrawText(vPos, uColor, buffer);
+
+	}
+}
+
+VOID Painter::SetCenter( const Vector2F &vPos )
+{
+	m_vCenter = vPos;
+	m_vOtherCenter = m_vCenter;
+	if( m_vCenter.x + m_pScreen->w / m_fZoomRate / 2 >= XTotalW )
+	{
+		m_vOtherCenter.x -= XTotalW;
+	}
+	else if( m_vCenter.x - m_pScreen->w / m_fZoomRate / 2 < 0 )
+	{
+		m_vOtherCenter.x += XTotalW;
+	}
+
+}
+
+VOID Painter::WorldDrawLine( const Vector2F &vWorldPosHead, const Vector2F &vWorldPosTail, DWORD dwColor )
+{
+	if( vWorldPosHead == vWorldPosTail )
+	{
+		return;
+	}
+
+	Vector2F vHead = vWorldPosHead, vTail = vWorldPosTail;
+
+	if( vWorldPosHead.x > vWorldPosTail.x )
+	{
+		 vHead = vWorldPosTail;
+		 vTail = vWorldPosHead;
+	}
+
+	Vector2F vHeadPos = vHead;
+	WorldToScreen(m_vCenter, &vHeadPos, NULL);
+	ScreenToSDL(&vHeadPos);
+
+	Vector2F vTailPos = vTail;
+	WorldToScreen(m_vCenter, &vTailPos, NULL);
+	ScreenToSDL(&vTailPos);
+
+	thickLineColor(m_pScreen, vHeadPos.x, vHeadPos.y, vTailPos.x, vTailPos.y, 1, dwColor);
+
+	if( m_vOtherCenter != m_vCenter )
+	{
+		Vector2F vHeadPos = vHead;
+		WorldToScreen(m_vOtherCenter, &vHeadPos, NULL);
+		ScreenToSDL(&vHeadPos);
+
+		Vector2F vTailPos = vTail;
+		WorldToScreen(m_vOtherCenter, &vTailPos, NULL);
+		ScreenToSDL(&vTailPos);
+
+		thickLineColor(m_pScreen, vHeadPos.x, vHeadPos.y, vTailPos.x, vTailPos.y, 1, dwColor);
+	}
 }

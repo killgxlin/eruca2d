@@ -7,10 +7,10 @@ VOID KeyBoard::Update()
 	while( SDL_PollEvent( &event ) ){
 		switch( event.type ){
 			case SDL_KEYDOWN:
-				m_bKey[event.key.keysym.sym] = true;
+				m_bKey[event.key.keysym.sym] = TRUE;
 				break;
 			case SDL_KEYUP:
-				m_bKey[event.key.keysym.sym] = false;
+				m_bKey[event.key.keysym.sym] = FALSE;
 				break;
 		}
 	}

@@ -6,7 +6,7 @@ BOOL Text::Init()
 	if( TTF_Init() == -1 ) return FALSE;
 	
 	m_lstUnits.clear();
-	m_bDrawText = true;
+	m_bDrawText = TRUE;
 
 	return SetFont("font.ttf");
 }

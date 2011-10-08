@@ -20,10 +20,9 @@ INT APIENTRY _tWinMain(HINSTANCE hInstance,
 	g_text.Init();
 
 	g_level.Init();
-	
+
 	while( !g_keyboard.FetchKey(SDLK_ESCAPE) )
 	{
-
 		timer2.Update();
 
 		g_framerate.CountFrame(timer2.GetIntervalU());

@@ -10,10 +10,11 @@ public:
 
 	VOID			Flush();
 	VOID			Clear();
-	VOID WorldDrawRect(const Vector2F &vWorldPos, const Vector2F &vSize, UINT32 uColor);
+	VOID			WorldDrawRect(const Vector2F &vWorldPos, const Vector2F &vSize, UINT32 uColor);
 	VOID			WorldDrawText(const Vector2F &vWorldPos, UINT32 uColor, const char* szFormat, ...);
+	VOID			WorldDrawLine(const Vector2F &vWorldPosHead, const Vector2F &vWorldPosTail, DWORD dwColor);
 
-	VOID			SetCenter(const Vector2F &vPos)			{ m_vCenter = vPos; }
+	VOID			SetCenter(const Vector2F &vPos);
 	VOID			SetZoomRate(FLOAT fRate)				{ m_fZoomRate = Cut(fRate, 0.5f, 2.0f); }
 
 	VOID			ModZoomRate(FLOAT fDelta)				{ m_fZoomRate = Cut(m_fZoomRate+fDelta, 0.5f, 2.0f); }
@@ -25,15 +26,17 @@ public:
 
 	
 private:
-	VOID			WorldToScreen(Vector2F* pPt, Vector2F* pSize);
+	VOID			WorldToScreen(const Vector2F &vCenter, Vector2F* pPt, Vector2F* pSize);
 	VOID			ScreenToSDL(Vector2F* pPt);
 	VOID			DrawRect(const Vector2F &vPos, const Vector2F &sSize, UINT32 uColor);
 
 	Vector2F		m_vCenter;
+	Vector2F		m_vOtherCenter;
 	FLOAT			m_fDrawPerSec;
 	DWORD			m_dwDt;
 	DWORD			m_dwDrawTimes;
 	FLOAT			m_fZoomRate;
+	AABBox			m_screenBox;
 
 	SDL_Surface*	m_pScreen;
 };

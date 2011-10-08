@@ -28,7 +28,7 @@ private:
 	};
 
 	list<tagUnit>	m_lstUnits;
-	bool			m_bDrawText;
+	BOOL			m_bDrawText;
 };
 
 extern Text g_text;

@@ -12,7 +12,7 @@ public:
 		return TRUE;
 	}
 
-	void	Update()
+	VOID	Update()
 	{
 		UINT32 cur_tick = SDL_GetTicks();
 
@@ -22,7 +22,7 @@ public:
 		_last_tick = cur_tick;
 	}
 
-	void	Destroy()
+	VOID	Destroy()
 	{
 	}
 

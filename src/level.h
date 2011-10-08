@@ -1,71 +1,34 @@
-#ifndef __LEVEL_H__
-#define __LEVEL_H__
+#ifndef LEVEL_NEW_h
+#define LEVEL_NEW_h
 
-#include "collider.h"
 
-class Painter;
-class Terrain;
 class Player;
-class Movable;
 class Arrow;
-
-
-
-struct tagBlock
-{
-	Vector2N		vIdx;
-	vector<Terrain*>	vecTerrains;
-
-	BOOL		Load(const Vector2N &vCenterIdx, const Vector2N &vOffset);
-	VOID		UnLoad();
-
-	VOID		Draw(Painter* pPainter);
-	VOID		Update(float dt);
-	VOID		Collide(Movable* pMover);
-
-};
+class Animal;
 
 class Level
 {
 public:
+	BOOL		OverLapEdge(Vector2F &vPos, Vector2F &vSize);
+	Vector2F	TransPos(Vector2F &vOldPos);
+	Vector2F	GetProperPos(Vector2F &vPos);
+public:
 	BOOL		Init();
 	VOID		Destroy();
 
-
 	VOID		Update(FLOAT dt);
+
 	VOID		Draw(Painter* pPainter);
 
-	Player*		m_pPlayer;
-
-	// something new :)
 public:
-	Vector2N	ConvertToBlockIdx(const Vector2F &vPos);
-	VOID		RefreshBlocks(const Vector2N &vIdx);
 
-	list<tagBlock*>	m_lstBlocks;
-	Vector2N	m_vLastIdx;
-
-	INT			m_nRefreshTimes;
-	INT			m_nNewXIdx;
-
-public:
-	tagBlock*	m_matBlocks[3][3];
-
-	template<typename T>
-	VOID		ForEachBlock(T func)
-	{
-		static INT nIdx[] = {4, 1, 3, 5, 7, 0, 2, 6, 8};
-		for(INT i=0; i<sizeof(nIdx) / sizeof(INT); ++i)
-		{
-			INT nX = nIdx[i] / 3;
-			INT nY = nIdx[i] % 3;
-			assert(m_matBlocks[nX][nY] != NULL);
-			func(m_matBlocks[nX][nY]);
-		}
-	}
+	int				m_matTerrain[XTilesW][XTilesH];
+	list<Player*>	m_lstPlayers;
 	list<Arrow*>	m_lstArrows;
+	list<Animal*>	m_lstAnimals;
+
 };
 
-extern 	Level g_level;
+extern Level g_level;
 
 #endif

@@ -18,7 +18,7 @@ public:
 		return m_bKey[uKey];
 	}
 public:
-	bool	m_bKey[SDLK_LAST];
+	BOOL	m_bKey[SDLK_LAST];
 };
 
 extern KeyBoard g_keyboard;

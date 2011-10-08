@@ -37,23 +37,32 @@ enum ECollideDir
 	ECD_All		= ECD_Top | ECD_Down | ECD_Left | ECD_Right,
 };
 
-#define XMaxPlayerSpeedX	500	//pixel per sec
-#define XGravity			Vector2F(0, -1000)	//pixel * pixel per sec
-#define XCtrlAcc			2000	//
-#define XJumpSpeed			500
+#define XMaxArrowSpeed		400
+#define XMaxPlayerSpeedX	200	//pixel per sec
+#define XGravity			Vector2F(0, -400)	//pixel * pixel per sec
+#define XCtrlAcc			800	//
+#define XJumpSpeed			200
 
 #define XScreenW			640
 #define XScreenH			(XScreenW * 3 / 4)
 
 #define XPlayerSize			(XScreenW / 40)
 #define XTerrainSize		XPlayerSize
-#define XArrowSize			(XPlayerSize / 2)
+#define XArrowSize			(XPlayerSize)
+#define XAnimalSize			(XPlayerSize)
+
+#define XTotalW				(XScreenW * 5)
+#define XTotalH				(XScreenH * 3)
+
+#define XTilesW				(XTotalW / XTerrainSize)
+#define XTilesH				(XTotalH / XTerrainSize)
+
 
 template<typename T = FLOAT>
 class Size
 {
 public:
-	Size(void) {}
+	Size(VOID) {}
 	Size(T width, T height) : w(width), h(height) {}
 
 	BOOL operator==(const Size& other) const;
@@ -70,7 +79,7 @@ template<typename T = FLOAT>
 class Vector2
 {
 public:
-	Vector2(void) {}
+	Vector2(VOID) {}
 	Vector2(T x_, T y_) : x(x_), y(y_) {}
 	template<typename TT>
 	Vector2(TT x_, TT y_) : x(T(x_)), y(T(y_)){}
@@ -264,8 +273,8 @@ public:
 			float	yEnter = 0.0f;
 			float	yLeave = 1.0f;
 
-			bool	bTop	= false;
-			bool	bRight	= false;
+			BOOL	bTop	= FALSE;
+			BOOL	bRight	= FALSE;
 
 			if (d.x == 0.0f) 
 			{
@@ -281,7 +290,7 @@ public:
 
 				if (xEnter > xLeave) 
 				{
-					bRight = true;
+					bRight = TRUE;
 					swap(xEnter, xLeave);
 				}
 
@@ -305,7 +314,7 @@ public:
 
 				if (yEnter > yLeave) 
 				{
-					bTop = true;
+					bTop = TRUE;
 					swap(yEnter, yLeave);
 				}
 

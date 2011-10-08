@@ -176,14 +176,6 @@
 			Name="engine"
 			>
 			<File
-				RelativePath="..\..\src\collider.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\collider.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\common.h"
 				>
 			</File>
@@ -201,6 +193,26 @@
 			</File>
 			<File
 				RelativePath="..\..\src\painter.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\SDL_gfxPrimitives.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\SDL_gfxPrimitives.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\SDL_gfxPrimitives_font.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\SDL_rotozoom.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\SDL_rotozoom.h"
 				>
 			</File>
 			<File
