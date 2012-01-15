@@ -11,10 +11,11 @@ class Sprite
 public:
 	virtual VOID	Animate(FLOAT dt){}
 	virtual VOID	Draw(Painter* pPainter, const Vector2F &vPos);
-	virtual AABBox	GetAABBox(const Vector2F &vPos);
+	virtual Square	GetAABBox(const Vector2F &vPos);
 
 public:
 	Sprite(GameObj* pGameObj, INT nW, INT nH, UINT8 u8R, UINT8 u8G, UINT8 u8B):m_pGameObj(pGameObj), m_Size(nW, nH),m_u8R(u8R), m_u8G(u8G), m_u8B(u8B), m_fSizeFactor(1.0f){}
+	virtual ~Sprite() { m_pGameObj = NULL; }
 	VOID			SetColor(UINT8 u8R, UINT8 u8G, UINT8 u8B) { m_u8R = u8R; m_u8G = u8G; m_u8B = u8B; }
 
 	Vector2F		GetSize() const { return m_Size*m_fSizeFactor; }
@@ -58,7 +59,7 @@ class SpriteArrow : public Sprite
 public:
 	SpriteArrow(GameObj* pGameObj):Sprite(pGameObj, XArrowSize, XArrowSize, 255, 255, 255){}
 	virtual VOID	Draw(Painter* pPainter, const Vector2F &vPos);
-	virtual AABBox	GetAABBox(const Vector2F &vPos);
+	virtual Square	GetAABBox(const Vector2F &vPos);
 private:
 	Vector2F		m_vVelUnit;
 };

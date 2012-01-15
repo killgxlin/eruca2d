@@ -25,18 +25,21 @@ public:
 	SDL_Surface*	GetScreen() const						{ return m_pScreen; }
 
 	
+	Vector2F		m_vCenter;
+	Vector2F		m_vOtherCenter;
+	Square			GetOtherScreenBox() const;
+	Square			GetScreenBox() const;
+
 private:
 	VOID			WorldToScreen(const Vector2F &vCenter, Vector2F* pPt, Vector2F* pSize);
 	VOID			ScreenToSDL(Vector2F* pPt);
 	VOID			DrawRect(const Vector2F &vPos, const Vector2F &sSize, UINT32 uColor);
 
-	Vector2F		m_vCenter;
-	Vector2F		m_vOtherCenter;
 	FLOAT			m_fDrawPerSec;
 	DWORD			m_dwDt;
 	DWORD			m_dwDrawTimes;
 	FLOAT			m_fZoomRate;
-	AABBox			m_screenBox;
+	Square			m_screenBox;
 
 	SDL_Surface*	m_pScreen;
 };

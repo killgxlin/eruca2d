@@ -9,9 +9,9 @@ VOID Sprite::Draw(Painter* pPainter, const Vector2F &vPos)
 	pPainter->WorldDrawRect(vPos, m_Size * m_fSizeFactor, pPainter->GetColor(m_u8R, m_u8G, m_u8B));
 }
 
-AABBox Sprite::GetAABBox( const Vector2F &vPos )
+Square Sprite::GetAABBox( const Vector2F &vPos )
 {
-	return AABBox(vPos, m_Size * m_fSizeFactor);
+	return Square(vPos, m_Size * m_fSizeFactor);
 }
 //-----------------------------------------------------------------------------------------------
 
@@ -38,13 +38,13 @@ VOID SpriteArrow::Draw( Painter* pPainter, const Vector2F &vPos )
 	g_painter.WorldDrawLine(vHead, vTail, g_painter.GetColor(m_u8R, m_u8G, m_u8B));
 }
 
-AABBox SpriteArrow::GetAABBox( const Vector2F &vPos )
+Square SpriteArrow::GetAABBox( const Vector2F &vPos )
 {
 	Vector2F vLastVel = static_cast<Arrow*>(m_pGameObj)->m_vLastVel;
 
 	m_vVelUnit = vLastVel * m_Size.x / vLastVel.Length();
 
-	AABBox tmpBox;
+	Square tmpBox;
 	tmpBox.AddPoint(vPos + m_vVelUnit / 2);
 	tmpBox.AddPoint(vPos - m_vVelUnit / 2);
 

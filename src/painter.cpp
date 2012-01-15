@@ -67,7 +67,7 @@ VOID Painter::WorldDrawRect( const Vector2F &vWorldPos, const Vector2F &vSize, U
 		WorldToScreen(m_vCenter, &vPos, &vLSize);
 		ScreenToSDL(&vPos);
 
-		AABBox rectBox(vPos, vLSize);
+		Square rectBox(vPos, vLSize);
 
 		if( m_screenBox.IntersectBox(rectBox) )
 		{
@@ -83,7 +83,7 @@ VOID Painter::WorldDrawRect( const Vector2F &vWorldPos, const Vector2F &vSize, U
 		WorldToScreen(m_vOtherCenter, &vPos, &vLSize);
 		ScreenToSDL(&vPos);
 
-		AABBox rectBox(vPos, vLSize);
+		Square rectBox(vPos, vLSize);
 
 		if( m_screenBox.IntersectBox(rectBox) )
 		{
@@ -210,4 +210,14 @@ VOID Painter::WorldDrawLine( const Vector2F &vWorldPosHead, const Vector2F &vWor
 
 		thickLineColor(m_pScreen, vHeadPos.x, vHeadPos.y, vTailPos.x, vTailPos.y, 1, dwColor);
 	}
+}
+
+Square Painter::GetOtherScreenBox() const
+{
+	return Square(m_vOtherCenter, Vector2F(XScreenW, XScreenH) / m_fZoomRate);
+}
+
+Square Painter::GetScreenBox() const
+{
+	return Square(m_vCenter, Vector2F(XScreenW, XScreenH) / m_fZoomRate);
 }

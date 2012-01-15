@@ -13,21 +13,30 @@ BOOL Level::Init()
 	{
 		for(INT j=0; j<XTilesH; ++j)
 		{
+			m_matTerrain[i][j].dwColideFlag = 0;
 			if( j < 1 )
 			{
-				m_matTerrain[i][j] = 1;
+				m_matTerrain[i][j].bExist = true;
 			}
 			else
 			{
-				if( j > 0 && m_matTerrain[i][j-1] && (rand()%2))
+				if( j > 0 && m_matTerrain[i][j-1].bExist && (rand()%2))
 				{
-					m_matTerrain[i][j] = 1;
+					m_matTerrain[i][j].bExist = true;
 				}
 				else
 				{
-					m_matTerrain[i][j] = 0;
+					m_matTerrain[i][j].bExist = false;
 				}
 			}
+		}
+	}
+
+	for(INT i=0; i<XTilesW; ++i)
+	{
+		for(INT j=0; j<XTilesH; ++j)
+		{
+			m_matTerrain[i][j].dwColideFlag = CalcCollideFlag(i,j);
 		}
 	}
 
@@ -86,17 +95,41 @@ struct UpdateGameObj
 	float m_dt;
 };	
 
-struct CollideWithTerrain
+template<typename A, typename B>
+struct ACheckTouchWithBs
 {
-	VOID operator()(Movable* pT)
+	struct ACheckTouchWithB
+	{
+		A*	m_pA;
+		ACheckTouchWithB(A* pA):m_pA(pA){}
+		VOID operator()(B* pB)
+		{
+			tagCollideRes result;
+			m_pA->CheckTouch(pB, &result);
+		}
+	};
+
+	const list<B*>	&m_lstB;
+	ACheckTouchWithBs(const list<B*> &lstCallers):m_lstB(lstCallers){}
+	VOID operator()(A* pArg)
+	{
+		for_each(m_lstB.begin(), m_lstB.end(), ACheckTouchWithB(pArg));
+	}
+};
+
+template<typename A>
+struct ACheckTouchWithBs<A, Terrain>
+{
+	VOID operator()(A* pA)
 	{
 		Terrain tmpTerrain;
 		tmpTerrain.Init();
 		tagCollideRes result;
 
-		pT->SetPos(g_level.GetProperPos(pT->GetPos()));
 
-		AABBox box = pT->GetAABBox();
+		pA->SetPos(g_level.GetProperPos(pA->GetPos()));
+
+		Square box = pA->GetAABBox();
 		INT nIdxXMin  = max(INT(floor(box.vMin.x / XTerrainSize)), 0);
 		INT nIdxYMin  = max(INT(floor(box.vMin.y / XTerrainSize)), 0);
 		INT nIdxXMax  = min(INT(floor(box.vMax.x / XTerrainSize)), XTilesW - 1);
@@ -107,26 +140,26 @@ struct CollideWithTerrain
 		{
 			for(INT j = nIdxYMin; j <= nIdxYMax; ++j)
 			{
-				if( !g_level.m_matTerrain[i][j] ) continue;
+				if( !g_level.m_matTerrain[i][j].bExist ) continue;
 
 				tmpTerrain.SetPos(Vector2F(XTerrainSize*(i + 0.5f), XTerrainSize*(j + 0.5f )));
-				tmpTerrain.SetCollideDirFlag(CalcCollideFlag(i, j));
-				tmpTerrain.Collide(pT, &result);
+				tmpTerrain.SetCollideDirFlag(g_level.m_matTerrain[i][j].dwColideFlag);
+				pA->CheckTouch(&tmpTerrain, &result);
 			}
 		}
 
 		// 得到结果
-		Vector2F vNewPos = pT->GetPos();
+		Vector2F vNewPos = pA->GetPos();
 
 		// 若结果盒子和边界重叠
-		if( g_level.OverLapEdge(vNewPos, pT->GetSize()) )
+		if( g_level.OverLapEdge(vNewPos, pA->GetSize()) )
 		{
 			// 转换坐标系
 			vNewPos = g_level.TransPos(vNewPos);
-			pT->SetPos(vNewPos);
+			pA->SetPos(vNewPos);
 
 			// 计算碰撞
-			AABBox box = pT->GetAABBox();
+			Square box = pA->GetAABBox();
 			INT nIdxXMin  = max(INT(floor(box.vMin.x / XTerrainSize)), 0);
 			INT nIdxYMin  = max(INT(floor(box.vMin.y / XTerrainSize)), 0);
 			INT nIdxXMax  = min(INT(floor(box.vMax.x / XTerrainSize)), XTilesW - 1);
@@ -137,64 +170,18 @@ struct CollideWithTerrain
 			{
 				for(INT j = nIdxYMin; j <= nIdxYMax; ++j)
 				{
-					if( !g_level.m_matTerrain[i][j] ) continue;
+					if( !g_level.m_matTerrain[i][j].bExist ) continue;
 
 					tmpTerrain.SetPos(Vector2F(XTerrainSize*(i + 0.5f), XTerrainSize*(j + 0.5f )));
-					tmpTerrain.SetCollideDirFlag(CalcCollideFlag(i, j));
-					tmpTerrain.Collide(pT, &result);
+					tmpTerrain.SetCollideDirFlag(g_level.m_matTerrain[i][j].dwColideFlag);
+					pA->CheckTouch(&tmpTerrain, &result);
 				}
 			}
 			// 切换到合适的坐标系
-			pT->SetPos(g_level.GetProperPos(pT->GetPos()));
+			pA->SetPos(g_level.GetProperPos(pA->GetPos()));
 		}
 
 		tmpTerrain.Destroy();
-	}
-
-	DWORD CalcCollideFlag( INT i, INT j ) 
-	{
-		DWORD dwDirFlag = ECD_All;
-		if( i-1 >= 0 && g_level.m_matTerrain[i-1][j] )
-		{
-			dwDirFlag &= ~ECD_Left;
-		}
-		if( i+1 < XTilesW && g_level.m_matTerrain[i+1][j] )
-		{
-			dwDirFlag &= ~ECD_Right;
-		}
-		if( j-1 >= 0 && g_level.m_matTerrain[i][j-1] )
-		{
-			dwDirFlag &= ~ECD_Down;
-		}
-		if( j+1 < XTilesH && g_level.m_matTerrain[i][j+1] )
-		{
-			dwDirFlag &= ~ECD_Top;
-		}
-
-		return dwDirFlag;
-	}
-
-};
-
-struct CollideWithGameObj
-{
-	Movable*	m_pMover;
-	CollideWithGameObj(Movable* pMover):m_pMover(pMover){}
-	VOID operator()(GameObj* pGameObj)
-	{
-		tagCollideRes result;
-		pGameObj->Collide(m_pMover, &result);
-	}
-};
-
-template<typename T>
-struct CollideWithGameObjs
-{
-	const list<T*>	&m_lstGameObjs;
-	CollideWithGameObjs(const list<T*> &lstGameObjs):m_lstGameObjs(lstGameObjs){}
-	VOID operator()(Movable* pMover)
-	{
-		for_each(m_lstGameObjs.begin(), m_lstGameObjs.end(), CollideWithGameObj(pMover));
 	}
 };
 
@@ -243,14 +230,14 @@ VOID Level::Update( FLOAT dt )
 	for_each(m_lstArrows.begin(), m_lstArrows.end(), UpdateGameObj<Arrow>(dt));
 	for_each(m_lstAnimals.begin(), m_lstAnimals.end(), UpdateGameObj<Animal>(dt));
 
-	for_each(m_lstPlayers.begin(), m_lstPlayers.end(), CollideWithTerrain());
-	for_each(m_lstArrows.begin(), m_lstArrows.end(), CollideWithTerrain());
-	for_each(m_lstAnimals.begin(), m_lstAnimals.end(), CollideWithTerrain());
+	for_each(m_lstPlayers.begin(), m_lstPlayers.end(), ACheckTouchWithBs<Player, Terrain>());
+	for_each(m_lstArrows.begin(), m_lstArrows.end(), ACheckTouchWithBs<Arrow, Terrain>());
+	for_each(m_lstAnimals.begin(), m_lstAnimals.end(), ACheckTouchWithBs<Animal, Terrain>());
 
-	for_each(m_lstPlayers.begin(), m_lstPlayers.end(), CollideWithGameObjs<Arrow>(m_lstArrows));
-	for_each(m_lstAnimals.begin(), m_lstAnimals.end(), CollideWithGameObjs<Arrow>(m_lstArrows));
-	
-	for_each(m_lstPlayers.begin(), m_lstPlayers.end(), CollideWithGameObjs<Animal>(m_lstAnimals));
+	for_each(m_lstPlayers.begin(), m_lstPlayers.end(), ACheckTouchWithBs<Player, Arrow>(m_lstArrows));
+	for_each(m_lstAnimals.begin(), m_lstAnimals.end(), ACheckTouchWithBs<Animal, Arrow>(m_lstArrows));
+
+	for_each(m_lstPlayers.begin(), m_lstPlayers.end(), ACheckTouchWithBs<Player, Animal>(m_lstAnimals));
 
 	g_painter.SetCenter(m_lstPlayers.front()->GetPos());
 
@@ -273,27 +260,48 @@ struct DrawGameObj
 
 VOID Level::Draw( Painter* pPainter )
 {
+	Square otherScreen = g_painter.GetOtherScreenBox();
+	Square screen = g_painter.GetScreenBox();
+	BOOL bNeedTrans = (otherScreen.vMin != screen.vMin);
+
 	Terrain tmpTerrain;
 	tmpTerrain.Init();
 	for(INT i=0; i<XTilesW; ++i)
 	{
 		for(INT j=0; j<XTilesH; ++j)
 		{
-			switch( m_matTerrain[i][j] )
+			switch( m_matTerrain[i][j].bExist )
 			{
-			case 0:
+			case FALSE:
 				break;
 			default:
-				tmpTerrain.SetPos(Vector2F(XTerrainSize*(i + 0.5f), XTerrainSize*(j + 0.5f )));
-				if( i==0 )
+				Vector2F vPos(XTerrainSize*(i + 0.5f), XTerrainSize*(j + 0.5f ));
+				tmpTerrain.SetPos(vPos);
+				Square terrainBox = tmpTerrain.GetAABBox();
+
+				if( bNeedTrans )
 				{
-					tmpTerrain.SetColor(255, 0, 0);
+					if( otherScreen.IntersectBox(terrainBox) )
+					{
+						vPos = TransPos(vPos);
+						tmpTerrain.SetPos(vPos);
+						terrainBox = tmpTerrain.GetAABBox();
+					}
 				}
-				else
+
+				if( screen.IntersectBox(terrainBox) )
 				{
-					tmpTerrain.SetColor(0, 255, 0);
+					if( i == 0 )
+					{
+						tmpTerrain.SetColor(255, 0, 0);
+					}
+					else
+					{
+						tmpTerrain.SetColor(0, 255, 0);
+					}
+					tmpTerrain.Draw(pPainter);
 				}
-				tmpTerrain.Draw(pPainter);
+
 				break;
 			}
 		}
@@ -334,4 +342,29 @@ Vector2F Level::GetProperPos( Vector2F &vPos )
 	if( vPos.x >= XTotalW ) vRt.x -= XTotalW;
 	else if( vPos.x < 0 ) vRt.x += XTotalW;
 	return vRt;
+}
+
+DWORD Level::CalcCollideFlag( INT i, INT j )
+{
+	if( !m_matTerrain[i][j].bExist ) return ECD_None;
+
+	DWORD dwDirFlag = ECD_All;
+	if( i-1 >= 0 && m_matTerrain[i-1][j].bExist )
+	{
+		dwDirFlag &= ~ECD_Left;
+	}
+	if( i+1 < XTilesW && m_matTerrain[i+1][j].bExist )
+	{
+		dwDirFlag &= ~ECD_Right;
+	}
+	if( j-1 >= 0 && m_matTerrain[i][j-1].bExist )
+	{
+		dwDirFlag &= ~ECD_Down;
+	}
+	if( j+1 < XTilesH && m_matTerrain[i][j+1].bExist )
+	{
+		dwDirFlag &= ~ECD_Top;
+	}
+
+	return dwDirFlag;
 }

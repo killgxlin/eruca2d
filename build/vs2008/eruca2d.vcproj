@@ -236,6 +236,10 @@
 			Name="game"
 			>
 			<File
+				RelativePath="..\..\src\collide.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\gameobj.cpp"
 				>
 			</File>
@@ -252,7 +256,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\listener.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\main.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shape.h"
 				>
 			</File>
 			<File

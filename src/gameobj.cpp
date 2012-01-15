@@ -43,7 +43,7 @@ VOID tagPhysic::Destroy()
 }
 //-----------------------------------------------------------------------------------------------
 
-VOID AIListener::Listen( tagInputMap &input )
+VOID AIListener::Listen( tagCtrlData &input )
 {
 	InputListener::Listen(input);
 
@@ -76,7 +76,6 @@ VOID AIListener::Listen( tagInputMap &input )
 VOID GameObj::Update( FLOAT dt )
 {
 	m_pSprite->Animate(dt);
-	m_vPrePos = m_vPos;
 }
 
 VOID GameObj::Draw( Painter* pScreen )
@@ -86,44 +85,33 @@ VOID GameObj::Draw( Painter* pScreen )
 
 VOID GameObj::Collide( GameObj* pRunner, tagCollideRes* pRes )
 {
-	AABBox thisBox = GetAABBox();
-	AABBox thatBox = pRunner->GetAABBox();
+	Square thisBox = GetAABBox();
+	Square thatBox = pRunner->GetAABBox();
 
 	pRes->vCollidePos = pRunner->GetPos();
 
 	FLOAT fDeep = 0.0f;
-	pRes->dwDirFlag = thisBox.IntersectTest(thatBox, fDeep, pRunner->GetCollideDirFlag());
+	pRes->dwDirFlag = thisBox.IntersectTest(&thatBox, fDeep, GetCollideDirFlag());
+
 	if( pRes->dwDirFlag & ECD_Top )
 	{
 		pRes->vCollidePos.y += fDeep;
 	}
-	else if( pRes->dwDirFlag & ECD_Down )
+	if( pRes->dwDirFlag & ECD_Down )
 	{
 		pRes->vCollidePos.y -= fDeep;
 	}
-	else if( pRes->dwDirFlag & ECD_Left )
+	if( pRes->dwDirFlag & ECD_Left )
 	{
 		pRes->vCollidePos.x -= fDeep;
 	}
-	else if( pRes->dwDirFlag & ECD_Right )
+	if( pRes->dwDirFlag & ECD_Right )
 	{
 		pRes->vCollidePos.x += fDeep;
 	}
-// 	Vector2F vD = pRunner->GetPos() - pRunner->GetPrePos();
-// 
-// 	FLOAT fT = thisBox.IntersectMovingAABB(thatBox, vD, pRes->dwDirFlag);
-// 	if( fT >= 0.0f && fT <= 1.0f )
-// 	{
-// 		pRes->vCollidePos = pRunner->GetPrePos() + vD * fT;
-// 	}
-// 	else
-// 	{
-// 		pRes->vCollidePos = pRunner->GetPos();
-// 	}
-
 }
 
-AABBox GameObj::GetAABBox() const
+Square GameObj::GetAABBox() const
 {
 	return m_pSprite->GetAABBox(m_vPos);
 }
@@ -133,45 +121,17 @@ VOID GameObj::SetColor( UINT8 u8R, UINT8 u8G, UINT8 u8B )
 	m_pSprite->SetColor(u8R, u8G, u8B);
 }
 
-AABBox GameObj::GetMoveBox() const
-{
-	AABBox curBox = m_pSprite->GetAABBox(m_vPos);
-	AABBox preBox = m_pSprite->GetAABBox(m_vPrePos);
-	curBox.AddBox(preBox);
-	
-	return curBox;
-}
-
 Vector2F GameObj::GetSize() const
 {
 	return m_pSprite->GetSize();
 }
 
-BOOL GameObj::Init( const Vector2F &vPos, UINT32 uCollideDirFlag, EGameObjType eGOT )
+BOOL GameObj::Init( UINT32 uCollideDirFlag )
 {
-	m_vPos = vPos;
+	m_vPos = Vector2F(0.0f, 0.0f);
 	m_uCollideDirFlag = uCollideDirFlag;
-	m_eGot = eGOT;
+	
 	m_bDelete = FALSE;
-	switch( eGOT )
-	{
-	case EGOT_Player:
-		m_pSprite = new SpritePlayer(this);
-		break;
-	case EGOT_Arrow:
-		m_pSprite = new SpriteArrow(this);
-		break;
-	case EGOT_Terrain:
-		m_pSprite = new SpriteTerrain(this);
-		break;
-	case EGOT_Animal:
-		m_pSprite = new SpriteAnimal(this);
-		break;
-	default:
-		return FALSE;
-		break;
-
-	}
 	return TRUE;
 }
 
@@ -184,125 +144,15 @@ VOID GameObj::Destroy()
 //-----------------------------------------------------------------------------------------------
 
 
-VOID Terrain::Collide( Movable* pMover, tagCollideRes* pRes )
-{
-	GameObj::Collide(pMover, pRes);
-	if( !pRes->dwDirFlag ) return;
-
-	switch( pMover->GetType() )
-	{
-	case EGOT_Player:
-		{
-			Player *pPlayer = dynamic_cast<Player *>(pMover);
-			if( pRes->dwDirFlag & ECD_Top )
-			{
-				if( pPlayer->m_vVel.y < 0 )
-				{
-					pPlayer->m_vVel.y *= 0;
-				}
-				pRes->vCollidePos.x = pPlayer->GetPos().x;
-				pPlayer->m_bLand = TRUE;
-				pPlayer->m_fJump = 0.0f;
-			}
-			if( pRes->dwDirFlag & ECD_Down )
-			{
-				pRes->vCollidePos.x = pPlayer->GetPos().x;
-				if( pPlayer->m_vVel.y > 0 )
-				{
-					pPlayer->m_vVel.y *= -1;
-				}
-			}
-			if( pRes->dwDirFlag & ECD_Left )
-			{
-				pRes->vCollidePos.y = pPlayer->GetPos().y;
-				if( pPlayer->m_vVel.x > 0 )
-				{
-					pPlayer->m_vVel.x *= 0;
-				}
-				pPlayer->m_bHitWall = TRUE;
-			}
-			if( pRes->dwDirFlag & ECD_Right )
-			{
-				pRes->vCollidePos.y = pPlayer->GetPos().y;
-				if( pPlayer->m_vVel.x < 0 )
-				{
-					pPlayer->m_vVel.x *= 0;
-				}
-				pPlayer->m_bHitWall = TRUE;
-			}
-
-			pPlayer->SetPos(pRes->vCollidePos);
-			SetColor(255, 255, 255);
-		}
-		break;
-	case EGOT_Arrow:
-		{
-			Arrow* pArrow = dynamic_cast<Arrow *>(pMover);
-			pArrow->m_vVel = Vector2F(0, 0);
-			SetColor(255, 255, 255);
-			if( pRes->dwDirFlag & (ECD_Left | ECD_Right))
-			{
-				pArrow->m_bHitWall = TRUE;	
-			}
-			else
-			{
-				pArrow->m_bLand = TRUE;
-			}
-		}
-		break;
-	case EGOT_Animal:
-		{
-			Animal *pAnimal = dynamic_cast<Animal *>(pMover);
-			if( pRes->dwDirFlag & ECD_Top )
-			{
-				if( pAnimal->m_vVel.y < 0 )
-				{
-					pAnimal->m_vVel.y *= 0;
-				}
-				pRes->vCollidePos.x = pAnimal->GetPos().x;
-				pAnimal->m_bLand = TRUE;
-				pAnimal->m_fJump = 0.0f;
-			}
-			if( pRes->dwDirFlag & ECD_Down )
-			{
-				pRes->vCollidePos.x = pAnimal->GetPos().x;
-				if( pAnimal->m_vVel.y > 0 )
-				{
-					pAnimal->m_vVel.y *= -1;
-				}
-			}
-			if( pRes->dwDirFlag & ECD_Left )
-			{
-				pRes->vCollidePos.y = pAnimal->GetPos().y;
-				if( pAnimal->m_vVel.x > 0 )
-				{
-					pAnimal->m_vVel.x *= 0;
-				}
-				pAnimal->m_bHitWall = TRUE;
-			}
-			if( pRes->dwDirFlag & ECD_Right )
-			{
-				pRes->vCollidePos.y = pAnimal->GetPos().y;
-				if( pAnimal->m_vVel.x < 0 )
-				{
-					pAnimal->m_vVel.x *= 0;
-				}
-				pAnimal->m_bHitWall = TRUE;
-			}
-
-			pAnimal->SetPos(pRes->vCollidePos);
-			SetColor(255, 255, 255);
-		}
-		break;
-	}
-}
-
 BOOL Terrain::Init()
 {
-	if( !GameObj::Init(Vector2F(0.0f, 0.0f), ECD_All, EGOT_Terrain) )
+	if( !GameObj::Init(ECD_All) )
 	{
 		return FALSE;
 	}
+
+	m_pSprite = new SpriteTerrain(this);
+
 	return TRUE;
 }
 
@@ -334,7 +184,9 @@ VOID Player::Update( FLOAT dt )
 		INT nIdxX = GetPos().x / XTerrainSize;
 		INT nIdxY = GetPos().y / XTerrainSize;
 
-		g_level.m_matTerrain[nIdxX][nIdxY] = 1;
+		g_level.m_matTerrain[nIdxX][nIdxY].bExist = true;
+		g_level.m_matTerrain[nIdxX][nIdxY].dwColideFlag = g_level.CalcCollideFlag(nIdxX, nIdxY);
+
 	}
 	if( m_Input.bUp )
 	{
@@ -428,7 +280,11 @@ VOID Player::UpdatePhysic( float dt )
 
 BOOL Player::Init()
 {
-	if( !Movable::Init(Vector2F(0, 0), ECD_None, EGOT_Player) ) return FALSE;
+	if( !Movable::Init(ECD_None) ) return FALSE;
+
+	m_pListener = new KeyBoardListener(this);
+	m_pSprite = new SpritePlayer(this);
+
 	m_fJump = 0.0f;
 	m_bJmpPressed = FALSE;
 	m_fBear = 0.0f;
@@ -441,41 +297,69 @@ VOID Player::Destroy()
 	Movable::Destroy();
 }
 
-//-----------------------------------------------------------------------------------------------
-
-VOID Arrow::Collide( GameObj* pRunner, tagCollideRes* pRes )
+VOID Player::CheckTouch( Terrain* pTerrain, tagCollideRes* pRes )
 {
-	GameObj::Collide(pRunner, pRes);
+	pTerrain->Collide(this, pRes);
 	if( !pRes->dwDirFlag ) return;
 
-	switch( pRunner->GetType() )
+	if( pRes->dwDirFlag & ECD_Top )
 	{
-	case EGOT_Player:
+		if( this->m_vVel.y < 0 )
 		{
-			if( m_bLand | m_bHitWall )
-			{
-				SetDelete();
-			}
-			if( pRunner != m_pOwner )
-			{
-				pRunner->SetDelete();
-			}
+			this->m_vVel.y *= 0;
 		}
-		break;
-	case EGOT_Animal:
-		{
-			if( m_bLand | m_bHitWall )
-			{
-				SetDelete();
-			}
-			else
-			{
-				pRunner->SetDelete();
-			}
-		}
-		break;
+		this->m_bLand = TRUE;
+		this->m_fJump = 0.0f;
 	}
+	if( pRes->dwDirFlag & ECD_Down )
+	{
+		if( this->m_vVel.y > 0 )
+		{
+			this->m_vVel.y *= -1;
+		}
+	}
+	if( pRes->dwDirFlag & ECD_Left )
+	{
+		if( this->m_vVel.x > 0 )
+		{
+			this->m_vVel.x *= 0;
+		}
+		this->m_bHitWall = TRUE;
+	}
+	if( pRes->dwDirFlag & ECD_Right )
+	{
+		if( this->m_vVel.x < 0 )
+		{
+			this->m_vVel.x *= 0;
+		}
+		this->m_bHitWall = TRUE;
+	}
+
+	this->SetPos(pRes->vCollidePos);
 }
+
+VOID Player::CheckTouch( Arrow* pArrow, tagCollideRes* pRes )
+{
+	pArrow->Collide(this, pRes);
+	if( !pRes->dwDirFlag ) return;
+
+	if( pArrow->m_bLand | pArrow->m_bHitWall )
+	{
+		pArrow->SetDelete();
+	}
+	else if( this != pArrow->m_pOwner )
+	{
+		this->SetDelete();
+	}
+
+}
+
+VOID Player::CheckTouch( Animal* pAnimal, tagCollideRes* pRes )
+{
+
+}
+
+//-----------------------------------------------------------------------------------------------
 
 VOID Arrow::Update( FLOAT dt )
 {
@@ -491,9 +375,13 @@ VOID Arrow::UpdatePhysic( FLOAT dt )
 	Vector2F vAcc = XGravity;
 
 	m_vVel += vAcc*dt;
-	if( m_bLand | m_bHitWall )
+	if( m_bLand )
 	{
-		m_vVel = Vector2F(0, 0);
+		m_vVel.y = 0;
+	}
+	if( m_bHitWall )
+	{
+		m_vVel.x = 0;
 	}
 
 	Movable::UpdatePhysic(dt);
@@ -501,7 +389,10 @@ VOID Arrow::UpdatePhysic( FLOAT dt )
 
 BOOL Arrow::Init( Player* pOwner )
 {
-	if( !Movable::Init(Vector2F(0, 0), ECD_All, EGOT_Arrow) ) return FALSE;
+	if( !Movable::Init(ECD_All) ) return FALSE;
+
+	m_pListener = new DummyListener(this);
+	m_pSprite = new SpriteArrow(this);
 
 	m_pOwner = pOwner;
 
@@ -514,6 +405,22 @@ VOID Arrow::Destroy()
 	Movable::Destroy();
 }
 
+VOID Arrow::CheckTouch( Terrain* pTerrain, tagCollideRes* pRes )
+{
+	pTerrain->Collide(this, pRes);
+	if( !pRes->dwDirFlag ) return;
+
+	this->m_vVel = Vector2F(0, 0);
+	if( pRes->dwDirFlag & (ECD_Left | ECD_Right))
+	{
+		this->m_bHitWall = TRUE;	
+	}
+	else
+	{
+		this->m_bLand = TRUE;
+	}
+}
+
 //-----------------------------------------------------------------------------------------------
 
 VOID Movable::Update( float dt )
@@ -523,34 +430,13 @@ VOID Movable::Update( float dt )
 	UpdatePhysic(dt);
 }
 
-BOOL Movable::Init( const Vector2F &vPos, DWORD dwDirFlag, EGameObjType eGOT )
+BOOL Movable::Init( DWORD dwDirFlag )
 {
-	if( !GameObj::Init(vPos, dwDirFlag, eGOT) ) return FALSE;
+	if( !GameObj::Init(dwDirFlag) ) return FALSE;
 
 	if( !tagPhysic::Init(this) ) return FALSE;
 
 	m_Input.u16Data = 0;
-
-	switch( eGOT )
-	{
-	case EGOT_Player:
-		m_pListener = new KeyBoardListener;
-		break;
-	case EGOT_Arrow:
-		m_pListener = new DummyListener;
-		break;
-	case EGOT_Terrain:
-		m_pListener = new DummyListener;
-		break;
-	case EGOT_Animal:
-		m_pListener = new AIListener;
-		break;
-	default:
-		return FALSE;
-		break;
-
-	}
-	m_pListener->m_pMover = this;
 
 	return TRUE;
 }
@@ -650,14 +536,13 @@ VOID Animal::Update( FLOAT dt )
 	Movable::Update(dt);
 }
 
-VOID Animal::Collide( GameObj* pRunner, tagCollideRes* pRes )
-{
-
-}
 
 BOOL Animal::Init()
 {
-	if( !Movable::Init(Vector2F(0.0f, 0.0f), ECD_All, EGOT_Animal) ) return FALSE;
+	if( !Movable::Init(ECD_All) ) return FALSE;
+
+	m_pListener = new AIListener(this);
+	m_pSprite = new SpriteAnimal(this);
 
 	return TRUE;
 }
@@ -665,4 +550,67 @@ BOOL Animal::Init()
 VOID Animal::Destroy()
 {
 	Movable::Destroy();
+}
+
+VOID Animal::CheckTouch( Terrain* pTerrain, tagCollideRes* pRes )
+{
+	pTerrain->Collide(this, pRes);
+	if( !pRes->dwDirFlag ) return;
+
+	Vector2F vPos = pRes->vCollidePos;
+
+	if( pRes->dwDirFlag & ECD_Top )
+	{
+		if( this->m_vVel.y < 0 )
+		{
+			this->m_vVel.y *= 0;
+		}
+		vPos.x = this->GetPos().x;
+		this->m_bLand = TRUE;
+		this->m_fJump = 0.0f;
+	}
+	if( pRes->dwDirFlag & ECD_Down )
+	{
+		vPos.x = this->GetPos().x;
+		if( this->m_vVel.y > 0 )
+		{
+			this->m_vVel.y *= -1;
+		}
+	}
+	if( pRes->dwDirFlag & ECD_Left )
+	{
+		vPos.y = this->GetPos().y;
+		if( this->m_vVel.x > 0 )
+		{
+			this->m_vVel.x *= 0;
+		}
+		this->m_bHitWall = TRUE;
+	}
+	if( pRes->dwDirFlag & ECD_Right )
+	{
+		vPos.y = this->GetPos().y;
+		if( this->m_vVel.x < 0 )
+		{
+			this->m_vVel.x *= 0;
+		}
+		this->m_bHitWall = TRUE;
+	}
+
+	this->SetPos(vPos);
+}
+
+VOID Animal::CheckTouch( Arrow* pArrow, tagCollideRes* pRes )
+{
+	pArrow->Collide(this, pRes);
+	if( !pRes->dwDirFlag ) return;
+
+
+	if(pArrow-> m_bLand | pArrow->m_bHitWall )
+	{
+		pArrow->SetDelete();
+	}
+	else
+	{
+		SetDelete();
+	}
 }
