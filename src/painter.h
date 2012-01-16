@@ -17,7 +17,7 @@ public:
 	VOID			SetCenter(const Vector2F &vPos);
 	VOID			SetZoomRate(FLOAT fRate)				{ m_fZoomRate = Cut(fRate, 0.5f, 2.0f); }
 
-	VOID			ModZoomRate(FLOAT fDelta)				{ m_fZoomRate = Cut(m_fZoomRate+fDelta, 0.5f, 2.0f); }
+	VOID			ModZoomRate(FLOAT fDelta)				{ m_fZoomRate = Cut(m_fZoomRate+fDelta, 0.5f,2.0f); }
 
 	UINT32			GetColor(UINT8 u8R, UINT8 u8G, UINT8 u8B);
 	FLOAT			GetZoomRate() const						{ return m_fZoomRate; }

@@ -48,7 +48,7 @@ enum ECollideDir
 
 #define XPlayerSize			(XScreenW / 40)
 #define XTerrainSize		XPlayerSize
-#define XArrowSize			(XPlayerSize)
+#define XArrowSize			(XPlayerSize/2)
 #define XAnimalSize			(XPlayerSize)
 
 #define XTotalW				(XScreenW * 5)

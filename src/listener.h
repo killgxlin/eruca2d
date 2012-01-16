@@ -44,8 +44,8 @@ public:
 		input.bRight	= g_keyboard.GetKey(SDLK_RIGHT);
 		input.bZoomIn	= g_keyboard.GetKey(SDLK_z);
 		input.bZoomOut= g_keyboard.GetKey(SDLK_x);
-		input.bFire	= g_keyboard.FetchKey(SDLK_LCTRL);
-		input.bConstruct = g_keyboard.FetchKey(SDLK_c);
+		input.bFire	= g_keyboard.GetButton(SDL_BUTTON_LEFT);
+		input.bConstruct = g_keyboard.FetchButton(SDL_BUTTON_RIGHT);
 		input.bUp = g_keyboard.GetKey(SDLK_e);
 		input.bDown = g_keyboard.GetKey(SDLK_r);
 	}

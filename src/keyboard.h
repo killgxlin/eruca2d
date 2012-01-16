@@ -17,6 +17,16 @@ public:
 	{
 		return m_bKey[uKey];
 	}
+	BOOL	FetchButton(BYTE byButton)
+	{
+		BOOL bPress = GetButton(byButton);
+		m_byMouse &= ~(SDL_BUTTON(byButton));
+		return bPress;
+	}
+	BOOL	GetButton(BYTE byButton)
+	{
+		return (m_byMouse & SDL_BUTTON(byButton)) != 0;
+	}
 public:
 	BOOL		m_bKey[SDLK_LAST];
 	BYTE		m_byMouse;
