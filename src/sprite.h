@@ -39,6 +39,7 @@ class SpritePlayer : public Sprite
 {
 public:
 	VOID			Animate(FLOAT dt);
+	VOID			Draw(Painter* pPainter, const Vector2F &vPos);
 public:
 	SpritePlayer(GameObj* pGameObj):Sprite(pGameObj, XPlayerSize, XPlayerSize, 120, 0, 90), m_nCounter(0){}
 

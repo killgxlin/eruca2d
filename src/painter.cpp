@@ -221,3 +221,21 @@ Square Painter::GetScreenBox() const
 {
 	return Square(m_vCenter, Vector2F(XScreenW, XScreenH) / m_fZoomRate);
 }
+
+VOID Painter::SDLToWorld( Vector2F* pPt )
+{
+	// SDL Screen
+	pPt->y = m_pScreen->h - pPt->y;
+
+	// Screen World
+	Vector2F vSize(FLOAT(m_pScreen->w), FLOAT(m_pScreen->h));
+
+	Vector2F vVec = *pPt - vSize / 2;
+	vVec /= m_fZoomRate;
+
+	*pPt = vVec + vSize / 2;
+
+	Vector2F vLeftBottom = m_vCenter - vSize / 2;
+	*pPt += vLeftBottom;
+
+}

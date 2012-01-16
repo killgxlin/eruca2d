@@ -37,7 +37,7 @@ enum ECollideDir
 	ECD_All		= ECD_Top | ECD_Down | ECD_Left | ECD_Right,
 };
 
-#define XMaxArrowSpeed		400
+#define XMaxArrowSpeed		1600
 #define XMaxPlayerSpeedX	200	//pixel per sec
 #define XGravity			Vector2F(0, -400)	//pixel * pixel per sec
 #define XCtrlAcc			800	//

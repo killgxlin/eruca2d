@@ -23,7 +23,8 @@ class GameObj
 public:
 	virtual VOID	Update(FLOAT dt);
 	virtual VOID	Draw(Painter* pScreen);
-	VOID			Collide(GameObj* pRunner, tagCollideRes* pRes);
+	VOID			NormalCollide(GameObj* pRunner, tagCollideRes* pRes);
+	VOID			BulletCollide(GameObj* pRunner, tagCollideRes* pRes);
 
 	virtual BOOL	Init(UINT32 uCollideDirFlag);
 	virtual VOID	Destroy();
@@ -45,6 +46,7 @@ public:
 	UINT32			GetCollideDirFlag() const	{ return m_uCollideDirFlag; }
 	Square			GetAABBox() const;
 	Vector2F		GetPos() const				{ return m_vPos; }
+	Vector2F		GetPrePos() const			{ return m_vPrePos; }
 	Vector2F		GetSize() const;
 
 	virtual VOID	CheckTouch(Arrow* pArrow, tagCollideRes* pRes)		{}
@@ -55,6 +57,7 @@ public:
 
 protected:
 	Vector2F		m_vPos;				// 当前位置
+	Vector2F		m_vPrePos;			// 之前位置
 	UINT32			m_uCollideDirFlag;	// 碰撞的方向
 };
 //-----------------------------------------------------------------------------------------------
@@ -99,7 +102,7 @@ public:
 
 	float			m_fJump;
 	BOOL			m_bJmpPressed;
-	FLOAT			m_fBear;
+	Vector2F		m_vArrowDir;
 };
 //-----------------------------------------------------------------------------------------------
 

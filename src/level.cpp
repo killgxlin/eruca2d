@@ -13,7 +13,6 @@ BOOL Level::Init()
 	{
 		for(INT j=0; j<XTilesH; ++j)
 		{
-			m_matTerrain[i][j].dwColideFlag = 0;
 			if( j < 1 )
 			{
 				m_matTerrain[i][j].bExist = true;
@@ -32,13 +31,6 @@ BOOL Level::Init()
 		}
 	}
 
-	for(INT i=0; i<XTilesW; ++i)
-	{
-		for(INT j=0; j<XTilesH; ++j)
-		{
-			m_matTerrain[i][j].dwColideFlag = CalcCollideFlag(i,j);
-		}
-	}
 
 	Player* pPlayer = new Player;
 	pPlayer->Init();
@@ -143,7 +135,7 @@ struct ACheckTouchWithBs<A, Terrain>
 				if( !g_level.m_matTerrain[i][j].bExist ) continue;
 
 				tmpTerrain.SetPos(Vector2F(XTerrainSize*(i + 0.5f), XTerrainSize*(j + 0.5f )));
-				tmpTerrain.SetCollideDirFlag(g_level.m_matTerrain[i][j].dwColideFlag);
+				tmpTerrain.SetCollideDirFlag(g_level.CalcCollideFlag(i, j));
 				pA->CheckTouch(&tmpTerrain, &result);
 			}
 		}
@@ -173,7 +165,7 @@ struct ACheckTouchWithBs<A, Terrain>
 					if( !g_level.m_matTerrain[i][j].bExist ) continue;
 
 					tmpTerrain.SetPos(Vector2F(XTerrainSize*(i + 0.5f), XTerrainSize*(j + 0.5f )));
-					tmpTerrain.SetCollideDirFlag(g_level.m_matTerrain[i][j].dwColideFlag);
+					tmpTerrain.SetCollideDirFlag(g_level.CalcCollideFlag(i, j));
 					pA->CheckTouch(&tmpTerrain, &result);
 				}
 			}

@@ -9,7 +9,6 @@ class Animal;
 struct tagTerrain 
 {
 	bool		bExist;
-	DWORD		dwColideFlag;
 };
 
 class Level

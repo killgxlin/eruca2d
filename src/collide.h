@@ -11,7 +11,6 @@ struct tagPhysic
 {
 	Vector2F		m_vVel;
 	BOOL			m_bLand;
-	BOOL			m_bFaceRight;
 	BOOL			m_bHitWall;
 
 	Movable*		m_pMover;

@@ -16,14 +16,6 @@ VOID tagPhysic::UpdatePhysic( FLOAT dt )
 	m_pMover->SetPos(m_pMover->GetPos()+vOffset);
 	m_bHitWall = FALSE;
 	m_bLand = FALSE;
-	if( m_pMover->m_Input.bLeft )
-	{
-		m_bFaceRight = FALSE;
-	}
-	else if( m_pMover->m_Input.bRight )
-	{
-		m_bFaceRight = TRUE;
-	}
 }
 
 BOOL tagPhysic::Init( Movable* pMover )
@@ -32,7 +24,6 @@ BOOL tagPhysic::Init( Movable* pMover )
 	m_vVel = Vector2F(0.0f, 0.0f);
 	m_bLand = FALSE;
 	m_bHitWall = FALSE;
-	m_bFaceRight = TRUE;
 
 	return TRUE;
 }
@@ -76,6 +67,7 @@ VOID AIListener::Listen( tagCtrlData &input )
 VOID GameObj::Update( FLOAT dt )
 {
 	m_pSprite->Animate(dt);
+	m_vPrePos = m_vPos;
 }
 
 VOID GameObj::Draw( Painter* pScreen )
@@ -83,7 +75,7 @@ VOID GameObj::Draw( Painter* pScreen )
 	m_pSprite->Draw(pScreen, m_vPos);
 }
 
-VOID GameObj::Collide( GameObj* pRunner, tagCollideRes* pRes )
+VOID GameObj::NormalCollide( GameObj* pRunner, tagCollideRes* pRes )
 {
 	Square thisBox = GetAABBox();
 	Square thatBox = pRunner->GetAABBox();
@@ -109,6 +101,7 @@ VOID GameObj::Collide( GameObj* pRunner, tagCollideRes* pRes )
 	{
 		pRes->vCollidePos.x += fDeep;
 	}
+
 }
 
 Square GameObj::GetAABBox() const
@@ -128,7 +121,7 @@ Vector2F GameObj::GetSize() const
 
 BOOL GameObj::Init( UINT32 uCollideDirFlag )
 {
-	m_vPos = Vector2F(0.0f, 0.0f);
+	m_vPrePos = m_vPos = Vector2F(0.0f, 0.0f);
 	m_uCollideDirFlag = uCollideDirFlag;
 	
 	m_bDelete = FALSE;
@@ -139,6 +132,26 @@ VOID GameObj::Destroy()
 {
 	delete m_pSprite;
 	m_pSprite = NULL;
+}
+
+VOID GameObj::BulletCollide( GameObj* pRunner, tagCollideRes* pRes )
+{
+	Square thisBox = this->GetAABBox();
+	Square thatBox = pRunner->GetAABBox();
+
+	pRes->vCollidePos = pRunner->GetPos();
+
+	Vector2F vD = pRunner->GetPos() - pRunner->GetPrePos();
+
+	FLOAT fT = thisBox.IntersectMovingAABB(thatBox, vD, pRes->dwDirFlag);
+	if( fT >= 0.0f && fT < 1.0f )
+	{
+		pRes->vCollidePos = this->GetPrePos() + vD * fT;
+	}
+	else
+	{
+		pRes->vCollidePos = this->GetPos();
+	}
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -168,15 +181,18 @@ VOID Player::Update( FLOAT dt )
 
 	Movable::Update(dt);
 	
+	m_vArrowDir = g_keyboard.m_vMousePos - GetPos();
+	m_vArrowDir /= m_vArrowDir.Length();
+
 	if( m_Input.bFire )
 	{
 		Arrow* pArrow = new Arrow;
 		pArrow->Init(this);
 		pArrow->SetPos(GetPos());
 		
-		pArrow->m_vVel.x = XMaxArrowSpeed*2*cos(m_fBear);
-		pArrow->m_vVel.y = XMaxArrowSpeed*2*sin(m_fBear);
-		pArrow->m_vVel.x *= (m_bFaceRight ? 1 : -1);
+		pArrow->m_vVel.x = XMaxArrowSpeed*m_vArrowDir.x;
+		pArrow->m_vVel.y = XMaxArrowSpeed*m_vArrowDir.y;
+
 		g_level.m_lstArrows.push_back(pArrow);
 	}
 	if( m_Input.bConstruct )
@@ -185,18 +201,8 @@ VOID Player::Update( FLOAT dt )
 		INT nIdxY = GetPos().y / XTerrainSize;
 
 		g_level.m_matTerrain[nIdxX][nIdxY].bExist = true;
-		g_level.m_matTerrain[nIdxX][nIdxY].dwColideFlag = g_level.CalcCollideFlag(nIdxX, nIdxY);
 
 	}
-	if( m_Input.bUp )
-	{
-		m_fBear += 0.01f;
-	}
-	if( m_Input.bDown )
-	{
-		m_fBear -= 0.01f;
-	}
-	m_fBear = Cut(m_fBear, -1.57f, 1.57f);
 }
 
 
@@ -287,7 +293,6 @@ BOOL Player::Init()
 
 	m_fJump = 0.0f;
 	m_bJmpPressed = FALSE;
-	m_fBear = 0.0f;
 
 	return TRUE;
 }
@@ -299,7 +304,7 @@ VOID Player::Destroy()
 
 VOID Player::CheckTouch( Terrain* pTerrain, tagCollideRes* pRes )
 {
-	pTerrain->Collide(this, pRes);
+	pTerrain->NormalCollide(this, pRes);
 	if( !pRes->dwDirFlag ) return;
 
 	if( pRes->dwDirFlag & ECD_Top )
@@ -340,10 +345,10 @@ VOID Player::CheckTouch( Terrain* pTerrain, tagCollideRes* pRes )
 
 VOID Player::CheckTouch( Arrow* pArrow, tagCollideRes* pRes )
 {
-	pArrow->Collide(this, pRes);
+	pArrow->BulletCollide(this, pRes);
 	if( !pRes->dwDirFlag ) return;
 
-	if( pArrow->m_bLand | pArrow->m_bHitWall )
+	if( pArrow->m_bLand || pArrow->m_bHitWall )
 	{
 		pArrow->SetDelete();
 	}
@@ -375,15 +380,11 @@ VOID Arrow::UpdatePhysic( FLOAT dt )
 	Vector2F vAcc = XGravity;
 
 	m_vVel += vAcc*dt;
-	if( m_bLand )
+	if( m_bLand || m_bHitWall )
 	{
 		m_vVel.y = 0;
-	}
-	if( m_bHitWall )
-	{
 		m_vVel.x = 0;
 	}
-
 	Movable::UpdatePhysic(dt);
 }
 
@@ -407,7 +408,7 @@ VOID Arrow::Destroy()
 
 VOID Arrow::CheckTouch( Terrain* pTerrain, tagCollideRes* pRes )
 {
-	pTerrain->Collide(this, pRes);
+	pTerrain->BulletCollide(this, pRes);
 	if( !pRes->dwDirFlag ) return;
 
 	this->m_vVel = Vector2F(0, 0);
@@ -554,7 +555,7 @@ VOID Animal::Destroy()
 
 VOID Animal::CheckTouch( Terrain* pTerrain, tagCollideRes* pRes )
 {
-	pTerrain->Collide(this, pRes);
+	pTerrain->NormalCollide(this, pRes);
 	if( !pRes->dwDirFlag ) return;
 
 	Vector2F vPos = pRes->vCollidePos;
@@ -601,7 +602,7 @@ VOID Animal::CheckTouch( Terrain* pTerrain, tagCollideRes* pRes )
 
 VOID Animal::CheckTouch( Arrow* pArrow, tagCollideRes* pRes )
 {
-	pArrow->Collide(this, pRes);
+	pArrow->NormalCollide(this, pRes);
 	if( !pRes->dwDirFlag ) return;
 
 

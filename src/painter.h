@@ -30,6 +30,7 @@ public:
 	Square			GetOtherScreenBox() const;
 	Square			GetScreenBox() const;
 
+	VOID			SDLToWorld(Vector2F* pPt);
 private:
 	VOID			WorldToScreen(const Vector2F &vCenter, Vector2F* pPt, Vector2F* pSize);
 	VOID			ScreenToSDL(Vector2F* pPt);

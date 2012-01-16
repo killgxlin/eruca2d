@@ -28,6 +28,18 @@ VOID SpritePlayer::Animate( FLOAT dt )
 
 	m_u8R = UINT8(fPct * 255);
 }
+
+VOID SpritePlayer::Draw( Painter* pPainter, const Vector2F &vPos )
+{
+	Player* pPlayer = dynamic_cast<Player*>(m_pGameObj);
+
+	Sprite::Draw(pPainter, vPos);
+
+	Vector2F vHead = vPos;
+	Vector2F vTail = vHead + pPlayer->m_vArrowDir * XArrowSize;
+	g_painter.WorldDrawLine(vHead, vTail, g_painter.GetColor(255, 255, 255));
+}
+
 //-----------------------------------------------------------------------------------------------
 
 VOID SpriteArrow::Draw( Painter* pPainter, const Vector2F &vPos )

@@ -14,6 +14,12 @@ VOID KeyBoard::Update()
 				break;
 		}
 	}
+	INT nX, nY;
+	m_byMouse = SDL_GetMouseState(&nX, &nY);
+	m_vMousePos.x = nX;
+	m_vMousePos.y = nY;
+	g_painter.SDLToWorld(&m_vMousePos);
+	g_text.AddText(g_painter.GetColor(255, 0, 0), "pos of mouse  :%4.2f ,%4.2f", m_vMousePos.x, m_vMousePos.y);
 }
 
 KeyBoard g_keyboard;
