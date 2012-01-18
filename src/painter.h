@@ -13,6 +13,7 @@ public:
 	VOID			WorldDrawRect(const Vector2F &vWorldPos, const Vector2F &vSize, UINT32 uColor);
 	VOID			WorldDrawText(const Vector2F &vWorldPos, UINT32 uColor, const char* szFormat, ...);
 	VOID			WorldDrawLine(const Vector2F &vWorldPosHead, const Vector2F &vWorldPosTail, DWORD dwColor);
+	VOID			WorldDrawImg(const Vector2F &vWorldPos, SDL_Surface* pSurface);
 
 	VOID			SetCenter(const Vector2F &vPos);
 	VOID			SetZoomRate(FLOAT fRate)				{ m_fZoomRate = Cut(fRate, 0.5f, 2.0f); }

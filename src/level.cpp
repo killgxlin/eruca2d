@@ -192,6 +192,12 @@ VOID Level::Update( FLOAT dt )
 		}
 	}
 
+	while(m_lstArrows.size() >= 1000)
+	{
+		Arrow* pArrow = m_lstArrows.front();
+		pArrow->Destroy();
+		m_lstArrows.pop_front();
+	}
 	for(list<Arrow*>::iterator itr = m_lstArrows.begin();
 		m_lstArrows.end() != itr;
 		)

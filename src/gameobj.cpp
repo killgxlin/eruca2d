@@ -24,6 +24,7 @@ BOOL tagPhysic::Init( Movable* pMover )
 	m_vVel = Vector2F(0.0f, 0.0f);
 	m_bLand = FALSE;
 	m_bHitWall = FALSE;
+	m_bFaceRight = TRUE;
 
 	return TRUE;
 }
@@ -210,37 +211,47 @@ VOID Player::UpdatePhysic( float dt )
 {
 	Vector2F vAcc = XGravity;
 
-	if( m_pMover->m_Input.bZoomIn )
-	{
-		m_pMover->GetSprite()->SetSizeFactor(m_pMover->GetSprite()->GetSizeFactor() - 0.1f);
-	}
-
-	if( m_pMover->m_Input.bZoomOut )
-	{
-		m_pMover->GetSprite()->SetSizeFactor(m_pMover->GetSprite()->GetSizeFactor() + 0.1f);
-	}
+// 	if( m_pMover->m_Input.bZoomIn )
+// 	{
+// 		m_pMover->GetSprite()->SetSizeFactor(m_pMover->GetSprite()->GetSizeFactor() - 0.1f);
+// 	}
+// 
+// 	if( m_pMover->m_Input.bZoomOut )
+// 	{
+// 		m_pMover->GetSprite()->SetSizeFactor(m_pMover->GetSprite()->GetSizeFactor() + 0.1f);
+// 	}
 
 	if( m_pMover->m_Input.bLeft )
 	{
 		vAcc.x = -XCtrlAcc;
+		m_bFaceRight = FALSE;
 	}
 
 	if( m_pMover->m_Input.bRight )
 	{
 		vAcc.x = XCtrlAcc;
+		m_bFaceRight = TRUE;
+	}
+
+	if( m_bLand )
+	{
+		vAcc.y = 0;
 	}
 
 	if( vAcc.x == 0.0f )
 	{
-		if( m_vVel.x > 0.0f )
+		FLOAT fFraction = dt * XCtrlAcc;
+		if( fabs(m_vVel.x) > fFraction )
 		{
-			vAcc.x = -XCtrlAcc;
+			vAcc.x = (m_vVel.x > 0 ? -XCtrlAcc : XCtrlAcc);
 		}
-		else if( m_vVel.x < 0.0f )
+		else
 		{
-			vAcc.x = XCtrlAcc;
+			vAcc.x = 0.0f;
+			m_vVel.x = 0;
 		}
 	}
+
 	m_vVel += vAcc*dt;
 
 	if( abs(m_vVel.x) > XMaxPlayerSpeedX )
@@ -276,10 +287,37 @@ VOID Player::UpdatePhysic( float dt )
 		}
 	}
 
+	EActDir eDir = m_bFaceRight ? EAD_Right : EAD_Left;
+	EActType eType = EAT_Stand;
+	BOOL bLoop = TRUE;
 	if( m_bLand )
 	{
-		m_vVel.y = 0;
+		if( vAcc.x != 0.0f )
+		{
+			eType = EAT_Run;
+			bLoop = TRUE;
+		}
+		else
+		{
+			eType = EAT_Stand;
+			bLoop = TRUE;
+		}
 	}
+	else
+	{
+		if( m_fJump >= 0.0F && m_bJmpPressed )
+		{
+			eType = EAT_Jump;
+			bLoop = TRUE;
+		}
+		else
+		{
+			eType = EAT_Fall;
+			bLoop = TRUE;
+		}
+	}
+
+	static_cast<SpriteEx*>(m_pSprite)->Start(eType, eDir, bLoop);
 
 	Movable::UpdatePhysic(dt);
 }
@@ -289,7 +327,8 @@ BOOL Player::Init()
 	if( !Movable::Init(ECD_None) ) return FALSE;
 
 	m_pListener = new KeyBoardListener(this);
-	m_pSprite = new SpritePlayer(this);
+	m_pSprite = new SpriteEx(this);
+	static_cast<SpriteEx*>(m_pSprite)->Load();
 
 	m_fJump = 0.0f;
 	m_bJmpPressed = FALSE;
@@ -299,6 +338,7 @@ BOOL Player::Init()
 
 VOID Player::Destroy()
 {
+	static_cast<SpriteEx*>(m_pSprite)->UnLoad();
 	Movable::Destroy();
 }
 
@@ -476,16 +516,16 @@ VOID Animal::UpdatePhysic( FLOAT dt )
 	{
 		vAcc.x = XCtrlAcc;
 	}
-
 	if( vAcc.x == 0.0f )
 	{
-		if( m_vVel.x > 0.0f )
+		FLOAT fFraction = dt * XCtrlAcc;
+		if( fabs(m_vVel.x) > fFraction )
 		{
-			vAcc.x = -XCtrlAcc;
+			vAcc.x = (m_vVel.x > 0 ? -XCtrlAcc : XCtrlAcc);
 		}
-		else if( m_vVel.x < 0.0f )
+		else
 		{
-			vAcc.x = XCtrlAcc;
+			m_vVel.x = 0;
 		}
 	}
 	m_vVel += vAcc*dt;

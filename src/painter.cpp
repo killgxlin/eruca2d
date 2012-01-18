@@ -239,3 +239,21 @@ VOID Painter::SDLToWorld( Vector2F* pPt )
 	*pPt += vLeftBottom;
 
 }
+
+VOID Painter::WorldDrawImg( const Vector2F &vWorldPos, SDL_Surface* pSurface )
+{
+	Vector2F vPos = vWorldPos;
+	WorldToScreen(m_vCenter, &vPos, NULL);
+	ScreenToSDL(&vPos);
+
+	Vector2F vSize(pSurface->w, pSurface->h);
+	Vector2F vLB = vPos - vSize / 2;
+
+	SDL_Rect rect;
+	rect.x = vLB.x;
+	rect.y = vLB.y;
+	rect.w = pSurface->w;
+	rect.h = pSurface->h;
+	
+	SDL_BlitSurface(pSurface, NULL, m_pScreen, &rect);
+}

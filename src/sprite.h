@@ -72,4 +72,47 @@ public:
 	SpriteAnimal(GameObj* pGameObj) : Sprite(pGameObj, XAnimalSize, XAnimalSize, 255, 0, 255){}
 
 };
+
+class SpriteEx : public Sprite
+{
+public:
+	SpriteEx(GameObj* pGameObj):Sprite(pGameObj, 0, 0, 0, 0, 0), m_bPlay(FALSE), m_fTimer(0.0f), m_eType(EAT_Stand), m_eDir(EAD_Right){}
+	virtual ~SpriteEx(){}
+	BOOL			Load();
+	VOID			UnLoad();
+
+	BOOL			Start(EActType eType, EActDir eDir, BOOL bLoop = TRUE)
+	{
+		if( m_eType == eType && eDir == m_eDir )
+		{
+			m_bPlay = TRUE;
+			return TRUE;
+		}
+		m_eType = eType;
+		m_eDir = eDir;
+		m_fTimer = 0.0f;
+		m_bLoop = bLoop;
+
+		return TRUE;
+	}
+	VOID			Pause()
+	{
+		m_bPlay = !m_bPlay;
+	}
+
+	virtual VOID	Animate(FLOAT dt);
+	virtual VOID	Draw(Painter* pPainter, const Vector2F &vPos);
+	virtual Square	GetAABBox(const Vector2F &vPos);
+
+private:
+	typedef vector<SDL_Surface*>	VecSurface;
+	VecSurface						m_arrSurfaces[EAD_End][EAT_End];
+
+	BOOL							m_bPlay;
+	FLOAT							m_fTimer;
+	EActType						m_eType;
+	EActDir							m_eDir;
+	BOOL							m_bLoop;
+};
+
 #endif

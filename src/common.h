@@ -26,6 +26,22 @@ using std::swap;
 using std::make_pair;
 using std::for_each;
 
+enum EActDir
+{
+	EAD_Right	= 0,
+	EAD_Left	= 1,
+	EAD_End,
+};
+
+enum EActType
+{
+	EAT_Stand	= 0,
+	EAT_Run		= 1,
+	EAT_Jump	= 2,
+	EAT_Fall	= 3,
+	EAT_Land	= 4,
+	EAT_End,
+};
 
 enum ECollideDir
 {
