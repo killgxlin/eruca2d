@@ -312,7 +312,7 @@ VOID Player::UpdatePhysic( float dt )
 		}
 		else
 		{
-			eType = EAT_Fall;
+			eType = EAT_Run;
 			bLoop = TRUE;
 		}
 	}

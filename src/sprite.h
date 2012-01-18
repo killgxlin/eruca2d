@@ -106,7 +106,12 @@ public:
 
 private:
 	typedef vector<SDL_Surface*>	VecSurface;
-	VecSurface						m_arrSurfaces[EAD_End][EAT_End];
+	struct tagActionInfo
+	{
+		VecSurface		acts[EAD_End];
+		FLOAT			fLastTime;
+	};
+	tagActionInfo					m_arrSurfaces[EAT_End];
 
 	BOOL							m_bPlay;
 	FLOAT							m_fTimer;

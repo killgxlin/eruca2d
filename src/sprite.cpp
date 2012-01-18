@@ -71,14 +71,15 @@ BOOL SpriteEx::Load()
 		EActType	eActType;
 		const char* szName;
 		INT			nNum;
+		FLOAT		fLastTime;
 	};
 
 	tagAniInfo arrInfo[] = {
-		{	EAT_Stand,	"rockman/stand%02d.bmp",	6	},
-		{	EAT_Run,	"rockman/run%02d.bmp",		11	},
-		{	EAT_Jump,	"rockman/jmp%02d.bmp",		6	},
-		{	EAT_Fall,	"rockman/fall%02d.bmp",		4	},
-		{	EAT_Land,	"rockman/land%02d.bmp",		2	},
+		{	EAT_Stand,	"rockman/stand%02d.bmp",	6,	3	},
+		{	EAT_Run,	"rockman/run%02d.bmp",		11,	1	},
+		{	EAT_Jump,	"rockman/jmp%02d.bmp",		6,	1	},
+		{	EAT_Fall,	"rockman/fall%02d.bmp",		4,	1	},
+		{	EAT_Land,	"rockman/land%02d.bmp",		2,	0.5	},
 	};
 	
 	INT nInfoLen = (sizeof(arrInfo) / sizeof(arrInfo[0]));
@@ -100,40 +101,43 @@ BOOL SpriteEx::Load()
 			SDL_SetColorKey(pLeft, SDL_SRCCOLORKEY, SDL_MapRGB(pSrc->format, 0, 0, 0));
 			SDL_FreeSurface(pSrc);
 
-			m_arrSurfaces[EAD_Right][arrInfo[i].eActType].push_back(pRight);
-			m_arrSurfaces[EAD_Left][arrInfo[i].eActType].push_back(pLeft);
+			m_arrSurfaces[arrInfo[i].eActType].acts[EAD_Right].push_back(pRight);
+			m_arrSurfaces[arrInfo[i].eActType].acts[EAD_Left].push_back(pLeft);
 		}
+		m_arrSurfaces[arrInfo[i].eActType].fLastTime = arrInfo[i].fLastTime;
 	}
 	return TRUE;
 }
 
 VOID SpriteEx::UnLoad()
 {
-	for(INT i=EAD_Right; i<EAD_End; ++i)
+	for(INT i=EAT_Stand; i<EAT_End; ++i)
 	{
-		for(INT j=EAT_Stand; j<EAT_End; ++j)
+		for(INT j=EAD_Right; j<EAD_End; ++j)
 		{
-			for(INT nSize = m_arrSurfaces[i][j].size()-1; nSize >= 0; --nSize)
+			for(INT nSize = m_arrSurfaces[i].acts[j].size()-1; nSize >= 0; --nSize)
 			{
-				SDL_FreeSurface(m_arrSurfaces[i][j][nSize]);
+				SDL_FreeSurface(m_arrSurfaces[i].acts[j][nSize]);
 			}
-			m_arrSurfaces[i][j].clear();
+			m_arrSurfaces[i].acts[j].clear();
 		}
 	}
 }
 
 VOID SpriteEx::Animate( FLOAT dt )
 {
+	FLOAT fLastTime = m_arrSurfaces[m_eType].fLastTime;
+
 	m_fTimer += dt;
-	if( m_fTimer > 1.0f )
+	if( m_fTimer > fLastTime )
 	{
 		if( m_bLoop )
 		{
-			m_fTimer = m_fTimer - floorf(m_fTimer);
+			m_fTimer -= floorf(m_fTimer / fLastTime) * fLastTime;
 		}
 		else
 		{
-			m_fTimer = 1.0f;
+			m_fTimer = fLastTime;
 		}
 	}
 	
@@ -141,7 +145,7 @@ VOID SpriteEx::Animate( FLOAT dt )
 
 VOID SpriteEx::Draw( Painter* pPainter, const Vector2F &vPos )
 {
-	VecSurface &vec = m_arrSurfaces[m_eDir][m_eType];
+	VecSurface &vec = m_arrSurfaces[m_eType].acts[m_eDir];
 	INT nIdx = ceilf((vec.size() - 1) * m_fTimer);
 	g_painter.WorldDrawImg(vPos, vec[nIdx]);
 	
@@ -149,7 +153,7 @@ VOID SpriteEx::Draw( Painter* pPainter, const Vector2F &vPos )
 
 Square SpriteEx::GetAABBox( const Vector2F &vPos )
 {
-	VecSurface &vec = m_arrSurfaces[m_eDir][m_eType];
+	VecSurface &vec = m_arrSurfaces[m_eType].acts[m_eDir];
 	INT nIdx = ceilf((vec.size() - 1) * m_fTimer);
 	return Square(vPos, Vector2F(vec[nIdx]->w, vec[nIdx]->h));
 }

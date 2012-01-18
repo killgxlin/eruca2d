@@ -57,7 +57,7 @@ enum ECollideDir
 #define XMaxPlayerSpeedX	200	//pixel per sec
 #define XGravity			Vector2F(0, -400)	//pixel * pixel per sec
 #define XCtrlAcc			800	//
-#define XJumpSpeed			200
+#define XJumpSpeed			400
 
 #define XScreenW			640
 #define XScreenH			(XScreenW * 3 / 4)
