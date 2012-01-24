@@ -1,48 +1,41 @@
 #ifndef __RES_MGR_H__
 #define __RES_MGR_H__
 
-struct tagAnimateProto
+//-------------------------------------------------------------------------------
+struct tagActionProto
 {
-	typedef vector<SDL_Surface*>	VecSurface;
-	struct tagActionProto
-	{
-		VecSurface		acts[EAD_End];
-		FLOAT			fLastTime;
-	};
-	tagActionProto		arrSurfaces[EAT_End];
-	Vector2F			vBox;
-};
-
-struct tagAniInfo
-{
-	EActType	eActType;
-	const char* szName;
+	const char* szFileName;
 	INT			nNum;
-	FLOAT		fLastTime;
+
+	const char* szAlias;
+	FLOAT		fDuration;
+	bool		bFlip;
+	FLOAT		fWidth;
 };
 
-class ResMgr
+struct tagAction
+{
+	typedef vector<SDL_Surface*>	SurfaceVec;
+	SurfaceVec		vecSurfaces;
+	FLOAT			fDuration;
+	Vector2F		vSize;
+};
+
+class ResMgrEx
 {
 public:
-	typedef map<INT32, tagAnimateProto*>	MapAniProto;
-	typedef map<INT32, SDL_Surface*>		MapSurface;
-
-	BOOL				Load();
-	VOID				UnLoad();
-	const tagAnimateProto*	GetAnimateProto(const char* szName);
-	const SDL_Surface*		GetImageSurface(const char* szName);
-
+	BOOL	Load();
+	VOID	Unload();
+	
+	tagAction*	GetAction(const char* szAlias);
 private:
-	tagAnimateProto*	LoadOneAnimateProto( const tagAniInfo* pAniInfo, INT nNum );
-	VOID				UnLoadOneAnimateProto(tagAnimateProto* pProto);
+	VOID	UnloadOneAction( tagAction* pUnload );
+	BOOL	LoadOneAction(const tagActionProto* pProto);
 
-	SDL_Surface*		LoadOneImageSurface( const char* szName );
-	VOID				UnLoadOneImageSurface( SDL_Surface* pImage );
-
-	MapAniProto			m_mapProtos;
-	MapSurface			m_mapSurfaces;
+	typedef map<INT32, tagAction*>			ActionMap;
+	ActionMap								m_mapActions;
 };
 
-extern ResMgr g_resmgr;
+extern ResMgrEx g_resmgrex;
 
 #endif

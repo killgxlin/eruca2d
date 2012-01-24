@@ -17,7 +17,7 @@ Square Sprite::GetAABBox( const Vector2F &vPos )
 
 VOID SpritePlayer::Draw( Painter* pPainter, const Vector2F &vPos )
 {
-	SpriteAnimate::Draw(pPainter, vPos);
+	SpriteDirAction::Draw(pPainter, vPos);
 
 	Player* pPlayer = dynamic_cast<Player*>(m_pGameObj);
 	if( pPlayer != NULL ) return;
@@ -50,67 +50,82 @@ Square SpriteArrow::GetAABBox( const Vector2F &vPos )
 	return tmpBox;
 }
 
-VOID SpriteAnimate::Animate( FLOAT dt )
+Square SpriteAction::GetAABBox( const Vector2F &vPos )
 {
-	FLOAT fLastTime = m_pAniProto->arrSurfaces[m_eType].fLastTime;
-
-	m_fTimer += dt;
-	if( m_fTimer > fLastTime )
+	if( m_pCurAction == NULL )
 	{
-		if( m_bLoop )
+		return Square(vPos, Vector2F(XPlayerSize, XPlayerSize));
+	}
+	return Square(vPos, m_pCurAction->vSize);
+}
+
+BOOL SpriteAction::Start( const char* szAlias, INT nCount /*= -1*/ )
+{
+	INT32 nAliasCrc = ssh_crc32(szAlias);
+	if( nAliasCrc == m_nCurAliasCrc )
+	{
+		m_nCount = nCount;
+		return TRUE;
+	}
+	ActionMap::iterator itr = m_mapActions.find(nAliasCrc);
+	if( itr == m_mapActions.end() )
+	{
+		return FALSE;
+	}
+
+	m_nCurAliasCrc = nAliasCrc;
+	m_fCurCuration = 0.0f;
+	m_nCount = nCount;
+	m_pCurAction = itr->second;
+
+	return TRUE;
+}
+
+VOID SpriteAction::RegAction( tagAction* pAction, const char* szAlias )
+{
+	assert(pAction != NULL);
+
+	if( pAction == NULL ) return;
+
+	INT32 nAliasCrc = ssh_crc32(szAlias);
+	ActionMap::iterator itr = m_mapActions.find(nAliasCrc);
+	if( itr != m_mapActions.end() ) return;
+
+	m_mapActions.insert(make_pair(nAliasCrc, pAction));
+}
+
+VOID SpriteAction::Draw( Painter* pPainter, const Vector2F &vPos )
+{
+	if( m_pCurAction == NULL ) return;
+
+	tagAction::SurfaceVec &vec = m_pCurAction->vecSurfaces;
+	FLOAT fDuration = m_pCurAction->fDuration;
+	if( vec.size() == 0 ) return;
+
+	INT nIdx = static_cast<INT>(ceilf((vec.size() - 1) * m_fCurCuration / fDuration));
+	g_painter.WorldDrawImg(vPos, vec[nIdx]);
+}
+
+VOID SpriteAction::Animate( FLOAT dt )
+{
+	if( m_pCurAction == NULL ) return;
+
+	FLOAT fDuration =m_pCurAction->fDuration;
+
+	m_fCurCuration += dt;
+	if( m_fCurCuration > m_pCurAction->fDuration )
+	{
+		if( m_nCount != 0 )
 		{
-			m_fTimer -= floorf(m_fTimer / fLastTime) * fLastTime;
+			m_fCurCuration -= floorf(m_fCurCuration / fDuration) * fDuration;
+			if( m_nCount > 0 )
+			{
+				-- m_nCount;
+			}
 		}
 		else
 		{
-			m_fTimer = fLastTime;
+			m_fCurCuration = m_pCurAction->fDuration;
 		}
 	}
-	
-}
-
-VOID SpriteAnimate::Draw( Painter* pPainter, const Vector2F &vPos )
-{
-	FLOAT fLastTime = m_pAniProto->arrSurfaces[m_eType].fLastTime;
-	const tagAnimateProto::VecSurface &vec = m_pAniProto->arrSurfaces[m_eType].acts[m_eDir];
-	INT nIdx = ceilf((vec.size() - 1) * m_fTimer / fLastTime);
-	g_painter.WorldDrawImg(vPos, vec[nIdx]);
-	
-}
-
-Square SpriteAnimate::GetAABBox( const Vector2F &vPos )
-{
-	FLOAT fLastTime = m_pAniProto->arrSurfaces[m_eType].fLastTime;
-	const tagAnimateProto::VecSurface &vec = m_pAniProto->arrSurfaces[m_eType].acts[m_eDir];
-	INT nIdx = ceilf((vec.size() - 1) * m_fTimer / fLastTime);
-	//return Square(vPos, m_pAniProto->vBox);
-	//return Square(vPos, Vector2F(vec[nIdx]->w, vec[nIdx]->h));
-	return Square(vPos, Vector2F(XPlayerSize, XPlayerSize));
-}
-
-SpriteAnimate::SpriteAnimate( GameObj* pGameObj, const char* szAniName) :Sprite(pGameObj, 0, 0, 0, 0, 0), m_bPlay(FALSE), m_fTimer(0.0f), m_eType(EAT_Stand), m_eDir(EAD_Right)
-{
-	const tagAnimateProto* pProto = g_resmgr.GetAnimateProto(szAniName);
-	assert(pProto != NULL);
-	m_pAniProto = pProto;
-}
-
-SpriteAnimate::~SpriteAnimate()
-{
-	m_pAniProto = NULL;
-}
-
-VOID SpriteImage::Draw( Painter* pPainter, const Vector2F &vPos )
-{
-	pPainter->WorldDrawImg(vPos, m_pSurface);
-}
-
-Square SpriteImage::GetAABBox( const Vector2F &vPos )
-{
-	return Square(vPos, Vector2F(m_pSurface->w, m_pSurface->h));
-}
-
-SpriteImage::SpriteImage( GameObj* pGameObj, const char* szName ) : Sprite(pGameObj, 0, 0, 0, 0, 0)
-{
-	m_pSurface = const_cast<SDL_Surface*>(g_resmgr.GetImageSurface("icebrick"));
 }

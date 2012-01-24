@@ -197,6 +197,7 @@ VOID Painter::WorldDrawLine( const Vector2F &vWorldPosHead, const Vector2F &vWor
 	ScreenToSDL(&vTailPos);
 
 	thickLineColor(m_pScreen, vHeadPos.x, vHeadPos.y, vTailPos.x, vTailPos.y, 1, dwColor);
+	++m_dwDrawTimes;
 
 	if( m_vOtherCenter != m_vCenter )
 	{
@@ -209,6 +210,7 @@ VOID Painter::WorldDrawLine( const Vector2F &vWorldPosHead, const Vector2F &vWor
 		ScreenToSDL(&vTailPos);
 
 		thickLineColor(m_pScreen, vHeadPos.x, vHeadPos.y, vTailPos.x, vTailPos.y, 1, dwColor);
+		++m_dwDrawTimes;
 	}
 }
 
@@ -256,4 +258,5 @@ VOID Painter::WorldDrawImg( const Vector2F &vWorldPos, SDL_Surface* pSurface )
 	rect.h = pSurface->h;
 	
 	SDL_BlitSurface(pSurface, NULL, m_pScreen, &rect);
+	++m_dwDrawTimes;
 }

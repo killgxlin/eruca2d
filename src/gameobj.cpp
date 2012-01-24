@@ -11,7 +11,7 @@ VOID tagPhysic::UpdatePhysic( FLOAT dt )
 	FLOAT fLen = vOffset.Length();
 	if( fLen >= XTerrainSize )
 	{
-		//vOffset /= fLen;
+		vOffset /= fLen;
 	}
 	m_pMover->SetPos(m_pMover->GetPos()+vOffset);
 	m_bHitWall = FALSE;
@@ -294,39 +294,33 @@ VOID Player::UpdatePhysic( float dt )
 		}
 	}
 
-	EActDir eDir = m_bFaceRight ? EAD_Right : EAD_Left;
-	EActType eType = EAT_Stand;
-	BOOL bLoop = TRUE;
+	const char* pType = NULL;
 	if( m_bLand )
 	{
 		if( vAcc.x != 0.0f )
 		{
-			eType = EAT_Run;
-			bLoop = TRUE;
+			pType = "run";
 		}
 		else
 		{
-			eType = EAT_Stand;
-			bLoop = TRUE;
+			pType = "stand";
 		}
 	}
 	else
 	{
 		if( m_fJump >= 0.0F && m_bJmpPressed )
 		{
-			eType = EAT_Jump;
-			bLoop = TRUE;
+			pType = "jump";
 		}
 		else
 		{
-			eType = EAT_Fall;
-			bLoop = TRUE;
+			pType = "fall";
 		}
 	}
 
 	if( bNewAction )
 	{
-		static_cast<SpriteAnimate*>(m_pSprite)->Start(eType, eDir, bLoop);
+		static_cast<SpritePlayer*>(m_pSprite)->Start(pType, m_bFaceRight);
 	}
 	
 
@@ -338,7 +332,7 @@ BOOL Player::Init()
 	if( !Movable::Init(ECD_None) ) return FALSE;
 
 	m_pListener = new KeyBoardListener(this);
-	m_pSprite = new SpritePlayer(this, "rockman");
+	m_pSprite = new SpritePlayer(this);
 
 	m_fJump = 0.0f;
 	m_bJmpPressed = FALSE;
@@ -457,7 +451,7 @@ VOID Arrow::Destroy()
 
 VOID Arrow::CheckTouch( Terrain* pTerrain, tagCollideRes* pRes )
 {
-	pTerrain->NormalCollide(this, pRes);
+	pTerrain->BulletCollide(this, pRes);
 	if( !pRes->dwDirFlag ) return;
 
 	this->m_vVel = Vector2F(0, 0);

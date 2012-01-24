@@ -2,134 +2,136 @@
 #include "res_mgr.h"
 #include "SDL_rotozoom.h"
 #include "SDL_image.h"
-
-ResMgr g_resmgr;
-
-tagAniInfo playerAni[] = {
-	{	EAT_Stand,	"rockman/stand%02d.bmp",	6,	0.5	},
-	{	EAT_Run,	"rockman/run%02d.bmp",		11,	1	},
-	{	EAT_Jump,	"rockman/jmp%02d.bmp",		6,	1	},
-	{	EAT_Fall,	"rockman/fall%02d.bmp",		4,	1	},
-	{	EAT_Land,	"rockman/land%02d.bmp",		2,	0.5	},
-};
-
-
-
-BOOL ResMgr::Load()
+VOID ResMgrEx::UnloadOneAction( tagAction* pUnload )
 {
-	if( IMG_Init(~0) == 0 ) return FALSE;
-
+	for(tagAction::SurfaceVec::iterator itr = pUnload->vecSurfaces.begin();
+		itr != pUnload->vecSurfaces.end();
+		++itr)
 	{
-		SDL_Surface* pSurface = LoadOneImageSurface("image/brick_ice.png");
-		if( pSurface == NULL ) return FALSE;
-		m_mapSurfaces.insert(make_pair(ssh_crc32("icebrick"), pSurface));
+		SDL_FreeSurface(*itr);
+	}
+	pUnload->vecSurfaces.clear();
+}
+
+BOOL ResMgrEx::LoadOneAction( const tagActionProto* pProto )
+{
+	INT32 nAliasCrc = ssh_crc32(pProto->szAlias);
+	ActionMap::iterator itr = m_mapActions.find(nAliasCrc);
+	if( itr != m_mapActions.end() )
+	{
+		return FALSE;
 	}
 
+	tagAction* pNew = new tagAction;
+	pNew->fDuration = pProto->fDuration;
+	float fZoom = -1.0f;
+	char buffer[100] = {0};
+	UINT32 u32ColorKey = 0;
+
+	for(INT j=1; j<=pProto->nNum; ++j)
 	{
-		tagAnimateProto* pAni = LoadOneAnimateProto(playerAni, sizeof(playerAni) / sizeof(playerAni[0]));
-		if( pAni == NULL ) return FALSE;
-		m_mapProtos.insert(make_pair(ssh_crc32("rockman"), pAni));
+		if( pProto->nNum != 1 )
+		{
+			sprintf_s(buffer, pProto->szFileName, j);
+		}
+		else
+		{
+			sprintf_s(buffer, pProto->szFileName);
+		}
+
+		SDL_Surface* pSrc = IMG_Load(buffer);
+		if( pSrc == NULL ) 
+		{
+			UnloadOneAction(pNew);
+			return FALSE;
+		}
+
+		// 第一次设置
+		if( fZoom < 0.0f )
+		{
+			// 若需要指定尺寸
+			if( pProto->fWidth > 0.0f  )
+			{
+				fZoom = pProto->fWidth / pSrc->w;
+			}
+			// 默认大小
+			else
+			{
+				fZoom = 1.0f;
+			}
+
+			// colorkey
+			u32ColorKey = ((UINT32*)pSrc->pixels)[0];
+
+			pNew->vSize.x = fZoom * pSrc->w;
+			pNew->vSize.y = pNew->vSize.x;
+			/*pNew->vSize.y = fZoom * pSrc->h;*/
+		}
+
+		SDL_SetColorKey(pSrc, SDL_SRCCOLORKEY, u32ColorKey);
+
+		SDL_Surface* pDst = zoomSurface(pSrc, pProto->bFlip ? -fZoom : fZoom, fZoom, SMOOTHING_ON);
+		SDL_FreeSurface(pSrc);
+
+		pNew->vecSurfaces.push_back(pDst);
+	}
+
+	m_mapActions.insert(make_pair(nAliasCrc, pNew));
+	return TRUE;
+}
+
+tagActionProto arrActionPro[] = {
+	// rockman right actions
+	{	"rockman/stand%02d.bmp",	6,	"rockman_stand_r",	0.5,	false,	XPlayerSize	},
+	{	"rockman/run%02d.bmp",		11,	"rockman_run_r",	1,		false,	XPlayerSize	},
+	{	"rockman/jmp%02d.bmp",		6,	"rockman_jump_r",	1,		false,	XPlayerSize	},
+	{	"rockman/fall%02d.bmp",		4,	"rockman_fall_r",	1,		false,	XPlayerSize	},
+	{	"rockman/land%02d.bmp",		2,	"rockman_land_r",	0.5,	false,	XPlayerSize	},
+
+	// rockman left actions
+	{	"rockman/stand%02d.bmp",	6,	"rockman_stand_l",	0.5,	true,	XPlayerSize	},
+	{	"rockman/run%02d.bmp",		11,	"rockman_run_l",	1,		true,	XPlayerSize	},
+	{	"rockman/jmp%02d.bmp",		6,	"rockman_jump_l",	1,		true,	XPlayerSize	},
+	{	"rockman/fall%02d.bmp",		4,	"rockman_fall_l",	1,		true,	XPlayerSize	},
+	{	"rockman/land%02d.bmp",		2,	"rockman_land_l",	0.5,	true,	XPlayerSize	},
+
+	// terrain action
+	{	"image/brick_ice.png",		1,	"brick_ice",		-1.0f,	false,	XTerrainSize},
+
+};
+
+BOOL ResMgrEx::Load()
+{
+	INT nNum = sizeof(arrActionPro) / sizeof(arrActionPro[0]);
+	for(INT i=0; i<nNum; ++i)
+	{
+		if( !LoadOneAction(&arrActionPro[i]) )
+			return FALSE;
 	}
 
 	return TRUE;
 }
 
-tagAnimateProto* ResMgr::LoadOneAnimateProto( const tagAniInfo* pAniInfo, INT nNum )
+VOID ResMgrEx::Unload()
 {
-	tagAnimateProto* pNew = new tagAnimateProto;
-
-	float fZoom = 0.0f;
-	INT nInfoLen = nNum;
-	for(INT i=0; i<nInfoLen; ++i)
+	for(ActionMap::iterator itr = m_mapActions.begin();
+		itr != m_mapActions.end();
+		++itr)
 	{
-		char buffer[100] = {0};
-		for(INT j=1; j<=pAniInfo[i].nNum; ++j)
-		{
-			sprintf_s(buffer, pAniInfo[i].szName, j);
-			SDL_Surface* pSrc = SDL_LoadBMP(buffer);
-			SDL_SetColorKey(pSrc, SDL_SRCCOLORKEY, SDL_MapRGB(pSrc->format, 0, 0, 0));
-			if( pSrc == NULL ) return NULL;
-
-			if( fZoom == 0.0f )
-			{
-				fZoom = float(XPlayerSize) / pSrc->w;
-			}
-
-			SDL_Surface* pRight = zoomSurface(pSrc, fZoom, fZoom, SMOOTHING_ON);
-			SDL_Surface* pLeft = zoomSurface(pSrc, -fZoom, fZoom, SMOOTHING_ON);
-			if( pRight == NULL || pLeft == NULL ) return NULL;
-
-			SDL_FreeSurface(pSrc);
-
-			pNew->arrSurfaces[pAniInfo[i].eActType].acts[EAD_Right].push_back(pRight);
-			pNew->arrSurfaces[pAniInfo[i].eActType].acts[EAD_Left].push_back(pLeft);
-		}
-		pNew->arrSurfaces[pAniInfo[i].eActType].fLastTime = pAniInfo[i].fLastTime;
+		UnloadOneAction(itr->second);
 	}
-	SDL_Surface* pSurface = pNew->arrSurfaces[EAT_Stand].acts[EAD_Right][0];
-	pNew->vBox = Vector2F(pSurface->w, pSurface->h);
-	return pNew;
+	m_mapActions.clear();
 }
 
-VOID ResMgr::UnLoadOneAnimateProto( tagAnimateProto* pProto )
+tagAction* ResMgrEx::GetAction( const char* szAlias )
 {
-	for(INT i=EAT_Stand; i<EAT_End; ++i)
+	INT32 nAliasCrc = ssh_crc32(szAlias);
+	ActionMap::iterator itr = m_mapActions.find(nAliasCrc);
+	if( itr == m_mapActions.end() )
 	{
-		for(INT j=EAD_Right; j<EAD_End; ++j)
-		{
-			for(INT nSize = pProto->arrSurfaces[i].acts[j].size()-1; nSize >= 0; --nSize)
-			{
-				SDL_FreeSurface(pProto->arrSurfaces[i].acts[j][nSize]);
-			}
-			pProto->arrSurfaces[i].acts[j].clear();
-		}
+		return NULL;
 	}
-
-	delete pProto;
-}
-
-VOID ResMgr::UnLoad()
-{
-	for(MapAniProto::iterator itr=m_mapProtos.begin(); itr!=m_mapProtos.end(); ++itr)
-	{
-		UnLoadOneAnimateProto(itr->second);
-	}
-	m_mapProtos.clear();
-
-	for(MapSurface::iterator itr=m_mapSurfaces.begin(); itr!=m_mapSurfaces.end(); ++itr)
-	{
-		UnLoadOneImageSurface(itr->second);
-	}
-	m_mapSurfaces.clear();
-
-	IMG_Quit();
-}
-
-const tagAnimateProto* ResMgr::GetAnimateProto( const char* szName )
-{
-	MapAniProto::iterator itr = m_mapProtos.find(ssh_crc32(szName));
-	if( itr == m_mapProtos.end() ) return NULL;
-
 	return itr->second;
 }
 
-const SDL_Surface* ResMgr::GetImageSurface( const char* szName )
-{
-	MapSurface::iterator itr = m_mapSurfaces.find(ssh_crc32(szName));
-	if( itr == m_mapSurfaces.end() ) return NULL;
-
-	return itr->second;
-}
-
-SDL_Surface* ResMgr::LoadOneImageSurface( const char* szName )
-{
-	SDL_Surface* pSurface = IMG_Load(szName);
-	
-	return pSurface;
-}
-
-VOID ResMgr::UnLoadOneImageSurface( SDL_Surface* pImage )
-{
-	SDL_FreeSurface(pImage);
-}
-
+ResMgrEx g_resmgrex;

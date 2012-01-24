@@ -19,7 +19,7 @@ BOOL Level::Init()
 			}
 			else
 			{
-				if( j > 0 && m_matTerrain[i][j-1].bExist && (rand()%3))
+				if( j > 0 && m_matTerrain[i][j-1].bExist && (rand()%2))
 				{
 					m_matTerrain[i][j].bExist = true;
 				}
