@@ -11,7 +11,7 @@ VOID tagPhysic::UpdatePhysic( FLOAT dt )
 	FLOAT fLen = vOffset.Length();
 	if( fLen >= XTerrainSize )
 	{
-		vOffset /= fLen;
+		//vOffset /= fLen;
 	}
 	m_pMover->SetPos(m_pMover->GetPos()+vOffset);
 	m_bHitWall = FALSE;
@@ -210,6 +210,7 @@ VOID Player::Update( FLOAT dt )
 VOID Player::UpdatePhysic( float dt )
 {
 	Vector2F vAcc = XGravity;
+	bool bNewAction = false;
 
 // 	if( m_pMover->m_Input.bZoomIn )
 // 	{
@@ -225,12 +226,14 @@ VOID Player::UpdatePhysic( float dt )
 	{
 		vAcc.x = -XCtrlAcc;
 		m_bFaceRight = FALSE;
+		bNewAction = true;
 	}
 
 	if( m_pMover->m_Input.bRight )
 	{
 		vAcc.x = XCtrlAcc;
 		m_bFaceRight = TRUE;
+		bNewAction = true;
 	}
 
 	if( m_bLand )
@@ -249,6 +252,7 @@ VOID Player::UpdatePhysic( float dt )
 		{
 			vAcc.x = 0.0f;
 			m_vVel.x = 0;
+			bNewAction = true;
 		}
 	}
 
@@ -267,6 +271,7 @@ VOID Player::UpdatePhysic( float dt )
 			{
 				m_vVel.y = XJumpSpeed;
 				m_bLand = FALSE;	
+				bNewAction = true;
 			}
 
 			m_fJump += dt;
@@ -274,6 +279,7 @@ VOID Player::UpdatePhysic( float dt )
 			{
 				m_vVel.y = 0;
 				m_fJump = -1.0f;
+				bNewAction = true;
 			}
 
 			m_bJmpPressed = TRUE;
@@ -282,6 +288,7 @@ VOID Player::UpdatePhysic( float dt )
 		{
 			m_vVel.y = 0;
 			m_fJump = -1.0f;
+			bNewAction = true;
 
 			m_bJmpPressed = FALSE;
 		}
@@ -312,12 +319,16 @@ VOID Player::UpdatePhysic( float dt )
 		}
 		else
 		{
-			eType = EAT_Run;
+			eType = EAT_Fall;
 			bLoop = TRUE;
 		}
 	}
 
-	static_cast<SpriteEx*>(m_pSprite)->Start(eType, eDir, bLoop);
+	if( bNewAction )
+	{
+		static_cast<SpriteAnimate*>(m_pSprite)->Start(eType, eDir, bLoop);
+	}
+	
 
 	Movable::UpdatePhysic(dt);
 }
@@ -327,8 +338,7 @@ BOOL Player::Init()
 	if( !Movable::Init(ECD_None) ) return FALSE;
 
 	m_pListener = new KeyBoardListener(this);
-	m_pSprite = new SpriteEx(this);
-	static_cast<SpriteEx*>(m_pSprite)->Load();
+	m_pSprite = new SpritePlayer(this, "rockman");
 
 	m_fJump = 0.0f;
 	m_bJmpPressed = FALSE;
@@ -338,7 +348,6 @@ BOOL Player::Init()
 
 VOID Player::Destroy()
 {
-	static_cast<SpriteEx*>(m_pSprite)->UnLoad();
 	Movable::Destroy();
 }
 
@@ -385,7 +394,7 @@ VOID Player::CheckTouch( Terrain* pTerrain, tagCollideRes* pRes )
 
 VOID Player::CheckTouch( Arrow* pArrow, tagCollideRes* pRes )
 {
-	pArrow->BulletCollide(this, pRes);
+	pArrow->NormalCollide(this, pRes);
 	if( !pRes->dwDirFlag ) return;
 
 	if( pArrow->m_bLand || pArrow->m_bHitWall )
@@ -448,7 +457,7 @@ VOID Arrow::Destroy()
 
 VOID Arrow::CheckTouch( Terrain* pTerrain, tagCollideRes* pRes )
 {
-	pTerrain->BulletCollide(this, pRes);
+	pTerrain->NormalCollide(this, pRes);
 	if( !pRes->dwDirFlag ) return;
 
 	this->m_vVel = Vector2F(0, 0);
@@ -456,7 +465,7 @@ VOID Arrow::CheckTouch( Terrain* pTerrain, tagCollideRes* pRes )
 	{
 		this->m_bHitWall = TRUE;	
 	}
-	else
+	else if( pRes->dwDirFlag & ECD_Top )
 	{
 		this->m_bLand = TRUE;
 	}

@@ -33,53 +33,27 @@ protected:
 	UINT8		m_u8B;
 	GameObj*	m_pGameObj;
 };
-//-----------------------------------------------------------------------------------------------
 
-class SpritePlayer : public Sprite
+//-----------------------------------------------------------------------------------------------
+class SpriteImage : public Sprite
 {
 public:
-	VOID			Animate(FLOAT dt);
-	VOID			Draw(Painter* pPainter, const Vector2F &vPos);
-public:
-	SpritePlayer(GameObj* pGameObj):Sprite(pGameObj, XPlayerSize, XPlayerSize, 120, 0, 90), m_nCounter(0){}
-
-private:
-	INT				m_nCounter;
-};
-//-----------------------------------------------------------------------------------------------
-
-class SpriteTerrain : public Sprite
-{
-public:
-	SpriteTerrain(GameObj* pGameObj):Sprite(pGameObj, XTerrainSize, XTerrainSize, 120, 120, 120){}
-};
-//-----------------------------------------------------------------------------------------------
-
-class SpriteArrow : public Sprite
-{
-public:
-	SpriteArrow(GameObj* pGameObj):Sprite(pGameObj, XArrowSize, XArrowSize, 255, 255, 255){}
+	virtual VOID	Animate(FLOAT dt){}
 	virtual VOID	Draw(Painter* pPainter, const Vector2F &vPos);
 	virtual Square	GetAABBox(const Vector2F &vPos);
+	SpriteImage(GameObj* pGameObj, const char* szName);
+	virtual ~SpriteImage(){m_pSurface = NULL;}
+
 private:
-	Vector2F		m_vVelUnit;
+	SDL_Surface*	m_pSurface;
 };
+
 //-----------------------------------------------------------------------------------------------
-
-class SpriteAnimal : public Sprite
+class SpriteAnimate : public Sprite
 {
 public:
-	SpriteAnimal(GameObj* pGameObj) : Sprite(pGameObj, XAnimalSize, XAnimalSize, 255, 0, 255){}
-
-};
-
-class SpriteEx : public Sprite
-{
-public:
-	SpriteEx(GameObj* pGameObj):Sprite(pGameObj, 0, 0, 0, 0, 0), m_bPlay(FALSE), m_fTimer(0.0f), m_eType(EAT_Stand), m_eDir(EAD_Right){}
-	virtual ~SpriteEx(){}
-	BOOL			Load();
-	VOID			UnLoad();
+	SpriteAnimate(GameObj* pGameObj, const char* szAniName);
+	virtual ~SpriteAnimate();
 
 	BOOL			Start(EActType eType, EActDir eDir, BOOL bLoop = TRUE)
 	{
@@ -105,19 +79,49 @@ public:
 	virtual Square	GetAABBox(const Vector2F &vPos);
 
 private:
-	typedef vector<SDL_Surface*>	VecSurface;
-	struct tagActionInfo
-	{
-		VecSurface		acts[EAD_End];
-		FLOAT			fLastTime;
-	};
-	tagActionInfo					m_arrSurfaces[EAT_End];
-
 	BOOL							m_bPlay;
 	FLOAT							m_fTimer;
 	EActType						m_eType;
 	EActDir							m_eDir;
 	BOOL							m_bLoop;
+	const tagAnimateProto*			m_pAniProto;
+};
+
+
+//-----------------------------------------------------------------------------------------------
+
+class SpritePlayer : public SpriteAnimate
+{
+public:
+	VOID			Draw(Painter* pPainter, const Vector2F &vPos);
+public:
+	SpritePlayer(GameObj* pGameObj, const char* szAniName):SpriteAnimate(pGameObj, szAniName){}
+
+};
+//-----------------------------------------------------------------------------------------------
+
+class SpriteTerrain : public SpriteImage
+{
+public:
+	SpriteTerrain(GameObj* pGameObj):SpriteImage(pGameObj, "icebrick"){}
+};
+//-----------------------------------------------------------------------------------------------
+
+class SpriteArrow : public Sprite
+{
+public:
+	SpriteArrow(GameObj* pGameObj):Sprite(pGameObj, XArrowSize, XArrowSize, 255, 255, 255){}
+	virtual VOID	Draw(Painter* pPainter, const Vector2F &vPos);
+	virtual Square	GetAABBox(const Vector2F &vPos);
+private:
+	Vector2F		m_vVelUnit;
+};
+//-----------------------------------------------------------------------------------------------
+
+class SpriteAnimal : public SpriteAnimate
+{
+public:
+	SpriteAnimal(GameObj* pGameObj) : SpriteAnimate(pGameObj, "rockman"){}
 };
 
 #endif

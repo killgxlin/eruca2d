@@ -1,6 +1,5 @@
 #include "common.h"
 #include "sprite.h"
-#include "SDL_rotozoom.h"
 
 #include "gameobj.h"
 //-----------------------------------------------------------------------------------------------
@@ -16,25 +15,12 @@ Square Sprite::GetAABBox( const Vector2F &vPos )
 }
 //-----------------------------------------------------------------------------------------------
 
-VOID SpritePlayer::Animate( FLOAT dt )
-{
-	Player* pPlayer = dynamic_cast<Player*>(m_pGameObj);
-
-	FLOAT fPct = pPlayer->m_vVel.Length() / FLOAT(XMaxPlayerSpeedX);
-	
-	if( fPct > 1.0f )
-	{
-		fPct = 1.0f;
-	}
-
-	m_u8R = UINT8(fPct * 255);
-}
-
 VOID SpritePlayer::Draw( Painter* pPainter, const Vector2F &vPos )
 {
-	Player* pPlayer = dynamic_cast<Player*>(m_pGameObj);
+	SpriteAnimate::Draw(pPainter, vPos);
 
-	Sprite::Draw(pPainter, vPos);
+	Player* pPlayer = dynamic_cast<Player*>(m_pGameObj);
+	if( pPlayer != NULL ) return;
 
 	Vector2F vHead = vPos;
 	Vector2F vTail = vHead + pPlayer->m_vArrowDir * XArrowSize;
@@ -64,69 +50,9 @@ Square SpriteArrow::GetAABBox( const Vector2F &vPos )
 	return tmpBox;
 }
 
-BOOL SpriteEx::Load()
+VOID SpriteAnimate::Animate( FLOAT dt )
 {
-	struct tagAniInfo
-	{
-		EActType	eActType;
-		const char* szName;
-		INT			nNum;
-		FLOAT		fLastTime;
-	};
-
-	tagAniInfo arrInfo[] = {
-		{	EAT_Stand,	"rockman/stand%02d.bmp",	6,	3	},
-		{	EAT_Run,	"rockman/run%02d.bmp",		11,	1	},
-		{	EAT_Jump,	"rockman/jmp%02d.bmp",		6,	1	},
-		{	EAT_Fall,	"rockman/fall%02d.bmp",		4,	1	},
-		{	EAT_Land,	"rockman/land%02d.bmp",		2,	0.5	},
-	};
-	
-	INT nInfoLen = (sizeof(arrInfo) / sizeof(arrInfo[0]));
-	for(INT i=0; i<nInfoLen; ++i)
-	{
-		char buffer[100] = {0};
-		for(INT j=1; j<=arrInfo[i].nNum; ++j)
-		{
-			sprintf_s(buffer, arrInfo[i].szName, j);
-			SDL_Surface* pSrc = SDL_LoadBMP(buffer);
-			if( pSrc == NULL ) return FALSE;
-
-			SDL_Surface* pRight = zoomSurface(pSrc, 0.5f, 0.5f, SMOOTHING_ON);
-			SDL_Surface* pLeft = zoomSurface(pSrc, -0.5f, 0.5f, SMOOTHING_ON);
-			if( pRight == NULL || pLeft == NULL ) return FALSE;
-
-
-			SDL_SetColorKey(pRight, SDL_SRCCOLORKEY, SDL_MapRGB(pSrc->format, 0, 0, 0));
-			SDL_SetColorKey(pLeft, SDL_SRCCOLORKEY, SDL_MapRGB(pSrc->format, 0, 0, 0));
-			SDL_FreeSurface(pSrc);
-
-			m_arrSurfaces[arrInfo[i].eActType].acts[EAD_Right].push_back(pRight);
-			m_arrSurfaces[arrInfo[i].eActType].acts[EAD_Left].push_back(pLeft);
-		}
-		m_arrSurfaces[arrInfo[i].eActType].fLastTime = arrInfo[i].fLastTime;
-	}
-	return TRUE;
-}
-
-VOID SpriteEx::UnLoad()
-{
-	for(INT i=EAT_Stand; i<EAT_End; ++i)
-	{
-		for(INT j=EAD_Right; j<EAD_End; ++j)
-		{
-			for(INT nSize = m_arrSurfaces[i].acts[j].size()-1; nSize >= 0; --nSize)
-			{
-				SDL_FreeSurface(m_arrSurfaces[i].acts[j][nSize]);
-			}
-			m_arrSurfaces[i].acts[j].clear();
-		}
-	}
-}
-
-VOID SpriteEx::Animate( FLOAT dt )
-{
-	FLOAT fLastTime = m_arrSurfaces[m_eType].fLastTime;
+	FLOAT fLastTime = m_pAniProto->arrSurfaces[m_eType].fLastTime;
 
 	m_fTimer += dt;
 	if( m_fTimer > fLastTime )
@@ -143,17 +69,48 @@ VOID SpriteEx::Animate( FLOAT dt )
 	
 }
 
-VOID SpriteEx::Draw( Painter* pPainter, const Vector2F &vPos )
+VOID SpriteAnimate::Draw( Painter* pPainter, const Vector2F &vPos )
 {
-	VecSurface &vec = m_arrSurfaces[m_eType].acts[m_eDir];
-	INT nIdx = ceilf((vec.size() - 1) * m_fTimer);
+	FLOAT fLastTime = m_pAniProto->arrSurfaces[m_eType].fLastTime;
+	const tagAnimateProto::VecSurface &vec = m_pAniProto->arrSurfaces[m_eType].acts[m_eDir];
+	INT nIdx = ceilf((vec.size() - 1) * m_fTimer / fLastTime);
 	g_painter.WorldDrawImg(vPos, vec[nIdx]);
 	
 }
 
-Square SpriteEx::GetAABBox( const Vector2F &vPos )
+Square SpriteAnimate::GetAABBox( const Vector2F &vPos )
 {
-	VecSurface &vec = m_arrSurfaces[m_eType].acts[m_eDir];
-	INT nIdx = ceilf((vec.size() - 1) * m_fTimer);
-	return Square(vPos, Vector2F(vec[nIdx]->w, vec[nIdx]->h));
+	FLOAT fLastTime = m_pAniProto->arrSurfaces[m_eType].fLastTime;
+	const tagAnimateProto::VecSurface &vec = m_pAniProto->arrSurfaces[m_eType].acts[m_eDir];
+	INT nIdx = ceilf((vec.size() - 1) * m_fTimer / fLastTime);
+	//return Square(vPos, m_pAniProto->vBox);
+	//return Square(vPos, Vector2F(vec[nIdx]->w, vec[nIdx]->h));
+	return Square(vPos, Vector2F(XPlayerSize, XPlayerSize));
+}
+
+SpriteAnimate::SpriteAnimate( GameObj* pGameObj, const char* szAniName) :Sprite(pGameObj, 0, 0, 0, 0, 0), m_bPlay(FALSE), m_fTimer(0.0f), m_eType(EAT_Stand), m_eDir(EAD_Right)
+{
+	const tagAnimateProto* pProto = g_resmgr.GetAnimateProto(szAniName);
+	assert(pProto != NULL);
+	m_pAniProto = pProto;
+}
+
+SpriteAnimate::~SpriteAnimate()
+{
+	m_pAniProto = NULL;
+}
+
+VOID SpriteImage::Draw( Painter* pPainter, const Vector2F &vPos )
+{
+	pPainter->WorldDrawImg(vPos, m_pSurface);
+}
+
+Square SpriteImage::GetAABBox( const Vector2F &vPos )
+{
+	return Square(vPos, Vector2F(m_pSurface->w, m_pSurface->h));
+}
+
+SpriteImage::SpriteImage( GameObj* pGameObj, const char* szName ) : Sprite(pGameObj, 0, 0, 0, 0, 0)
+{
+	m_pSurface = const_cast<SDL_Surface*>(g_resmgr.GetImageSurface("icebrick"));
 }

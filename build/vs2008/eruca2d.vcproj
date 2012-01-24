@@ -118,7 +118,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)..\..\dependent\SDL_ttf\include&quot;;&quot;$(ProjectDir)..\..\dependent\SDL\include&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)..\..\dependent\SDL_ttf\include&quot;;&quot;$(ProjectDir)..\..\dependent\SDL_image\include&quot;;&quot;$(ProjectDir)..\..\dependent\SDL\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -137,9 +137,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="sdl.lib sdl_ttf.lib"
+				AdditionalDependencies="sdl.lib sdl_ttf.lib sdl_image.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(ProjectDir)..\..\dependent\SDL\lib&quot;;&quot;$(ProjectDir)..\..\dependent\SDL_ttf\lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)..\..\dependent\SDL\lib&quot;;&quot;$(ProjectDir)..\..\dependent\SDL_ttf\lib&quot;;&quot;$(ProjectDir)..\..\dependent\SDL_image\lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -180,6 +180,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\crc32.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\crc32.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\keyboard.cpp"
 				>
 			</File>
@@ -193,6 +201,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\painter.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\res_mgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\res_mgr.h"
 				>
 			</File>
 			<File

@@ -15,6 +15,8 @@ INT APIENTRY _tWinMain(HINSTANCE hInstance,
 	Timer timer2;
 	timer2.Init();
 
+	g_resmgr.Load();
+
 	g_framerate.Init();
 
 	g_text.Init();
@@ -54,6 +56,7 @@ INT APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	g_framerate.Destroy();
 
+	g_resmgr.UnLoad();
 	timer2.Destroy();
 	g_painter.Destroy();
 

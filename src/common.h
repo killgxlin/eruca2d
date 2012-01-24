@@ -73,11 +73,12 @@ enum ECollideDir
 #define XTilesW				(XTotalW / XTerrainSize)
 #define XTilesH				(XTotalH / XTerrainSize)
 
-
+#include "crc32.h"
 #include "shape.h"
 #include "keyboard.h"
 #include "text.h"
 #include "painter.h"
 #include "timer.h"
+#include "res_mgr.h"
 
 #endif

@@ -13,13 +13,13 @@ BOOL Level::Init()
 	{
 		for(INT j=0; j<XTilesH; ++j)
 		{
-			if( j < 1 )
+			if( j < 2 )
 			{
 				m_matTerrain[i][j].bExist = true;
 			}
 			else
 			{
-				if( j > 0 && m_matTerrain[i][j-1].bExist && (rand()%1))
+				if( j > 0 && m_matTerrain[i][j-1].bExist && (rand()%3))
 				{
 					m_matTerrain[i][j].bExist = true;
 				}
@@ -31,21 +31,25 @@ BOOL Level::Init()
 		}
 	}
 
+	{
 
-	Player* pPlayer = new Player;
-	pPlayer->Init();
-	pPlayer->SetPos(Vector2F(rand()%XScreenW, XScreenH));
-	pPlayer->m_vVel = Vector2F(0, 0);
+		Player* pPlayer = new Player;
+		pPlayer->Init();
+		pPlayer->SetPos(Vector2F(rand()%XScreenW, XScreenH));
+		pPlayer->m_vVel = Vector2F(0, 0);
 
-	m_lstPlayers.push_back(pPlayer);
+		m_lstPlayers.push_back(pPlayer);
+	}
 
-	Animal* pAnimal = new Animal;
-	pAnimal->Init();
-	pAnimal->SetPos(pPlayer->GetPos());
-	pAnimal->m_vVel = Vector2F(0, 0);
-
-	m_lstAnimals.push_back(pAnimal);
-
+// 	{
+// 		Animal* pAnimal = new Animal;
+// 		pAnimal->Init();
+// 		pAnimal->SetPos(pPlayer->GetPos());
+// 		pAnimal->m_vVel = Vector2F(0, 0);
+// 
+// 		m_lstAnimals.push_back(pAnimal);
+// 
+// 	}
 
 	return TRUE;
 }
@@ -122,8 +126,8 @@ struct ACheckTouchWithBs<A, Terrain>
 		pA->SetPos(g_level.GetProperPos(pA->GetPos()));
 
 		Square box = pA->GetAABBox();
-		INT nIdxXMin  = max(INT(floor(box.vMin.x / XTerrainSize)), 0);
-		INT nIdxYMin  = max(INT(floor(box.vMin.y / XTerrainSize)), 0);
+		INT nIdxXMin  = max(INT(floor((box.vMin.x - 1.0f) / XTerrainSize)), 0);
+		INT nIdxYMin  = max(INT(floor((box.vMin.y - 1.0f) / XTerrainSize)), 0);
 		INT nIdxXMax  = min(INT(floor(box.vMax.x / XTerrainSize)), XTilesW - 1);
 		INT nIdxYMax  = min(INT(floor(box.vMax.y / XTerrainSize)), XTilesH - 1);
 
@@ -152,8 +156,8 @@ struct ACheckTouchWithBs<A, Terrain>
 
 			// ¼ÆËãÅö×²
 			Square box = pA->GetAABBox();
-			INT nIdxXMin  = max(INT(floor(box.vMin.x / XTerrainSize)), 0);
-			INT nIdxYMin  = max(INT(floor(box.vMin.y / XTerrainSize)), 0);
+			INT nIdxXMin  = max(INT(floor((box.vMin.x - 1.0f) / XTerrainSize)), 0);
+			INT nIdxYMin  = max(INT(floor((box.vMin.y - 1.0f) / XTerrainSize)), 0);
 			INT nIdxXMax  = min(INT(floor(box.vMax.x / XTerrainSize)), XTilesW - 1);
 			INT nIdxYMax  = min(INT(floor(box.vMax.y / XTerrainSize)), XTilesH - 1);
 
@@ -237,7 +241,9 @@ VOID Level::Update( FLOAT dt )
 
 	for_each(m_lstPlayers.begin(), m_lstPlayers.end(), ACheckTouchWithBs<Player, Animal>(m_lstAnimals));
 
-	g_painter.SetCenter(m_lstPlayers.front()->GetPos());
+	Vector2F vCamera = m_lstPlayers.front()->GetPos();
+	vCamera.y = XScreenH / 2;
+	g_painter.SetCenter(vCamera);
 
 	g_text.AddText(g_painter.GetColor(255, 0, 0), "player on land :%4d", m_lstPlayers.front()->m_bLand);
 	g_text.AddText(g_painter.GetColor(255, 0, 0), "pos of player  :%4.2f ,%4.2f", m_lstPlayers.front()->GetPos().x, m_lstPlayers.front()->GetPos().y);
@@ -289,7 +295,7 @@ VOID Level::Draw( Painter* pPainter )
 
 				if( screen.IntersectBox(terrainBox) )
 				{
-					if( i == 0 )
+					if( i % 3 == 0 )
 					{
 						tmpTerrain.SetColor(255, 0, 0);
 					}
