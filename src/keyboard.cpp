@@ -24,9 +24,9 @@ VOID KeyBoard::Update()
 	SDL_GetMouseState(&nX, &nY);
 	m_vMousePos.x = nX;
 	m_vMousePos.y = nY;
-	g_painter.SDLToWorld(&m_vMousePos);
-	g_text.AddText(g_painter.GetColor(255, 0, 0), "pos of mouse  :%4.2f ,%4.2f", m_vMousePos.x, m_vMousePos.y);
-	g_text.AddText(g_painter.GetColor(255, 0, 0), "state of mouse:%d, %d ,%d", GetButton(SDL_BUTTON_LEFT), GetButton(SDL_BUTTON_MIDDLE), GetButton(SDL_BUTTON_RIGHT));
+	g_painter.WinToWorld(&m_vMousePos);
+	g_text.AddText(XColorR, "pos of mouse  :%4.2f ,%4.2f", m_vMousePos.x, m_vMousePos.y);
+	g_text.AddText(XColorR, "state of mouse:%d, %d ,%d", GetButton(SDL_BUTTON_LEFT), GetButton(SDL_BUTTON_MIDDLE), GetButton(SDL_BUTTON_RIGHT));
 }
 
 KeyBoard g_keyboard;

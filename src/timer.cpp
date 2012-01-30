@@ -49,9 +49,9 @@ VOID FrameRate::CountFrame( UINT32 dt )
 		ModSpeedRate(-GetSpeedRate()/2);
 	}
 
-	g_text.AddText(g_painter.GetColor(255, 0, 0), "FPS      : %4.2f", g_framerate.GetFPS());
-	g_text.AddText(g_painter.GetColor(255, 0, 0), "custFPS  : %4.2f", g_framerate.GetCustomFPS());
-	g_text.AddText(g_painter.GetColor(255, 0, 0), "factor   : %4.2f", g_framerate.GetSpeedRate());
+	g_text.AddText(XColorR, "FPS      : %4.2f", g_framerate.GetFPS());
+	g_text.AddText(XColorR, "custFPS  : %4.2f", g_framerate.GetCustomFPS());
+	g_text.AddText(XColorR, "factor   : %4.2f", g_framerate.GetSpeedRate());
 }
 
 VOID FrameRate::BeginFrame()

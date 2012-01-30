@@ -137,7 +137,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="sdl.lib sdl_ttf.lib sdl_image.lib"
+				AdditionalDependencies="sdl.lib sdl_ttf.lib sdl_image.lib opengl32.lib glut32.lib glu32.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)..\..\dependent\SDL\lib&quot;;&quot;$(ProjectDir)..\..\dependent\SDL_ttf\lib&quot;;&quot;$(ProjectDir)..\..\dependent\SDL_image\lib&quot;"
 				GenerateDebugInformation="true"

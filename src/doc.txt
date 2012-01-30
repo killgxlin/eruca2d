@@ -1,13 +1,6 @@
-动画帧整理成通用的序列
-struct tagAction
-{
-	FLOAT					fDuration;
-	vector<SDL_Surface*>	vecAction;
-	Vector2F				vSize;
-};
-
-确定图片尺寸
-整理sprite
 整理painter
 整理level
 整理碰撞部分
+
+创意
+	背景tiles有多层，一层不过可以切换到其它层

@@ -242,13 +242,20 @@ VOID Level::Update( FLOAT dt )
 	for_each(m_lstPlayers.begin(), m_lstPlayers.end(), ACheckTouchWithBs<Player, Animal>(m_lstAnimals));
 
 	Vector2F vCamera = m_lstPlayers.front()->GetPos();
-	vCamera.y = XScreenH / 2;
+	if( vCamera.y > XScreenH/2 )
+	{
+				
+	}
+	else
+	{
+		vCamera.y = XScreenH / 2;
+	}
 	g_painter.SetCenter(vCamera);
 
-	g_text.AddText(g_painter.GetColor(255, 0, 0), "player on land :%4d", m_lstPlayers.front()->m_bLand);
-	g_text.AddText(g_painter.GetColor(255, 0, 0), "pos of player  :%4.2f ,%4.2f", m_lstPlayers.front()->GetPos().x, m_lstPlayers.front()->GetPos().y);
-	g_text.AddText(g_painter.GetColor(255, 0, 0), "vel of player  :%4.2f ,%4.2f, %4.2f", m_lstPlayers.front()->m_vVel.x, m_lstPlayers.front()->m_vVel.y, m_lstPlayers.front()->m_vVel.Length());
-	g_text.AddText(g_painter.GetColor(255, 0, 0), "num of arrows  :%d", m_lstArrows.size());
+	g_text.AddText(XColorR, "player on land :%4d", m_lstPlayers.front()->m_bLand);
+	g_text.AddText(XColorR, "pos of player  :%4.2f ,%4.2f", m_lstPlayers.front()->GetPos().x, m_lstPlayers.front()->GetPos().y);
+	g_text.AddText(XColorR, "vel of player  :%4.2f ,%4.2f, %4.2f", m_lstPlayers.front()->m_vVel.x, m_lstPlayers.front()->m_vVel.y, m_lstPlayers.front()->m_vVel.Length());
+	g_text.AddText(XColorR, "num of arrows  :%d", m_lstArrows.size());
 
 }
 
@@ -350,6 +357,7 @@ Vector2F Level::GetProperPos( Vector2F &vPos )
 
 DWORD Level::CalcCollideFlag( INT i, INT j )
 {
+	return ECD_All;
 	if( !m_matTerrain[i][j].bExist ) return ECD_None;
 
 	DWORD dwDirFlag = ECD_All;

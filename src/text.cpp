@@ -45,16 +45,10 @@ VOID Text::DrawText(const Vector2F &vPos, UINT32 uColor, const char* szFormat, .
 	vsprintf_s(buffer, 1024, szFormat, argList);
 	va_end(argList);
 
-	SDL_Surface *text_surface = TTF_RenderText_Solid(m_pFont, buffer, *((SDL_Color*)&uColor));//*((SDL_Color*)&uColor));
+	SDL_Surface *text_surface = TTF_RenderText_Blended(m_pFont, buffer, *((SDL_Color*)&uColor));//*((SDL_Color*)&uColor));
 	if (text_surface != NULL)
 	{
-		SDL_Rect rect;
-		rect.x = UINT16(vPos.x);
-		rect.y = UINT16(vPos.y);
-		rect.w = INT16(text_surface->w);
-		rect.h = INT16(text_surface->h);
-
-		SDL_BlitSurface(text_surface, NULL, g_painter.GetScreen(), &rect);
+		g_painter.WinDrawText(vPos, text_surface);
 		SDL_FreeSurface(text_surface);
 	}
 }

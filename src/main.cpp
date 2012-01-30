@@ -35,13 +35,15 @@ INT APIENTRY _tWinMain(HINSTANCE hInstance,
 
 		g_level.Update(timer2.GetIntervalF());
 
+		g_painter.BeginDraw();
+
 		g_painter.Clear();
 
 		g_level.Draw(&g_painter);
 
 		g_text.DrawTextAll();
 
-		g_painter.Flush();
+		g_painter.EndDraw();
 
 		g_framerate.EndFrame();
 

@@ -54,7 +54,7 @@ enum ECollideDir
 };
 
 #define XMaxArrowSpeed		1600
-#define XMaxPlayerSpeedX	200	//pixel per sec
+#define XMaxPlayerSpeedX	400	//pixel per sec
 #define XGravity			Vector2F(0, -400)	//pixel * pixel per sec
 #define XCtrlAcc			800	//
 #define XJumpSpeed			400
@@ -67,11 +67,19 @@ enum ECollideDir
 #define XArrowSize			(XPlayerSize/2)
 #define XAnimalSize			(XPlayerSize)
 
-#define XTotalW				(XScreenW * 5)
-#define XTotalH				(XScreenH * 3)
+#define XScreenNumW			5
+#define XScreenNumH			3
+
+#define XTotalW				(XScreenW * XScreenNumW)
+#define XTotalH				(XScreenH * XScreenNumH)
 
 #define XTilesW				(XTotalW / XTerrainSize)
 #define XTilesH				(XTotalH / XTerrainSize)
+
+#define XColorB				( 0xffff0000)
+#define XColorG				( 0xff00ff00)
+#define XColorR				( 0xff0000ff)
+#define XColorWhite			( 0xffffffff)
 
 #include "crc32.h"
 #include "shape.h"

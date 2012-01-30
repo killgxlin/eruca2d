@@ -1,9 +1,7 @@
 #include "common.h"
 #include "painter.h"
 #include "SDL_gfxPrimitives.h"
-
-Painter g_painter;
-
+#ifndef XUseGL
 BOOL Painter::Init( INT w, INT h, const char* title )
 {
 	m_fDrawPerSec	= 0.0f;
@@ -30,7 +28,7 @@ VOID Painter::Destroy()
 	m_pScreen = NULL;
 }
 
-VOID Painter::Flush()
+VOID Painter::EndDraw()
 {
 	SDL_Flip(m_pScreen);
 }
@@ -56,40 +54,6 @@ VOID Painter::DrawRect( const Vector2F &vPos, const Vector2F &sSize, UINT32 uCol
 UINT32 Painter::GetColor( UINT8 u8R, UINT8 u8G, UINT8 u8B )
 {
 	return SDL_MapRGBA(m_pScreen->format, u8R, u8G, u8B, 255);
-}
-
-VOID Painter::WorldDrawRect( const Vector2F &vWorldPos, const Vector2F &vSize, UINT32 uColor )
-{
-	{
-		Vector2F vPos = vWorldPos;
-		Vector2F vLSize = vSize;
-
-		WorldToScreen(m_vCenter, &vPos, &vLSize);
-		ScreenToSDL(&vPos);
-
-		Square rectBox(vPos, vLSize);
-
-		if( m_screenBox.IntersectBox(rectBox) )
-		{
-			DrawRect(vPos, vLSize, uColor);
-		}
-	}
-
-	if( m_vOtherCenter != m_vCenter )
-	{
-		Vector2F vPos = vWorldPos;
-		Vector2F vLSize = vSize;
-
-		WorldToScreen(m_vOtherCenter, &vPos, &vLSize);
-		ScreenToSDL(&vPos);
-
-		Square rectBox(vPos, vLSize);
-
-		if( m_screenBox.IntersectBox(rectBox) )
-		{
-			DrawRect(vPos, vLSize, uColor);
-		}
-	}
 }
 
 VOID Painter::WorldToScreen( const Vector2F &vCenter, Vector2F* pPt, Vector2F* pSize )
@@ -131,8 +95,8 @@ VOID Painter::Update( DWORD dwDt )
 		ModZoomRate(-0.01f);
 	}
 
-	g_text.AddText(g_painter.GetColor(255, 0, 0), "draw ps  : %4.2f", g_painter.GetDrawPerSec());
-	g_text.AddText(g_painter.GetColor(255, 0, 0), "zoom rate: %4.2f", g_painter.GetZoomRate());
+// 	g_text.AddText(XColorR, "draw ps  : %4.2f", g_painter.GetDrawPerSec());
+// 	g_text.AddText(XColorR, "zoom rate: %4.2f", g_painter.GetZoomRate());
 }
 
 VOID Painter::WorldDrawText( const Vector2F &vWorldPos, UINT32 uColor, const char* szFormat, ... )
@@ -224,7 +188,7 @@ Square Painter::GetScreenBox() const
 	return Square(m_vCenter, Vector2F(XScreenW, XScreenH) / m_fZoomRate);
 }
 
-VOID Painter::SDLToWorld( Vector2F* pPt )
+VOID Painter::WinToWorld( Vector2F* pPt )
 {
 	// SDL Screen
 	pPt->y = m_pScreen->h - pPt->y;
@@ -260,3 +224,218 @@ VOID Painter::WorldDrawImg( const Vector2F &vWorldPos, SDL_Surface* pSurface )
 	SDL_BlitSurface(pSurface, NULL, m_pScreen, &rect);
 	++m_dwDrawTimes;
 }
+
+VOID Painter::BeginDraw()
+{
+
+}
+
+VOID Painter::WinDrawText( const Vector2F &vWinPos, SDL_Surface* pSurface )
+{
+	SDL_Rect rect;
+
+	rect.x = vWinPos.x;
+	rect.y = vWinPos.y;
+	rect.w = pSurface->w;
+	rect.h = pSurface->h;
+
+	SDL_BlitSurface(pSurface, NULL, m_pScreen, &rect);
+}
+#else
+BOOL Painter::Init( INT w, INT h, const char* title )
+{
+    if( SDL_Init( SDL_INIT_VIDEO ) < 0 ) return FALSE;
+
+	const SDL_VideoInfo* info = SDL_GetVideoInfo();
+    if( !info ) return FALSE;
+
+    if( SDL_SetVideoMode( w, h, info->vfmt->BitsPerPixel, SDL_OPENGL ) == 0 ) return FALSE;
+	if( title != NULL )
+		SDL_WM_SetCaption(title, 0);
+
+
+    glShadeModel( GL_SMOOTH );
+	glEnable (GL_BLEND);
+
+
+    glClearColor( 0, 0, 0, 0 );
+
+    glViewport( 0, 0, w, h );
+
+	m_vSize = Vector2F(w, h);
+
+	SetCenter(Vector2F(0, 0));
+
+	return TRUE;
+}
+
+void Painter::SetCenter(const Vector2F &vPos)
+{
+	m_vCenter = vPos;
+	m_vOtherCenter = m_vCenter;
+	m_sScreenBox = Square(m_vCenter, m_vSize);
+	
+	if( m_sScreenBox.vMax.x >= XTotalW )
+	{
+		m_vOtherCenter.x -= XTotalW;
+	}
+	else if( m_sScreenBox.vMin.x < 0 )
+	{
+		m_vOtherCenter.x += XTotalW;
+	}
+	m_sOtherScreenBox = Square(m_vOtherCenter, m_vSize);
+
+	glMatrixMode( GL_PROJECTION );
+	glLoadIdentity( );
+
+	glOrtho(m_sScreenBox.vMin.x, m_sScreenBox.vMax.x, m_sScreenBox.vMin.y, m_sScreenBox.vMax.y, -10, 10);
+}
+
+VOID Painter::Destroy()
+{
+	// Çå¿ÕÎÆÀí»º³å
+	for(TexMap::iterator itr = m_mapTex.begin();
+		itr != m_mapTex.end();
+		++itr)
+	{
+		ReturnTex(itr->second);
+	}
+
+	m_mapTex.clear();
+	
+}
+
+VOID Painter::BeginDraw()
+{
+	glEnable(GL_TEXTURE_2D);
+	glMatrixMode( GL_MODELVIEW );
+	glPushMatrix();
+
+}
+
+VOID Painter::EndDraw()
+{
+	glPopMatrix();
+	SDL_GL_SwapBuffers();
+}
+
+VOID Painter::Clear()
+{
+	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+}
+
+VOID Painter::WinToWorld( Vector2F* pPt )
+{
+	// Win Screen
+	pPt->y = m_vSize.y - pPt->y;
+
+	// Screen World
+	Vector2F vHalfSize = m_vSize / 2;
+
+	Vector2F vVec = *pPt - vHalfSize;
+/*	vVec /= m_fZoomRate;*/
+
+	*pPt = vVec + vHalfSize;
+
+	Vector2F vLeftBottom = m_vCenter - vHalfSize;
+	*pPt += vLeftBottom;
+}
+
+VOID Painter::WorldDrawLine( const Vector2F &vWorldPosHead, const Vector2F &vWorldPosTail, DWORD dwColor )
+{
+	glColor3f(1.0f, 1.0f, 1.0f);
+	glBegin(GL_LINE);
+		glVertex2f(vWorldPosHead.x, vWorldPosHead.y);
+		glVertex2f(vWorldPosTail.x, vWorldPosTail.y);
+	glEnd();
+}
+
+VOID Painter::WorldDrawImg( const Vector2F &vWorldPos, SDL_Surface* pSurface )
+{
+	Vector2F vSize(pSurface->w, pSurface->h);
+	Square sBox(vWorldPos, vSize);
+
+	GLuint tex = GetTex(pSurface, TRUE);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 1.0f);	glVertex2f(sBox.vMin.x, sBox.vMin.y);
+		glTexCoord2f(1.0f, 1.0f);	glVertex2f(sBox.vMax.x, sBox.vMin.y);
+		glTexCoord2f(1.0f, 0.0f);	glVertex2f(sBox.vMax.x, sBox.vMax.y);
+		glTexCoord2f(0.0f, 0.0f);	glVertex2f(sBox.vMin.x, sBox.vMax.y);
+	glEnd();
+}
+
+VOID Painter::WinDrawText( const Vector2F &vWinPos, SDL_Surface* pSurface )
+{
+	Vector2F vPos = vWinPos;
+	vPos.y = m_vSize.y - vPos.y;
+	vPos = vPos + m_vCenter;
+	Vector2F vSize(pSurface->w, pSurface->h);
+	Square sBox;
+	sBox.vMin = vPos;
+	sBox.vMax = vPos + vSize;
+
+	GLuint tex = GetTex(pSurface, FALSE);
+	glBindTexture(GL_TEXTURE_2D, tex);
+
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 1.0f);	glVertex2f(sBox.vMin.x, sBox.vMin.y);
+		glTexCoord2f(1.0f, 1.0f);	glVertex2f(sBox.vMax.x, sBox.vMin.y);
+		glTexCoord2f(1.0f, 0.0f);	glVertex2f(sBox.vMax.x, sBox.vMax.y);
+		glTexCoord2f(0.0f, 0.0f);	glVertex2f(sBox.vMin.x, sBox.vMax.y);
+	glEnd();
+
+
+	ReturnTex(tex);
+}
+
+GLuint Painter::GetTex( SDL_Surface* pSurface, BOOL bNeedRet )
+{
+	GLuint tex;
+	if( bNeedRet )
+	{
+		TexMap::iterator itr = m_mapTex.find(pSurface);
+		if( itr == m_mapTex.end() )
+		{
+			glGenTextures(1, &tex);
+			glBindTexture(GL_TEXTURE_2D, tex);
+			gluBuild2DMipmaps(GL_TEXTURE_2D, 4, pSurface->w, pSurface->h, GL_RGBA, GL_UNSIGNED_BYTE, pSurface->pixels);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			m_mapTex.insert(make_pair(pSurface, tex));
+		}
+		else
+		{
+			tex = itr->second;
+		}
+	}
+	else
+	{
+		glGenTextures(1, &tex);
+		glBindTexture(GL_TEXTURE_2D, tex);
+		gluBuild2DMipmaps(GL_TEXTURE_2D, 4, pSurface->w, pSurface->h, GL_RGBA, GL_UNSIGNED_BYTE, pSurface->pixels);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
+
+	return tex;
+}
+
+VOID Painter::ReturnTex( GLuint tex )
+{
+	glDeleteTextures(1, &tex);
+}
+
+
+VOID Painter::Update( DWORD dwDt )
+{
+
+}
+
+#endif
+
+Painter g_painter;
