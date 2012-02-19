@@ -365,29 +365,22 @@ VOID Painter::WorldDrawImg( const Vector2F &vWorldPos, SDL_Surface* pSurface )
 		glTexCoord2f(0.0f, 0.0f);	glVertex2f(sBox.vMin.x, sBox.vMax.y);
 	glEnd();
 }
-
-VOID Painter::WinDrawText( const Vector2F &vWinPos, SDL_Surface* pSurface )
+#include <gl/glut.h>
+void
+print_bitmap_string(void* font, char* s)
 {
-	Vector2F vPos = vWinPos;
-	vPos.y = m_vSize.y - vPos.y;
-	vPos = vPos + m_vCenter;
-	Vector2F vSize(pSurface->w, pSurface->h);
-	Square sBox;
-	sBox.vMin = vPos;
-	sBox.vMax = vPos + vSize;
-
-	GLuint tex = GetTex(pSurface, FALSE);
-	glBindTexture(GL_TEXTURE_2D, tex);
-
-	glBegin(GL_QUADS);
-		glTexCoord2f(0.0f, 1.0f);	glVertex2f(sBox.vMin.x, sBox.vMin.y);
-		glTexCoord2f(1.0f, 1.0f);	glVertex2f(sBox.vMax.x, sBox.vMin.y);
-		glTexCoord2f(1.0f, 0.0f);	glVertex2f(sBox.vMax.x, sBox.vMax.y);
-		glTexCoord2f(0.0f, 0.0f);	glVertex2f(sBox.vMin.x, sBox.vMax.y);
-	glEnd();
-
-
-	ReturnTex(tex);
+	if (s && strlen(s)) {
+		while (*s) {
+			glutBitmapCharacter(font, *s);
+			s++;
+		}
+	}
+}
+VOID Painter::WinDrawText( const Vector2F &vWinPos, char* szStr )
+{
+	glColor3f(1.0f, 0.0f, 0.0f);
+	glRasterPos2f(vWinPos.x, vWinPos.y);
+	print_bitmap_string(GLUT_BITMAP_9_BY_15, szStr);
 }
 
 GLuint Painter::GetTex( SDL_Surface* pSurface, BOOL bNeedRet )

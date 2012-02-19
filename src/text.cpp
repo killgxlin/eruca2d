@@ -45,12 +45,18 @@ VOID Text::DrawText(const Vector2F &vPos, UINT32 uColor, const char* szFormat, .
 	vsprintf_s(buffer, 1024, szFormat, argList);
 	va_end(argList);
 
+#ifdef XUseGL
+	g_painter.WinDrawText(vPos, buffer);
+#else
 	SDL_Surface *text_surface = TTF_RenderText_Blended(m_pFont, buffer, *((SDL_Color*)&uColor));//*((SDL_Color*)&uColor));
 	if (text_surface != NULL)
 	{
 		g_painter.WinDrawText(vPos, text_surface);
 		SDL_FreeSurface(text_surface);
 	}
+
+#endif
+
 }
 
 VOID Text::AddText( UINT32 uColor, const char* szFormat, ... )

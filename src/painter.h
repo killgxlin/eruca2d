@@ -70,7 +70,7 @@ public:
 
 	VOID			WorldDrawLine(const Vector2F &vWorldPosHead, const Vector2F &vWorldPosTail, DWORD dwColor);
 	VOID			WorldDrawImg(const Vector2F &vWorldPos, SDL_Surface* pSurface);
-	VOID			WinDrawText(const Vector2F &vWinPos, SDL_Surface* pSurface);
+	VOID			WinDrawText(const Vector2F &vWinPos, char* szStr);
 
 private:
 	typedef map<SDL_Surface*, GLuint>	TexMap;

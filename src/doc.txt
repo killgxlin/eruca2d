@@ -1,6 +1,74 @@
 整理painter
+	text
+	opengl
+	其他接口
+	
 整理level
 整理碰撞部分
+framerate写得更通用（项目外使用）
 
 创意
 	背景tiles有多层，一层不过可以切换到其它层
+	放风筝的快感
+	
+深度缓冲
+glutInitDisplayMode (GLUT_DEPTH | .... );
+glEnable(GL_DEPTH_TEST); 
+glDepthFunc();
+... 
+while (1) { 
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+   get_viewing_point_from_mouse_position(); 
+   draw_3d_object_A(); 
+   draw_3d_object_B(); 
+}
+
+混合
+  glEnable (GL_BLEND);
+   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+ 
+纹理
+	1.纹理尺寸
+	2.加载纹理
+	glGenTextures(1, &texName);
+   glBindTexture(GL_TEXTURE_2D, texName);
+
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, checkImageWidth, 
+                checkImageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 
+                checkImage);
+
+	3.渲染纹理
+	   glEnable(GL_TEXTURE_2D);
+   glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+   glBindTexture(GL_TEXTURE_2D, texName);
+   glBegin(GL_QUADS);
+   glTexCoord2f(0.0, 0.0); glVertex3f(-2.0, -1.0, 0.0);
+   glTexCoord2f(0.0, 1.0); glVertex3f(-2.0, 1.0, 0.0);
+   glTexCoord2f(1.0, 1.0); glVertex3f(0.0, 1.0, 0.0);
+   glTexCoord2f(1.0, 0.0); glVertex3f(0.0, -1.0, 0.0);
+
+   glEnd();
+   4.删除
+	glTexDelete(texName);
+
+显示列表
+	1.生成
+	box=glGenLists(2);									// Generate 2 Different Lists
+	glNewList(box,GL_COMPILE);							// Start With The Box List
+		glPushAttrib();
+		glBegin(GL_QUADS);
+			// Bottom Face
+			glNormal3f( 0.0f,-1.0f, 0.0f);
+			glTexCoord2f(1.0f, 1.0f); glVertex3f(-1.0f, -1.0f, -1.0f);
+			glTexCoord2f(0.0f, 1.0f); glVertex3f( 1.0f, -1.0f, -1.0f);
+			glTexCoord2f(0.0f, 0.0f); glVertex3f( 1.0f, -1.0f,  1.0f);
+			glTexCoord2f(1.0f, 0.0f); glVertex3f(-1.0f, -1.0f,  1.0f);
+		glEnd();
+		glPopAttrib();
+	glEndList();
+	2.glCallList(box);
+	3.glDeleteLists();

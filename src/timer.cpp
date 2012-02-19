@@ -52,6 +52,10 @@ VOID FrameRate::CountFrame( UINT32 dt )
 	g_text.AddText(XColorR, "FPS      : %4.2f", g_framerate.GetFPS());
 	g_text.AddText(XColorR, "custFPS  : %4.2f", g_framerate.GetCustomFPS());
 	g_text.AddText(XColorR, "factor   : %4.2f", g_framerate.GetSpeedRate());
+
+	char buf[100] = {0};
+	sprintf(buf, "%4.2f", g_framerate.GetFPS());
+	SDL_WM_SetCaption(buf, NULL);
 }
 
 VOID FrameRate::BeginFrame()
