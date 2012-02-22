@@ -256,6 +256,7 @@ BOOL Painter::Init( INT w, INT h, const char* title )
 
     glShadeModel( GL_SMOOTH );
 	glEnable (GL_BLEND);
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
     glClearColor( 0, 0, 0, 0 );
@@ -288,7 +289,8 @@ void Painter::SetCenter(const Vector2F &vPos)
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity( );
 
-	glOrtho(m_sScreenBox.vMin.x, m_sScreenBox.vMax.x, m_sScreenBox.vMin.y, m_sScreenBox.vMax.y, -10, 10);
+	//glOrtho(m_sScreenBox.vMin.x, m_sScreenBox.vMax.x, m_sScreenBox.vMin.y, m_sScreenBox.vMax.y, -10, 10);
+	gluPerspective(90.0f, m_vSize.x/m_vSize.y, 0.0f, 1000.0f);
 }
 
 VOID Painter::Destroy()
@@ -310,6 +312,10 @@ VOID Painter::BeginDraw()
 	glEnable(GL_TEXTURE_2D);
 	glMatrixMode( GL_MODELVIEW );
 	glPushMatrix();
+	Vector2F vEye = m_vCenter;
+	//gluLookAt(vEye.x + 400, vEye.y + 400, 400, m_vCenter.x, m_vCenter.y, 0, 0, 1, 0);
+	gluLookAt(vEye.x, vEye.y, 240, m_vCenter.x, m_vCenter.y, 0, 0, 1, 0);
+
 
 }
 
@@ -344,10 +350,12 @@ VOID Painter::WinToWorld( Vector2F* pPt )
 VOID Painter::WorldDrawLine( const Vector2F &vWorldPosHead, const Vector2F &vWorldPosTail, DWORD dwColor )
 {
 	glColor3f(1.0f, 1.0f, 1.0f);
-	glBegin(GL_LINE);
+	glDisable(GL_TEXTURE_2D);
+	glBegin(GL_LINES);
 		glVertex2f(vWorldPosHead.x, vWorldPosHead.y);
 		glVertex2f(vWorldPosTail.x, vWorldPosTail.y);
 	glEnd();
+	glEnable(GL_TEXTURE_2D);
 }
 
 VOID Painter::WorldDrawImg( const Vector2F &vWorldPos, SDL_Surface* pSurface )
@@ -357,13 +365,14 @@ VOID Painter::WorldDrawImg( const Vector2F &vWorldPos, SDL_Surface* pSurface )
 
 	GLuint tex = GetTex(pSurface, TRUE);
 	glBindTexture(GL_TEXTURE_2D, tex);
-	
+	glEnable(GL_TEXTURE_2D);
 	glBegin(GL_QUADS);
 		glTexCoord2f(0.0f, 1.0f);	glVertex2f(sBox.vMin.x, sBox.vMin.y);
 		glTexCoord2f(1.0f, 1.0f);	glVertex2f(sBox.vMax.x, sBox.vMin.y);
 		glTexCoord2f(1.0f, 0.0f);	glVertex2f(sBox.vMax.x, sBox.vMax.y);
 		glTexCoord2f(0.0f, 0.0f);	glVertex2f(sBox.vMin.x, sBox.vMax.y);
 	glEnd();
+	glDisable(GL_TEXTURE_2D);
 }
 #include <gl/glut.h>
 void
@@ -378,8 +387,8 @@ print_bitmap_string(void* font, char* s)
 }
 VOID Painter::WinDrawText( const Vector2F &vWinPos, char* szStr )
 {
-	glColor3f(1.0f, 0.0f, 0.0f);
-	glRasterPos2f(vWinPos.x, vWinPos.y);
+	Vector2F vPos = vWinPos + m_vCenter;
+	glRasterPos2f(vPos.x, vPos.y);
 	print_bitmap_string(GLUT_BITMAP_9_BY_15, szStr);
 }
 

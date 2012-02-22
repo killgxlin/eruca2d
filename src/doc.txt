@@ -1,7 +1,15 @@
+//collide整理一下，想个清晰的方法
+level调整为大地图并且多相位切换，动态生成
+ai，智能跟踪攻击
+
+
+
+
 整理painter
 	text
 	opengl
 	其他接口
+	
 	
 整理level
 整理碰撞部分
@@ -10,6 +18,7 @@ framerate写得更通用（项目外使用）
 创意
 	背景tiles有多层，一层不过可以切换到其它层
 	放风筝的快感
+	滑翔伞 追逐气流 持续滞空时间
 	
 深度缓冲
 glutInitDisplayMode (GLUT_DEPTH | .... );

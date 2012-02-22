@@ -9,6 +9,7 @@ class Animal;
 struct tagTerrain 
 {
 	bool		bExist;
+	bool		bCollide;
 };
 
 class Level

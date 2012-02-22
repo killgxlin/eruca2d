@@ -102,7 +102,7 @@ VOID GameObj::NormalCollide( GameObj* pRunner, tagCollideRes* pRes )
 	{
 		pRes->vCollidePos.x += fDeep;
 	}
-
+	
 }
 
 Square GameObj::GetAABBox() const

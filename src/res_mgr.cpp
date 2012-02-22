@@ -96,7 +96,7 @@ tagActionProto arrActionPro[] = {
 	{	"rockman/land%02d.bmp",		2,	"rockman_land_l",	0.5,	true,	XPlayerSize	},
 
 	// terrain action
-	{	"image/brick_ice.png",		1,	"brick_ice",		-1.0f,	false,	XTerrainSize},
+	{	"image/brick_ice.bmp",		1,	"brick_ice",		-1.0f,	false,	XTerrainSize},
 
 };
 

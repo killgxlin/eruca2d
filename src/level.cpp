@@ -116,6 +116,17 @@ struct ACheckTouchWithBs
 template<typename A>
 struct ACheckTouchWithBs<A, Terrain>
 {
+	struct CloserToA
+	{
+		bool operator()(
+			const Terrain& _Left, 
+			const Terrain& _Right
+			) const
+		{
+			return _Left.m_fDist <= _Right.m_fDist;
+		}
+	};
+
 	VOID operator()(A* pA)
 	{
 		Terrain tmpTerrain;
@@ -125,24 +136,8 @@ struct ACheckTouchWithBs<A, Terrain>
 
 		pA->SetPos(g_level.GetProperPos(pA->GetPos()));
 
-		Square box = pA->GetAABBox();
-		INT nIdxXMin  = max(INT(floor((box.vMin.x - 1.0f) / XTerrainSize)), 0);
-		INT nIdxYMin  = max(INT(floor((box.vMin.y - 1.0f) / XTerrainSize)), 0);
-		INT nIdxXMax  = min(INT(floor(box.vMax.x / XTerrainSize)), XTilesW - 1);
-		INT nIdxYMax  = min(INT(floor(box.vMax.y / XTerrainSize)), XTilesH - 1);
+		CollideTest(pA, tmpTerrain, result);
 
-		// 当前计算碰撞
-		for(INT i = nIdxXMin; i <= nIdxXMax; ++i)
-		{
-			for(INT j = nIdxYMin; j <= nIdxYMax; ++j)
-			{
-				if( !g_level.m_matTerrain[i][j].bExist ) continue;
-
-				tmpTerrain.SetPos(Vector2F(XTerrainSize*(i + 0.5f), XTerrainSize*(j + 0.5f )));
-				tmpTerrain.SetCollideDirFlag(g_level.CalcCollideFlag(i, j));
-				pA->CheckTouch(&tmpTerrain, &result);
-			}
-		}
 
 		// 得到结果
 		Vector2F vNewPos = pA->GetPos();
@@ -154,33 +149,60 @@ struct ACheckTouchWithBs<A, Terrain>
 			vNewPos = g_level.TransPos(vNewPos);
 			pA->SetPos(vNewPos);
 
-			// 计算碰撞
+			CollideTest(pA, tmpTerrain, result);
+		}
+
+		tmpTerrain.Destroy();
+	}
+
+	void CollideTest( A* pA, Terrain &tmpTerrain, tagCollideRes &result ) 
+	{
+		{
 			Square box = pA->GetAABBox();
 			INT nIdxXMin  = max(INT(floor((box.vMin.x - 1.0f) / XTerrainSize)), 0);
 			INT nIdxYMin  = max(INT(floor((box.vMin.y - 1.0f) / XTerrainSize)), 0);
 			INT nIdxXMax  = min(INT(floor(box.vMax.x / XTerrainSize)), XTilesW - 1);
 			INT nIdxYMax  = min(INT(floor(box.vMax.y / XTerrainSize)), XTilesH - 1);
 
-			// 当前计算碰撞
-			for(INT i = nIdxXMin; i <= nIdxXMax; ++i)
+			list<Terrain> lstTerrains;
+			for( INT i=nIdxXMin; i<=nIdxXMax; ++i )
 			{
-				for(INT j = nIdxYMin; j <= nIdxYMax; ++j)
+				for( INT j=nIdxYMin; j<=nIdxYMax; ++j )
 				{
 					if( !g_level.m_matTerrain[i][j].bExist ) continue;
 
+
 					tmpTerrain.SetPos(Vector2F(XTerrainSize*(i + 0.5f), XTerrainSize*(j + 0.5f )));
 					tmpTerrain.SetCollideDirFlag(g_level.CalcCollideFlag(i, j));
-					pA->CheckTouch(&tmpTerrain, &result);
+					tmpTerrain.m_fDist = (tmpTerrain.GetPos() - pA->GetPos()).Length2();
+
+					lstTerrains.push_back(tmpTerrain);
 				}
 			}
-			// 切换到合适的坐标系
-			pA->SetPos(g_level.GetProperPos(pA->GetPos()));
+
+			lstTerrains.sort(CloserToA());
+
+			for( list<Terrain>::iterator itr = lstTerrains.begin(); itr != lstTerrains.end(); ++itr )
+			{
+				pA->CheckTouch(&(*itr), &result);
+
+				Vector2F vPos = itr->GetPos();
+				INT nIdxX = vPos.x / XTerrainSize;
+				INT nIdxY = vPos.y / XTerrainSize;
+
+				if( result.dwDirFlag )
+				{
+					g_level.m_matTerrain[nIdxX][nIdxY].bCollide = true;
+				}
+				else
+				{
+					g_level.m_matTerrain[nIdxX][nIdxY].bCollide = false;
+				}
+			}
 		}
-
-		tmpTerrain.Destroy();
 	}
-};
 
+};
 VOID Level::Update( FLOAT dt )
 {
 	for(list<Player*>::iterator itr = m_lstPlayers.begin();
@@ -310,7 +332,16 @@ VOID Level::Draw( Painter* pPainter )
 					{
 						tmpTerrain.SetColor(0, 255, 0);
 					}
+					if( m_matTerrain[i][j].bCollide )
+					{
+//						glColor3f(1.0f, 0.0f, 0.0f);
+					}
 					tmpTerrain.Draw(pPainter);
+					if( m_matTerrain[i][j].bCollide )
+					{
+//						glColor3f(1.0f, 1.0f, 1.0f);
+						m_matTerrain[i][j].bCollide = false;
+					}
 				}
 
 				break;
@@ -358,25 +389,25 @@ Vector2F Level::GetProperPos( Vector2F &vPos )
 DWORD Level::CalcCollideFlag( INT i, INT j )
 {
 	return ECD_All;
-	if( !m_matTerrain[i][j].bExist ) return ECD_None;
+// 	if( !m_matTerrain[i][j].bExist ) return ECD_None;
+// 
+// 	DWORD dwDirFlag = ECD_All;
+// 	if( i-1 >= 0 && m_matTerrain[i-1][j].bExist )
+// 	{
+// 		dwDirFlag &= ~ECD_Left;
+// 	}
+// 	if( i+1 < XTilesW && m_matTerrain[i+1][j].bExist )
+// 	{
+// 		dwDirFlag &= ~ECD_Right;
+// 	}
+// 	if( j-1 >= 0 && m_matTerrain[i][j-1].bExist )
+// 	{
+// 		dwDirFlag &= ~ECD_Down;
+// 	}
+// 	if( j+1 < XTilesH && m_matTerrain[i][j+1].bExist )
+// 	{
+// 		dwDirFlag &= ~ECD_Top;
+// 	}
 
-	DWORD dwDirFlag = ECD_All;
-	if( i-1 >= 0 && m_matTerrain[i-1][j].bExist )
-	{
-		dwDirFlag &= ~ECD_Left;
-	}
-	if( i+1 < XTilesW && m_matTerrain[i+1][j].bExist )
-	{
-		dwDirFlag &= ~ECD_Right;
-	}
-	if( j-1 >= 0 && m_matTerrain[i][j-1].bExist )
-	{
-		dwDirFlag &= ~ECD_Down;
-	}
-	if( j+1 < XTilesH && m_matTerrain[i][j+1].bExist )
-	{
-		dwDirFlag &= ~ECD_Top;
-	}
-
-	return dwDirFlag;
+//	return dwDirFlag;
 }

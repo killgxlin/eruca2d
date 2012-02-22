@@ -51,7 +51,10 @@ private:
 };
 
 #else
-#include <gl/glew.h>
+//#include <gl/glew.h>
+#include <gl/GL.h>
+#include <gl/GLU.h>
+#include <gl/glut.h>
 class Painter
 {
 public:
